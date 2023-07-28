@@ -1,0 +1,7 @@
+Menu="VMs"
+Icon="server"
+---
+
+<script src="/plugins/folder.view/scripts/vm.js" defer></script>
+
+<link rel="stylesheet" href="/plugins/folder.view/styles/docker.css">

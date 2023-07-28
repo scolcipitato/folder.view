@@ -1,0 +1,5 @@
+Menu="Dashboard"
+Icon="server"
+---
+
+<script src="/plugins/folder.view/scripts/dashboard.js" defer></script>

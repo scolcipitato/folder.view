@@ -1,0 +1,7 @@
+Menu="Docker"
+Icon="server"
+---
+
+<script src="/plugins/folder.view/scripts/docker.js" defer></script>
+
+<link rel="stylesheet" href="/plugins/folder.view/styles/docker.css">

@@ -1,0 +1,212 @@
+Title="Folder"
+Markdown="false"
+---
+
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
+<link type="text/css" rel="stylesheet" href="/plugins/folder.view/styles/folder.css">
+
+<div class="canvas">
+    <form onsubmit="submitForm(this); return false">
+        <div class="basic">
+            <dl>
+                <dt>Name:</dt>
+                <dd>
+                    <img class="img" style="visibility: hidden;">
+                    <input type="text" name="name" pattern="[a-zA-Z0-9_.\ \-]+" value="" required>
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    The name of the folder, not that difficult.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
+                <dt>Icon:</dt>
+                <dd>
+                    <img src="/plugins/dynamix.docker.manager/images/question.png" class="img" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';">
+                    <input type="text" name="icon" value=""  oninput="updateIcon(this)">
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    A link to an image (<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#supported_image_formats" target="_blank">Supported formats</a>)
+                    <br>
+                    It also supports <b>data:image/{type};base64,</b> format (<a href="https://base64.guru/converter/encode/image" target="_blank">Convert image to data strings</a>)
+                    <br>
+                    <a href="https://github.com/hernandito/unRAID-Docker-Folder-Animated-Icons---Alternate-Colors" target="_blank">GitHub with some icons</a>.
+                    <br>
+                    You can click the icon of the Docker/VM to set the folder icon.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
+                <dt>Preview:</dt>
+                <dd>
+                    <img class="img" style="visibility: hidden;">
+                    <select name="preview" onchange="previewChange(this)">
+                        <option value="0">None</option>
+                        <option value="1" selected>Icon and label</option>
+                        <option value="2">Only icon</option>
+                        <option value="3">Only label</option>
+                    </select>
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    The preview type, not that difficult.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-2 preview-3">
+            <dl>
+                <dt>Show preview only on hover:</dt>
+                <dd>
+                    <input class="basic-switch" name="preview_hover" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will make the preview only show when mouse is hovering over.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-3 docker">
+            <dl>
+                <dt>Orange text on update:</dt>
+                <dd>
+                    <input class="basic-switch" name="preview_update" type="checkbox" style="display: none;" checked />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will make the name of the container in the preview orange if an update is available.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-2">
+            <dl>
+                <dt>Preview icon grayscale:</dt>
+                <dd>
+                    <input class="basic-switch" name="preview_grayscale" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will make the preview icons grayscaled.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-3 docker">
+            <dl>
+                <dt>Add preview open WebUI:</dt>
+                <dd>
+                    <input class="basic-switch" name="preview_webui" type="checkbox" style="display: none;" checked />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will add a little globe icon that opens the webUI.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-3 docker">
+            <dl>
+                <dt>Add preview open logs:</dt>
+                <dd>
+                    <input class="basic-switch" name="preview_logs" type="checkbox" style="display: none;" checked />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will add a little log icon that opens the log menu.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
+                <dt>Expanded on Docker/VM tab:</dt>
+                <dd>
+                    <input class="basic-switch" name="expand_tab" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will make the folder start expanded on the Docker/VMs tab.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
+                <dt>Expanded on Dashboard tab:</dt>
+                <dd>
+                    <input class="basic-switch" name="expand_dashboard" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will make the folder start expanded on the Dashboard.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
+                <dt>Regex:</dt>
+                <dd>
+                    <input type="text" name="regex" oninput="updateRegex(this)" value="">
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Regex... <b>Lasciate ogne speranza, voi ch'intrate</b>
+                    <br>
+                    Any container name the regex matches will be added to folder.
+                    <br>
+                    Example for adding pterodactyl egg: <b>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}</b>.
+                    <br>
+                    <a href="https://regex101.com/">Site for testing your regex</a>.
+                    <br>
+                    When you edit the regex anything selected manually will be deselected.
+                </p>
+            </blockquote>
+        </div>
+        <input type="submit" value="Submit">
+        <input type="button" value="Cancel" onclick="cancelBtn()">
+        <div class="basic">
+            <dl>
+                <dt>Order:</dt>
+                <dd></dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Drag and drop to make your desired order, if you edit the regex the selection will be deselected.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" style="width: 115em; text-align: center; margin-top: 3em;">
+            <dl>
+                <dd>
+                    <table class="sortable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Name
+                                </th>
+                                <th>
+                                    Included
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </dd>
+            </dl>
+        </div>
+    </form>
+</div>
+
+<script src="/plugins/folder.view/scripts/folder.js" defer></script>

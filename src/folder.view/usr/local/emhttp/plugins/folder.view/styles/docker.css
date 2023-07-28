@@ -1,0 +1,7 @@
+.hover:hover div.folder-preview div {
+    visibility: visible;
+}
+
+.hover div.folder-preview div {
+    visibility: hidden;
+}

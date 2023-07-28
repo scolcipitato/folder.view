@@ -1,0 +1,61 @@
+<?xml version="1.0" standalone="yes"?>
+<!DOCTYPE PLUGIN [
+<!ENTITY name "folder.view">
+<!ENTITY author "scolcipitato">
+<!ENTITY version "2023.07.28">
+<!ENTITY github "&author;/&name;">
+<!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
+<!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
+<!ENTITY md5 "e2d4572f748897a8edfda6f2e44b693c">
+]>
+
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="docker" support="https://forums.unraid.net/topic/89702-plugin-docker-folder/" min="6.12.3">
+    <CHANGES>
+    ###2023.07.28
+    - Fixed a issue where folder where offseting index on the grabbing
+    - A little CSS work, is still really hard
+    - UX on the folder creation/edit page
+    - debug mode
+    - ability to set the folder icon from a docker container or VM
+    ###2023.07.27.1
+    - Bug fix
+    - New container/vm now are counted in the order
+    ###2023.07.27
+    - VM now WORK!
+    ###2023.07.26.1
+    - Bug fix
+    ###2023.07.26
+    - Initial Release
+    </CHANGES>
+
+    <!-- New source file -->
+    <FILE Name="/boot/config/plugins/&name;/&name;-&version;.txz" Run="upgradepkg --install-new">
+        <URL>https://raw.github.com/&github;/master/archive/&name;-&version;.txz</URL>
+        <MD5>&md5;</MD5>
+    </FILE>
+
+    <!-- Post install -->
+    <FILE Run="/bin/bash">
+        <INLINE>
+            mkdir -p /boot/config/plugins/&name;
+            rm -f $(ls /boot/config/plugins/&name;/&name;*.txz)
+            echo "&version;" > /boot/config/plugins/&name;/version
+            echo ""
+            echo "----------------------------------------------------"
+            echo " &name; has been installed."
+            echo " Version: &version;"
+            echo "----------------------------------------------------"
+            echo ""
+        </INLINE>
+    </FILE>
+
+    <!-- Remove the plugin -->
+    <FILE Run="/bin/bash" Method="remove">
+        <INLINE>
+            removepkg &name;-&version;
+            rm -rf &plugdir;
+            rm -rf /boot/config/plugins/&name;
+        </INLINE>
+    </FILE>
+
+</PLUGIN>
