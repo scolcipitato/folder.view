@@ -6,10 +6,10 @@
 <!ENTITY github "&author;/&name;">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY md5 "e2d4572f748897a8edfda6f2e44b693c">
+<!ENTITY md5 "2d5550bba83e4855ff74d969e6a5bd57">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="docker" support="https://forums.unraid.net/topic/89702-plugin-docker-folder/" min="6.12.3">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="docker" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
     ###2023.07.28
     - Fixed a issue where folder where offseting index on the grabbing
