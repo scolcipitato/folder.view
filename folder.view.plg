@@ -2,15 +2,18 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "folder.view">
 <!ENTITY author "scolcipitato">
-<!ENTITY version "2023.07.31">
+<!ENTITY version "2023.07.31.1">
 <!ENTITY github "&author;/&name;">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY md5 "e45dfc1e8056e2dd897a30ae10a1d630">
+<!ENTITY md5 "c60e13275e2c6dd369ad203ea4ed8412">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="docker" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+    ###2023.07.31.1
+    - hotfix, a call to function was ranamed wrongly
+
     ###2023.07.31
     - order rework
     - ability to start, stop, pause, resume, restart, update and force update all containers in a folder

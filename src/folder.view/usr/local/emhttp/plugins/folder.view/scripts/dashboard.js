@@ -93,7 +93,7 @@ const createFolders = async () => {
         // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
         for (const [id, value] of Object.entries(foldersDone)) {
             if (value.settings.expand_dashboard) {
-                expandFolderDcoker(id);
+                expandFolderDocker(id);
             }
         }
     
