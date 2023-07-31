@@ -15,37 +15,38 @@ const createFolders = async () => {
             // Get the order as unraid sees it
             $.get('/plugins/folder.view/server/read_order.php?type=docker').promise(),
             // Get the info on containers, needed for autostart, update and started
-            $.get('/plugins/folder.view/server/read_containers_info.php').promise()
+            $.get('/plugins/folder.view/server/read_containers_info.php').promise(),
+            // Get the order that is shown in the webui
+            $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise()
         ]);
-        // Get the list of container on the webui
-        const webUiOrder = $('tbody#docker_view > tr.updated > td > span.outer.apps > span.inner > span:not(".state")').map((i, el) => el.innerText.trim()).get();
         // Parse the results
         let folders = JSON.parse(prom[0]);
         const unraidOrder = JSON.parse(prom[1]);
         const containersInfo = JSON.parse(prom[2]);
+        let order = JSON.parse(prom[3]);
     
-        // Filter the order to make sure no 'ghost' container are present in the final order, unraid don't remove deleted container from the order
-        let order = unraidOrder.filter(e => (webUiOrder.includes(e) || (folderRegex.test(e) && folders[e.slice(7)])));
-        // Filter the webui order to get the container that aren't in the order, this happen when a new container is created
-        let newOnes = webUiOrder.filter(x => !order.includes(x));
-        // This seems strange but unraid keep the first element in the order and insert element around it
-        newOnes.push(order.shift());
-        // Sort the container to mirror unraid behavior
-        newOnes.sort();
-        // Finally add the new contaners to the final order
-        order = newOnes.concat(order);
+        // Filter the order to get the container that aren't in the order, this happen when a new container is created
+        let newOnes = order.filter(x => !unraidOrder.includes(x));
+
+        // Insert the folder in the unraid folder into the order shifted by the unlisted containers
+        for (let index = 0; index < unraidOrder.length; index++) {
+            const element = unraidOrder[index];
+            if((folderRegex.test(element) && folders[element.slice(7)])) {
+                order.splice(index+newOnes.length, 0, element);
+            }
+        }
 
         // debug mode, download the debug json file
         if(folderDebugMode) {
             let element = document.createElement('a');
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
                 veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
-                webUiOrder,
                 folders,
                 unraidOrder,
-                containersInfo,
+                originalOrder: await $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise(),
                 newOnes,
-                order
+                order,
+                containersInfo
             })));
             element.setAttribute('download', 'debug-DASHBOARD-DOCKER.json');
         
@@ -115,37 +116,38 @@ const createFolders = async () => {
             // Get the order as unraid sees it
             $.get('/plugins/folder.view/server/read_order.php?type=vm').promise(),
             // Get the info on VMs, needed for autostart and started
-            $.get('/plugins/folder.view/server/read_vms_info.php').promise()
+            $.get('/plugins/folder.view/server/read_vms_info.php').promise(),
+            // Get the order that is shown in the webui
+            $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()
         ]);
-        // Get the list of container on the webui
-        const webUiOrder = $('tbody#vm_view > tr.updated > td > span.outer.vms > span.inner').clone().children().remove().end().map((i, el) => el.innerText.trim()).get();
         // Parse the results
         let folders = JSON.parse(prom[0]);
         const unraidOrder = JSON.parse(prom[1]);
         const vmInfo = JSON.parse(prom[2]);
+        let order = JSON.parse(prom[3]);
     
-        // Filter the order to make sure no 'ghost' container are present in the final order, unraid don't remove deleted container from the order
-        let order = unraidOrder.filter(e => (webUiOrder.includes(e) || (folderRegex.test(e) && folders[e.slice(7)])));
         // Filter the webui order to get the container that aren't in the order, this happen when a new container is created
-        let newOnes = webUiOrder.filter(x => !order.includes(x));
-        // This seems strange but unraid keep the first element in the order and insert element around it
-        newOnes.push(order.shift());
-        // Sort the container to mirror unraid behavior
-        newOnes.sort();
-        // Finally add the new contaners to the final order
-        order = newOnes.concat(order);
+        let newOnes = order.filter(x => !unraidOrder.includes(x));
+
+        // Insert the folder in the unraid folder into the order shifted by the unlisted containers
+        for (let index = 0; index < unraidOrder.length; index++) {
+            const element = unraidOrder[index];
+            if((folderRegex.test(element) && folders[element.slice(7)])) {
+                order.splice(index+newOnes.length, 0, element);
+            }
+        }
 
         // debug mode, download the debug json file
         if(folderDebugMode) {
             let element = document.createElement('a');
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
                 veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
-                webUiOrder,
                 folders,
                 unraidOrder,
-                vmInfo,
+                originalOrder: await $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise(),
                 newOnes,
-                order
+                order,
+                vmInfo
             })));
             element.setAttribute('download', 'debug-DASHBOARD-VM.json');
         
@@ -215,7 +217,7 @@ const createFolders = async () => {
 const createFolderDocker = (folder, id, position, order, containersInfo, foldersDone) => {
     // default varibles
     let upToDate = true;
-    let started = false;
+    let started = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -259,17 +261,22 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             const element = $(`tbody#docker_view > tr.updated > td > span.outer.apps > span#folder-id-${id}`).siblings('div.folder_storage');
             // grab the container and put it onto the storage
             element.append($('tbody#docker_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`));
-            // get the id from the id of the container in the page
-            newFolder[container] = element.children('span.outer').children('span.hand').last()[0].id;
+            
+            const ct = containersInfo[container];
+
+            newFolder[container] = {};
+            newFolder[container].id = element.children('span.outer').children('span.hand').last()[0].id;
+            newFolder[container].pause = ct.paused ? 1 : 0;
+            newFolder[container].state = ct.running ? 1 : 0;
+            newFolder[container].update = ct.updated === "false" ? 1 : 0;
 
             if(folderDebugMode) {
                 console.log(`Docker ${newFolder[container]}(${offsetIndex}, ${index}) => ${id}`);
             }
 
             // set the status of the folder
-            const ct = containersInfo[container];
             upToDate = upToDate && ct.updated == "true";
-            started = started || ct.running;
+            started += ct.running ? 1 : 0;
         }
     }
 
@@ -288,8 +295,13 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     if (started) {
         sel.parent().removeClass('stopped').addClass('started');
         sel.next('span.inner').children('i').replaceWith($('<i class="fa fa-play started green-text"></i>'));
-        sel.next('span.inner').children('span.state').text('started')
+        sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} started`);
     }
+
+    // set the status
+    folder.status = {};
+    folder.status.upToDate = upToDate;
+    folder.status.started = started;
 };
 
 /**
@@ -303,7 +315,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
  */
 const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
     // default varibles
-    let started = false;
+    let started = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -355,7 +367,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
             }
             
             // set the status of the folder
-            started = started || ct.running;
+            started += ct.running ? 1 : 0;
         }
     }
 
@@ -368,7 +380,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         const sel = $(`tbody#vm_view > tr.updated > td > span.outer.vms > span#folder-id-${id}`);
         sel.parent().removeClass('stopped').addClass('started');
         sel.next('span.inner').children('i').replaceWith($('<i class="fa fa-play started green-text"></i>'));
-        sel.next('span.inner').children('span.state').text('started')
+        sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} started`);
     }
 };
 
@@ -376,7 +388,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
  * Handle the dropdown expand button of folders
  * @param {string} id the id of the folder
  */
-const expandFolderDcoker = (id) => {
+const expandFolderDocker = (id) => {
     const el = $(`tbody#docker_view > tr.updated > td > span.outer.apps > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
@@ -488,8 +500,58 @@ const addDockerFolderContext = (id) => {
     opts.push({
         text: exp ? 'Compress' : 'Expand',
         icon: exp ? 'fa-minus' : 'fa-plus',
-        action: (e) => { e.preventDefault(); expandFolderDcoker(id); }
+        action: (e) => { e.preventDefault(); expandFolderDocker(id); }
     });
+    opts.push({
+        divider: true
+    });
+    opts.push({
+        text: 'Start',
+        icon: 'fa-play',
+        action: (e) => { e.preventDefault(); startFolderDocker(id); }
+    });
+    opts.push({
+        text: 'Stop',
+        icon: 'fa-stop',
+        action: (e) => { e.preventDefault(); stopFolderDocker(id); }
+    });
+    
+    opts.push({
+        text: 'Pause',
+        icon: 'fa-pause',
+        action: (e) => { e.preventDefault(); pauseFolderDocker(id); }
+    });
+
+    opts.push({
+        text: 'Resume',
+        icon: 'fa-play-circle',
+        action: (e) => { e.preventDefault(); resumeFolderDocker(id); }
+    });
+
+    opts.push({
+        text: 'Restart',
+        icon: 'fa-refresh',
+        action: (e) => { e.preventDefault(); restartFolderDocker(id); }
+    });
+
+    opts.push({
+        divider: true
+    });
+
+    if(!globalFolders.docker[id].status.upToDate) {
+        opts.push({
+            text: 'Update',
+            icon: 'fa-cloud-download',
+            action: (e) => { e.preventDefault();  updateFolderDocker(id); }
+        });
+    } else {
+        opts.push({
+            text: 'Force update',
+            icon: 'fa-cloud-download',
+            action: (e) => { e.preventDefault(); forceUpdateFolderDocker(id); }
+        });
+    }
+    
     opts.push({
         divider: true
     });
@@ -501,10 +563,6 @@ const addDockerFolderContext = (id) => {
     });
 
     opts.push({
-        divider: true
-    });
-
-    opts.push({
         text: 'Remove',
         icon: 'fa-trash',
         action: (e) => { e.preventDefault(); rmDockerFolder(id); }
@@ -512,6 +570,137 @@ const addDockerFolderContext = (id) => {
 
 
     context.attach(`#folder-id-${id}`, opts);
+};
+
+/**
+ * Force update all the containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const forceUpdateFolderDocker = (id) => {
+    const folder = globalFolders.docker[id];
+    openDocker('update_container ' + Object.keys(folder.containers).join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+};
+
+/**
+ * Update all the updatable containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const updateFolderDocker = (id) => {
+    const folder = globalFolders.docker[id];
+    let toUpdate = [];
+    for (const name of Object.keys(folder.containers)) {
+        if(folder.containers[name].update > 0) {
+            toUpdate.push(name);
+        }
+    }
+    openDocker('update_container ' + toUpdate.join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+};
+
+/**
+ * Restart all the containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const restartFolderDocker = (id) => {
+    const folder = globalFolders.docker[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const cid = folder.containers[cts[index]].id;
+        eventControl({action:'restart', container:cid}, targetFn);
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Pause all the started containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const pauseFolderDocker = (id) => {
+    const folder = globalFolders.docker[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 1 && ct.pause === 0) {
+            eventControl({action:'pause', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Resume all the paused containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const resumeFolderDocker = (id) => {
+    const folder = globalFolders[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 1 && ct.pause === 1) {
+            eventControl({action:'resume', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Stop all the started containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const stopFolderDocker = (id) => {
+    const folder = globalFolders.docker[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 1) {
+            eventControl({action:'stop', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Start all the stopped containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const startFolderDocker = (id) => {
+    const folder = globalFolders.docker[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 0) {
+            eventControl({action:'start', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
 };
 
 /**
@@ -555,6 +744,13 @@ const addVMFolderContext = (id) => {
 
     context.attach(`#folder-id-${id}`, opts);
 };
+
+
+
+/**
+ * Just a empty function, please ignore and leave it here
+ */
+const folderBlank = () => {};
 
 // Global variables
 let loadedFolder = false;

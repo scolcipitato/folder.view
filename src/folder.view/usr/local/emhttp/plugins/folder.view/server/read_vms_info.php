@@ -1,9 +1,13 @@
 <?php
     require_once("/usr/local/emhttp/plugins/folder.view/server/lib.php");
-    require_once("$documentRoot/plugins/dynamix.vm.manager/include/libvirt.php");
+    require_once ("$documentRoot/webGui/include/Helpers.php");
+    require_once ("$documentRoot/plugins/dynamix.vm.manager/include/libvirt_helpers.php");
 
-    $lv = new Libvirt('qemu:///system', null, null, false);
     $vms = $lv->get_domains();
+    if (empty($vms)) {
+        echo '[]';
+        return;
+    }
     $info = [];
     foreach ($vms as $vm) {
         $res = $lv->get_domain_by_name($vm);

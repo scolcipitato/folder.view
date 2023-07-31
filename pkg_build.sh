@@ -15,6 +15,7 @@ makepkg -l y -c y $CWD/folder.view-${version}.txz
 
 cd $CWD
 rm -R $CWD/tmp
+chmod 0755 -R .
 
 echo "MD5:"
 md5sum $CWD/folder.view-${version}.txz

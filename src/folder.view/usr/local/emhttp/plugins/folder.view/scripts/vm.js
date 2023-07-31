@@ -8,37 +8,39 @@ const createFolders = async () => {
         // Get the order as unraid sees it
         $.get('/plugins/folder.view/server/read_order.php?type=vm').promise(),
         // Get the info on VMs, needed for autostart and started
-        $.get('/plugins/folder.view/server/read_vms_info.php').promise()
+        $.get('/plugins/folder.view/server/read_vms_info.php').promise(),
+        // Get the order that is shown in the webui
+        $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()
     ]);
-    // Get the list of container on the webui
-    const webUiOrder = $("#kvm_list > tr.sortable > td.vm-name > span.outer >  span.inner > a").map((i, el) => el.innerText.trim()).get();
     // Parse the results
     let folders = JSON.parse(prom[0]);
     const unraidOrder = JSON.parse(prom[1]);
     const vmInfo = JSON.parse(prom[2]);
+    let order = JSON.parse(prom[3]);
 
-    // Filter the order to make sure no 'ghost' container are present in the final order, unraid don't remove deleted container from the order
-    let order = unraidOrder.filter(e => (webUiOrder.includes(e) || (folderRegex.test(e) && folders[e.slice(7)])));
+    
     // Filter the webui order to get the container that aren't in the order, this happen when a new container is created
-    let newOnes = webUiOrder.filter(x => !order.includes(x));
-    // This seems strange but unraid keep the first element in the order and insert element around it
-    newOnes.push(order.shift());
-    // Sort the container to mirror unraid behavior
-    newOnes.sort();
-    // Finally add the new contaners to the final order
-    order = newOnes.concat(order);
+    let newOnes = order.filter(x => !unraidOrder.includes(x));
+
+    // Insert the folder in the unraid folder into the order shifted by the unlisted containers
+    for (let index = 0; index < unraidOrder.length; index++) {
+        const element = unraidOrder[index];
+        if((folderRegex.test(element) && folders[element.slice(7)])) {
+            order.splice(index+newOnes.length, 0, element);
+        }
+    }
 
     // debug mode, download the debug json file
     if(folderDebugMode) {
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
             veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
-            webUiOrder,
             folders,
             unraidOrder,
-            vmInfo,
+            originalOrder: await $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise(),
             newOnes,
-            order
+            order,
+            vmInfo
         })));
         element.setAttribute('download', 'debug-VM.json');
     
@@ -101,7 +103,7 @@ const createFolders = async () => {
  */
 const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     // default varibles
-    let started = false;
+    let started = 0;
     let autostart = false;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
@@ -199,7 +201,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
             }
 
             // set the status of the folder
-            started = started || ct.running;
+            started += ct.running ? 1 : 0;
             autostart = autostart || ct.autostart;
         }
     }
@@ -214,7 +216,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
 
     if (started) {
         $(`tr.folder-id-${id} > td.vm-name > span.outer > span.inner > i#load-folder-${id}`).attr('class', 'fa fa-play started green-text');
-        $(`#docker_list > tr.folder-id-${id} > td.vm-name > span.outer > span.inner > span.state`).text('started');
+        $(`#docker_list > tr.folder-id-${id} > td.vm-name > span.outer > span.inner > span.state`).text(`${started}/${Object.entries(folder.containers).length} started`);
     }
 
     if (autostart) {

@@ -8,39 +8,38 @@ const createFolders = async () => {
         // Get the order as unraid sees it
         $.get('/plugins/folder.view/server/read_order.php?type=docker').promise(),
         // Get the info on containers, needed for autostart, update and started
-        $.get('/plugins/folder.view/server/read_containers_info.php').promise()
+        $.get('/plugins/folder.view/server/read_containers_info.php').promise(),
+        // Get the order that is shown in the webui
+        $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise()
     ]);
-    // Get the list of container on the webui
-    const webUiOrder = $("#docker_list > tr.sortable > td.ct-name > span.outer >  span.inner > span.appname").map((i, el) => el.innerText.trim()).get();
     // Parse the results
     let folders = JSON.parse(prom[0]);
     const unraidOrder = JSON.parse(prom[1]);
     const containersInfo = JSON.parse(prom[2]);
+    let order = JSON.parse(prom[3]);
 
+    // Filter the order to get the container that aren't in the order, this happen when a new container is created
+    const newOnes = order.filter(x => !unraidOrder.includes(x));
 
+    // Insert the folder in the unraid folder into the order shifted by the unlisted containers
+    for (let index = 0; index < unraidOrder.length; index++) {
+        const element = unraidOrder[index];
+        if((folderRegex.test(element) && folders[element.slice(7)])) {
+            order.splice(index+newOnes.length, 0, element);
+        }
+    }
 
-    // Filter the order to make sure no 'ghost' container are present in the final order, unraid don't remove deleted container from the order
-    let order = unraidOrder.filter(e => (webUiOrder.includes(e) || (folderRegex.test(e) && folders[e.slice(7)])));
-    // Filter the webui order to get the container that aren't in the order, this happen when a new container is created
-    let newOnes = webUiOrder.filter(x => !order.includes(x));
-    // This seems strange but unraid keep the first element in the order and insert element around it
-    newOnes.push(order.shift());
-    // Sort the container to mirror unraid behavior
-    newOnes.sort();
-    // Finally add the new contaners to the final order
-    order = newOnes.concat(order);
-    
     // debug mode, download the debug json file
     if(folderDebugMode) {
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
             veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
-            webUiOrder,
             folders,
             unraidOrder,
-            containersInfo,
+            originalOrder: await $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise(),
             newOnes,
-            order
+            order,
+            containersInfo
         })));
         element.setAttribute('download', 'debug-DOCKER.json');
     
@@ -104,7 +103,7 @@ const createFolders = async () => {
 const createFolder = (folder, id, position, order, containersInfo, foldersDone) => {
     // default varibles
     let upToDate = true;
-    let started = false;
+    let started = 0;
     let autostart = false;
 
     // Get if the advanced view is enabled
@@ -180,8 +179,13 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             
             addPreview(id);
 
-            // add the id to the container name 
-            newFolder[container] = $(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr:last > td.ct-name > span.outer > span.hand`)[0].id;
+            const ct = containersInfo[container];
+
+            newFolder[container] = {};
+            newFolder[container].id = $(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr:last > td.ct-name > span.outer > span.hand`)[0].id;
+            newFolder[container].pause = ct.paused ? 1 : 0;
+            newFolder[container].state = ct.running ? 1 : 0;
+            newFolder[container].update = ct.updated === "false" ? 1 : 0;
 
             if(folderDebugMode) {
                 console.log(`${newFolder[container]}(${offsetIndex}, ${index}) => ${id}`);
@@ -192,7 +196,6 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
             //temp var
             let sel;
-            const ct = containersInfo[container];
 
             //set the preview option
 
@@ -204,7 +207,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 sel.css('filter', 'grayscale(100%)');
             }
 
-            if (folder.settings.preview_update && ct.updated != "true") {
+            if (folder.settings.preview_update && ct.updated === "false") {
                 sel = element.children('span.inner').children('span.blue-text');
                 if (!sel.length) {
                     sel = element.children('span.blue-text');
@@ -218,7 +221,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 if (!sel.length) {
                     sel = element;
                 }
-                sel.append($(`<span><a href="${ct.url}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i></a></span>`));
+                sel.append($(`<span style="margin-left: 0.5em;"><a href="${ct.url}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i></a></span>`));
             }
 
             if (folder.settings.preview_logs) {
@@ -226,12 +229,12 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 if (!sel.length) {
                     sel = element;
                 }
-                sel.append($(`<span><a href="#" onclick="openTerminal('docker', '${container}', '.log')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
+                sel.append($(`<span style="margin-left: 0.5em;"><a href="#" onclick="openTerminal('docker', '${container}', '.log')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
             }
 
             // set the status of the folder
-            upToDate = upToDate && ct.updated == "true";
-            started = started || ct.running;
+            upToDate = upToDate && ct.updated !== "false";
+            started += ct.running ? 1 : 0;
             autostart = autostart || ct.autostart;
         }
     }
@@ -252,12 +255,18 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     if (started) {
         $(`#docker_list > tr.folder-id-${id} > td.ct-name > span.outer > span.inner > i#load-folder-${id}`).attr('class', 'fa fa-play started green-text');
-        $(`#docker_list > tr.folder-id-${id} > td.ct-name > span.outer > span.inner > span.state`).text('started');
+        $(`#docker_list > tr.folder-id-${id} > td.ct-name > span.outer > span.inner > span.state`).text(`${started}/${Object.entries(folder.containers).length} started`);
     }
 
     if (autostart) {
         $(`#folder-${id}-auto`).next().click();
     }
+
+    // set the status
+    folder.status = {};
+    folder.status.upToDate = upToDate;
+    folder.status.started = started;
+    folder.status.autostart = autostart;
 
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before
     $(`#folder-${id}-auto`).on("change", folderAutostart);
@@ -339,24 +348,208 @@ const editFolder = (id) => {
 };
 
 /**
+ * Force update all the containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const forceUpdateFolder = (id) => {
+    const folder = globalFolders[id];
+    openDocker('update_container ' + Object.keys(folder.containers).join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+};
+
+/**
+ * Update all the updatable containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const updateFolder = (id) => {
+    const folder = globalFolders[id];
+    let toUpdate = [];
+    for (const name of Object.keys(folder.containers)) {
+        if(folder.containers[name].update > 0) {
+            toUpdate.push(name);
+        }
+    }
+    openDocker('update_container ' + toUpdate.join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+};
+
+/**
+ * Restart all the containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const restartFolder = (id) => {
+    const folder = globalFolders[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const cid = folder.containers[cts[index]].id;
+        eventControl({action:'restart', container:cid}, targetFn);
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Pause all the started containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const pauseFolder = (id) => {
+    const folder = globalFolders[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 1 && ct.pause === 0) {
+            eventControl({action:'pause', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Resume all the paused containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const resumeFolder = (id) => {
+    const folder = globalFolders[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 1 && ct.pause === 1) {
+            eventControl({action:'resume', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Stop all the started containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const stopFolder = (id) => {
+    const folder = globalFolders[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 1) {
+            eventControl({action:'stop', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Start all the stopped containers inside a folder
+ * @param {string} id the id of the folder
+ */
+const startFolder = (id) => {
+    const folder = globalFolders[id];
+    const cts = Object.keys(folder.containers);
+    let targetFn = 'folderBlank';
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        if(index === cts.length-1) {
+            targetFn = 'loadlist';
+        }
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === 0) {
+            eventControl({action:'start', container:cid}, targetFn);
+        }
+    }
+    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+};
+
+/**
+ * Just a empty function, please ignore and leave it here
+ */
+const folderBlank = () => {};
+
+/**
  * Atach the menu when clicking the folder icon
  * @param {string} id the id of the folder
  */
 const addDockerFolderContext = (id) => {
     let opts = [];
+
     context.settings({
         right: false,
         above: false
     });
 
     opts.push({
-        text: 'Edit',
-        icon: 'fa-wrench',
-        action: (e) => { e.preventDefault(); editFolder(id); }
+        text: 'Start',
+        icon: 'fa-play',
+        action: (e) => { e.preventDefault(); startFolder(id); }
+    });
+    opts.push({
+        text: 'Stop',
+        icon: 'fa-stop',
+        action: (e) => { e.preventDefault(); stopFolder(id); }
+    });
+    
+    opts.push({
+        text: 'Pause',
+        icon: 'fa-pause',
+        action: (e) => { e.preventDefault(); pauseFolder(id); }
+    });
+
+    opts.push({
+        text: 'Resume',
+        icon: 'fa-play-circle',
+        action: (e) => { e.preventDefault(); resumeFolder(id); }
+    });
+
+    opts.push({
+        text: 'Restart',
+        icon: 'fa-refresh',
+        action: (e) => { e.preventDefault(); restartFolder(id); }
     });
 
     opts.push({
         divider: true
+    });
+
+    if(!globalFolders[id].status.upToDate) {
+        opts.push({
+            text: 'Update',
+            icon: 'fa-cloud-download',
+            action: (e) => { e.preventDefault();  updateFolder(id); }
+        });
+    } else {
+        opts.push({
+            text: 'Force update',
+            icon: 'fa-cloud-download',
+            action: (e) => { e.preventDefault(); forceUpdateFolder(id); }
+        });
+    }
+
+    opts.push({
+        divider: true
+    });
+
+    opts.push({
+        text: 'Edit',
+        icon: 'fa-wrench',
+        action: (e) => { e.preventDefault(); editFolder(id); }
     });
 
     opts.push({
