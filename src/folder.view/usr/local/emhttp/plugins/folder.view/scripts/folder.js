@@ -9,6 +9,13 @@ const type = new URLSearchParams(location.search).get('type');
 //id of the folder if present
 const id = new URLSearchParams(location.search).get('id');
 
+const rgbToHex = (rgb) => {
+    rgb = rgb.slice(4, -1).split(', ');
+    return "#" + (1 << 24 | rgb[0] << 16 | rgb[1] << 8 | rgb[2]).toString(16).slice(1);
+}
+
+$('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('color'));
+
 (async () => {
     // if editing a vm hide docker related settings
     if (type !== 'docker') {
@@ -29,12 +36,19 @@ const id = new URLSearchParams(location.search).get('id');
         const currFolder = folders[id];
         delete folders[id];
 
+        // new setting set to default if not present
+
+        currFolder.settings.preview_border = currFolder.settings.preview_border === undefined ? true : currFolder.settings.preview_border;
+        currFolder.settings.preview_border_color = currFolder.settings.preview_border_color === undefined ? "#FFFFFF" : currFolder.settings.preview_border_color;
+
         // set the value of the form
         const form = $('div.canvas > form')[0];
         form.name.value = currFolder.name;
         form.icon.value = currFolder.icon;
         form.regex.value = currFolder.regex;
         form.preview.value = currFolder.settings.preview.toString();
+        form.preview_border.checked = currFolder.settings.preview_border;
+        form.preview_border_color.value = currFolder.settings.preview_border_color;
         form.preview_hover.checked = currFolder.settings.preview_hover;
         form.preview_update.checked = currFolder.settings.preview_update;
         form.preview_grayscale.checked = currFolder.settings.preview_grayscale;
@@ -187,6 +201,8 @@ const submitForm = async (e) => {
         regex: e.regex.value.toString(),
         settings: {
             'preview': parseInt(e.preview.value.toString()),
+            'preview_border': e.preview_border.checked,
+            'preview_border_color': e.preview_border_color.value.toString(),
             'preview_hover': e.preview_hover.checked,
             'preview_update': e.preview_update.checked,
             'preview_grayscale': e.preview_grayscale.checked,
@@ -197,6 +213,7 @@ const submitForm = async (e) => {
         },
         containers: [...$('input[name*="containers"]:checked').map((i, e) => $(e).val())]
     }
+    console.log(folder);
     // send the data to the right endpoint
     if (id) {
         await $.post('/plugins/folder.view/server/update.php', { type: type, content: JSON.stringify(folder), id: id });

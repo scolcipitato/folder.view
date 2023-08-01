@@ -271,11 +271,11 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             newFolder[container].update = ct.updated === "false" ? 1 : 0;
 
             if(folderDebugMode) {
-                console.log(`Docker ${newFolder[container]}(${offsetIndex}, ${index}) => ${id}`);
+                console.log(`Docker ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
             }
 
             // set the status of the folder
-            upToDate = upToDate && ct.updated == "true";
+            upToDate = upToDate && ct.updated !== "false";
             started += ct.running ? 1 : 0;
         }
     }
@@ -357,17 +357,19 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
 
             // add the id to the container name 
             const ct = vmInfo[container];
-            newFolder[container] = ct.uuid;
+            newFolder[container] = {};
+            newFolder[container].id = ct.uuid;
+            newFolder[container].state = ct.state;
 
             // grab the container and put it onto the storage
             $(`tbody#vm_view > tr.updated > td > span.outer.vms > span#folder-id-${id}`).siblings('div.folder_storage').append($('tbody#vm_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`));
 
             if(folderDebugMode) {
-                console.log(`VM ${newFolder[container]}(${offsetIndex}, ${index}) => ${id}`);
+                console.log(`VM ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
             }
             
             // set the status of the folder
-            started += ct.running ? 1 : 0;
+            started += ct.state!=="shutoff" ? 1 : 0;
         }
     }
 
@@ -600,107 +602,168 @@ const updateFolderDocker = (id) => {
  * Restart all the containers inside a folder
  * @param {string} id the id of the folder
  */
-const restartFolderDocker = (id) => {
+const restartFolderDocker = async (id) => {
     const folder = globalFolders.docker[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const cid = folder.containers[cts[index]].id;
-        eventControl({action:'restart', container:cid}, targetFn);
+        proms.push($.post(eventURL, {action:'restart', container:cid}, null,'json').promise());
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Pause all the started containers inside a folder
  * @param {string} id the id of the folder
  */
-const pauseFolderDocker = (id) => {
+const pauseFolderDocker = async (id) => {
     const folder = globalFolders.docker[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 1 && ct.pause === 0) {
-            eventControl({action:'pause', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'pause', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Resume all the paused containers inside a folder
  * @param {string} id the id of the folder
  */
-const resumeFolderDocker = (id) => {
-    const folder = globalFolders[id];
+const resumeFolderDocker = async (id) => {
+    const folder = globalFolders.docker[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 1 && ct.pause === 1) {
-            eventControl({action:'resume', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'resume', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Stop all the started containers inside a folder
  * @param {string} id the id of the folder
  */
-const stopFolderDocker = (id) => {
+const stopFolderDocker = async (id) => {
     const folder = globalFolders.docker[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 1) {
-            eventControl({action:'stop', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'stop', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Start all the stopped containers inside a folder
  * @param {string} id the id of the folder
  */
-const startFolderDocker = (id) => {
+const startFolderDocker = async (id) => {
     const folder = globalFolders.docker[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 0) {
-            eventControl({action:'start', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'start', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
@@ -721,6 +784,53 @@ const addVMFolderContext = (id) => {
         icon: exp ? 'fa-minus' : 'fa-plus',
         action: (e) => { e.preventDefault(); expandFolderVM(id); }
     });
+    
+    opts.push({
+        divider: true
+    });
+
+    opts.push({
+        text:"Start",
+        icon:"fa-play",
+        action:(e) => { e.preventDefault(); startFolderVM(id); }
+    });
+
+    opts.push({
+        text:"Stop",
+        icon:"fa-stop",
+        action:(e) => { e.preventDefault(); stopFolderVM(id); }
+    });
+
+    opts.push({
+        text:"Pause",
+        icon:"fa-pause",
+        action:(e) => { e.preventDefault(); pauseFolderVM(id); }
+    });
+
+    opts.push({
+        text:"Resume",
+        icon:"fa-play-circle",
+        action:(e) => { e.preventDefault(); resumeFolderVM(id); }
+    });
+
+    opts.push({
+        text:"Restart",
+        icon:"fa-refresh",
+        action:(e) => { e.preventDefault(); restartFolderVM(id); }
+    });
+
+    opts.push({
+        text:"Hibernate",
+        icon:"fa-bed",
+        action:(e) => { e.preventDefault(); hibernateFolderVM(id); }
+    });
+
+    opts.push({
+        text:"Force Stop",
+        icon:"fa-bomb",
+        action:(e) => { e.preventDefault(); forceStopFolderVM(id); }
+    });
+
     opts.push({
         divider: true
     });
@@ -729,10 +839,6 @@ const addVMFolderContext = (id) => {
         text: 'Edit',
         icon: 'fa-wrench',
         action: (e) => { e.preventDefault(); editVMFolder(id); }
-    });
-
-    opts.push({
-        divider: true
     });
 
     opts.push({
@@ -745,12 +851,246 @@ const addVMFolderContext = (id) => {
     context.attach(`#folder-id-${id}`, opts);
 };
 
-
+/**
+ * Force stop all the vms inside a folder
+ * @param {string} id the id of the folder
+ */
+const forceStopFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === "running" || ct.state === "pmsuspended" || ct.state === "paused" || ct.state === "unknown") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-destroy", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
 
 /**
- * Just a empty function, please ignore and leave it here
+ * Hibernate all the started vms inside a folder
+ * @param {string} id the id of the folder
  */
-const folderBlank = () => {};
+const hibernateFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === "running") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-pmsuspend", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
+ * Restart all the started vms inside a folder
+ * @param {string} id the id of the folder
+ */
+const restartFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === "running") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-restart", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
+ * resume all the paused vms inside a folder
+ * @param {string} id the id of the folder
+ */
+const resumeFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === "paused" || ct.state === "unknown") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-resume", uuid:cid}, null,'json').promise());
+        }
+        if(ct.state === "pmsuspended") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-pmwakeup", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
+ * Pause all the started vms inside a folder
+ * @param {string} id the id of the folder
+ */
+const pauseFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === "running") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-pause", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
+ * Stop all the started vms inside a folder
+ * @param {string} id the id of the folder
+ */
+const stopFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state === "running") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-stop", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
+ * Start all the stopped vms inside a folder
+ * @param {string} id the id of the folder
+ */
+const startFolderVM = async (id) => {
+    const folder = globalFolders.vms[id];
+    const cts = Object.keys(folder.containers);
+    let proms = [];
+    let errors;
+    $(`#folder-id-${id}`).next().children('i').removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
+    $('div.spinner.fixed').show('slow');
+    for (let index = 0; index < cts.length; index++) {
+        const ct = folder.containers[cts[index]];
+        const cid = ct.id;
+        if(ct.state !== "running" && ct.state !== "pmsuspended" && ct.state !== "paused" && ct.state !== "unknown") {
+            proms.push($.post('/plugins/dynamix.vm.manager/include/VMajax.php', {action:"domain-start", uuid:cid}, null,'json').promise());
+        }
+    }
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
 
 // Global variables
 let loadedFolder = false;

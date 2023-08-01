@@ -15,7 +15,7 @@
         $info[$vm] = [
             'uuid' => $lv->domain_get_uuid($res),
             'autostart' => $lv->domain_get_autostart($res),
-            'running' => $lv->domain_state_translate($dom['state']) == 'running'
+            'state' => $lv->domain_state_translate($dom['state'])
         ];
     }
     echo json_encode($info);

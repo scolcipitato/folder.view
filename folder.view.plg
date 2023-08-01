@@ -2,15 +2,22 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "folder.view">
 <!ENTITY author "scolcipitato">
-<!ENTITY version "2023.07.31.1">
 <!ENTITY github "&author;/&name;">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY md5 "c60e13275e2c6dd369ad203ea4ed8412">
+<!ENTITY version "2023.08.01">
+<!ENTITY md5 "2ad99c84871bda440016edb610002db7">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="docker" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
+<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+    ###2023.08.01
+    - Fixed folder load on the docker tab
+    - added ability to anable/disable border on the docker/vm tab
+    - added tha ability to change the color of the border on the docker/vm tab
+    - ability to start, stop, pause, resume, restart, Hibernate and force stop all vms in a folder
+    - rework ability to start, stop, pause, resume, restart, update and force update all containers in a folder
+
     ###2023.07.31.1
     - hotfix, a call to function was ranamed wrongly
 

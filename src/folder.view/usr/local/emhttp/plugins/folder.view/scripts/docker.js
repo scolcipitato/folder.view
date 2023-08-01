@@ -116,7 +116,9 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     }
 
     // the HTML template for the folder
-    const fld = `<tr class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''}"><td class="ct-name" style="width:220px;padding:8px"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer"><span id="${id}" onclick="addDockerFolderContext('${id}')" class="hand"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner"><span class="appname " style="display: none;"><a>folder-${id}</a></span><a class="exec" onclick='editFolder("${id}")'>${folder.name}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text"></i><span class="state">stopped</span></span></span><button class="dropDown-${id}" onclick="dropDownButton('${id}')" style="padding:6px;min-width:0;margin:0;margin-left: 1em;float:right;"><i class="fa fa-chevron-down" aria-hidden="true"></i></button></td><td class="updatecolumn"><span class="green-text" style="white-space:nowrap"><i class="fa fa-check fa-fw"></i>up-to-date</span></td><td colspan="3"><div class="folder_storage" style="display:none"></div><div class="folder-preview" style="border:solid ${$('body').css('color')} 1px;border-radius:4px;height:3.5em;overflow:hidden"></div></td><td class="advanced" ${advanced ? 'style="display: table-cell;"' : ''}><span class="cpu-folder-${id}">0%</span><div class="usage-disk mm"><span id="cpu-folder-${id}" style="width:0%"></span><span></span></div><br><span class="mem-folder-${id}">0B / 0B</span></td><td><input type="checkbox" id="folder-${id}-auto" class="autostart" style="display:none"><div style="clear:left"></div></td><td></td></tr>`;
+    const fld = `<tr class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''}"><td class="ct-name" style="width:220px;padding:8px"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer"><span id="${id}" onclick="addDockerFolderContext('${id}')" class="hand"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner"><span class="appname " style="display: none;"><a>folder-${id}</a></span><a class="exec" onclick='editFolder("${id}")'>${folder.name}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text"></i><span class="state">stopped</span></span></span><button class="dropDown-${id}" onclick="dropDownButton('${id}')" style="padding:6px;min-width:0;margin:0;margin-left: 1em;float:right;"><i class="fa fa-chevron-down" aria-hidden="true"></i></button></td><td class="updatecolumn"><span class="green-text" style="white-space:nowrap"><i class="fa fa-check fa-fw"></i>up-to-date</span></td><td colspan="3"><div class="folder_storage" style="display:none"></div><div class="folder-preview" style="border-radius:4px;height:3.5em;overflow:hidden"></div></td><td class="advanced" ${advanced ? 'style="display: table-cell;"' : ''}><span class="cpu-folder-${id}">0%</span><div class="usage-disk mm"><span id="cpu-folder-${id}" style="width:0%"></span><span></span></div><br><span class="mem-folder-${id}">0B / 0B</span></td><td><input type="checkbox" id="folder-${id}-auto" class="autostart" style="display:none"><div style="clear:left"></div></td><td></td></tr>`;
+
+    //border:solid ${$('body').css('color')} 1px;
 
     // insertion at position of the folder
     if (position === 0) {
@@ -136,16 +138,28 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr > td.ct-name > span.outer:last`).clone());
             };
+            // Set the border if enabled and set the color
+            if(folder.settings.preview_border) {
+                $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
+            }
             break;
         case 2:
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr > td.ct-name > span.outer > span.hand:last`).clone());
             };
+            // Set the border if enabled and set the color
+            if(folder.settings.preview_border) {
+                $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
+            }
             break;
         case 3:
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr > td.ct-name > span.outer > span.inner:last`).clone());
             };
+            // Set the border if enabled and set the color
+            if(folder.settings.preview_border) {
+                $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
+            }
             break;
         default:
             addPreview = (id) => { };
@@ -188,7 +202,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             newFolder[container].update = ct.updated === "false" ? 1 : 0;
 
             if(folderDebugMode) {
-                console.log(`${newFolder[container]}(${offsetIndex}, ${index}) => ${id}`);
+                console.log(`${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
             }
 
             // element to set the preview options
@@ -375,113 +389,168 @@ const updateFolder = (id) => {
  * Restart all the containers inside a folder
  * @param {string} id the id of the folder
  */
-const restartFolder = (id) => {
+const restartFolder = async (id) => {
     const folder = globalFolders[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`i#load-folder-${id}`).removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const cid = folder.containers[cts[index]].id;
-        eventControl({action:'restart', container:cid}, targetFn);
+        proms.push($.post(eventURL, {action:'restart', container:cid}, null,'json').promise());
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Pause all the started containers inside a folder
  * @param {string} id the id of the folder
  */
-const pauseFolder = (id) => {
+const pauseFolder = async (id) => {
     const folder = globalFolders[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`i#load-folder-${id}`).removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 1 && ct.pause === 0) {
-            eventControl({action:'pause', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'pause', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Resume all the paused containers inside a folder
  * @param {string} id the id of the folder
  */
-const resumeFolder = (id) => {
+const resumeFolder = async (id) => {
     const folder = globalFolders[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`i#load-folder-${id}`).removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 1 && ct.pause === 1) {
-            eventControl({action:'resume', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'resume', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Stop all the started containers inside a folder
  * @param {string} id the id of the folder
  */
-const stopFolder = (id) => {
+const stopFolder = async (id) => {
     const folder = globalFolders[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`i#load-folder-${id}`).removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 1) {
-            eventControl({action:'stop', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'stop', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
 
 /**
  * Start all the stopped containers inside a folder
  * @param {string} id the id of the folder
  */
-const startFolder = (id) => {
+const startFolder = async (id) => {
     const folder = globalFolders[id];
     const cts = Object.keys(folder.containers);
-    let targetFn = 'folderBlank';
+    let proms = [];
+    let errors;
+    $(`i#load-folder-${id}`).removeClass('fa-play fa-square fa-pause').addClass('fa-refresh fa-spin');
     $('div.spinner.fixed').show('slow');
     for (let index = 0; index < cts.length; index++) {
-        if(index === cts.length-1) {
-            targetFn = 'loadlist';
-        }
         const ct = folder.containers[cts[index]];
         const cid = ct.id;
         if(ct.state === 0) {
-            eventControl({action:'start', container:cid}, targetFn);
+            proms.push($.post(eventURL, {action:'start', container:cid}, null,'json').promise());
         }
     }
-    setTimeout(() => {$('div.spinner.fixed').hide('slow')}, 5000);
+    proms = await Promise.all(proms);
+    errors = proms.filter(e => e.success !== true);
+    errors = errors.map(e => e.success);
+    if(errors.length > 0) {
+        swal({
+            title:'Execution error',
+            text:errors.join('<br>'),
+            type:'error',
+            html:true,
+            confirmButtonText:'Ok'
+        }, loadlist);
+    }
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
 };
-
-/**
- * Just a empty function, please ignore and leave it here
- */
-const folderBlank = () => {};
 
 /**
  * Atach the menu when clicking the folder icon
@@ -595,7 +664,7 @@ $.get('/plugins/folder.view/server/cpu.php').promise().then((data) => {
             let totalMem = 0;
             let loadMem = 0;
             for (const [cid, cvalue] of Object.entries(value.containers)) {
-                const curLoad = load[cvalue] || { cpu: '0.00%', mem: ['0B', '0B'] };
+                const curLoad = load[cvalue.id] || { cpu: '0.00%', mem: ['0B', '0B'] };
                 loadCpu += parseFloat(curLoad.cpu.replace('%', ''))/cpus;
                 loadMem += memToB(curLoad.mem[0]);
                 let tempTotalMem = memToB(curLoad.mem[1]);

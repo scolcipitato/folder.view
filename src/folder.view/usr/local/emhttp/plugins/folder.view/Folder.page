@@ -63,6 +63,38 @@ Markdown="false"
         </div>
         <div class="basic" constraint="preview-1 preview-2 preview-3">
             <dl>
+                <dt>Show preview border:</dt>
+                <dd>
+                    <input class="basic-switch" checked name="preview_border" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will Show a border on the preview box.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-2 preview-3">
+            <dl>
+                <dt>Preview border color:</dt>
+                <dd>
+                    <input type="color" name="preview_border_color">
+                    <button onclick="event.preventDefault(); $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('color'));" style="padding:6px;min-width:0;margin:0;margin-left: 1em; position: relative;
+                    top: -0.54em;">
+                        <i class="fa fa-repeat" aria-hidden="true"></i>
+                    </button>
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will make the preview border a specific color.
+                    <br>
+                    The <i class="fa fa-repeat" aria-hidden="true"></i> button will set the color to the current font color.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-2 preview-3">
+            <dl>
                 <dt>Show preview only on hover:</dt>
                 <dd>
                     <input class="basic-switch" name="preview_hover" type="checkbox" style="display: none;" />
