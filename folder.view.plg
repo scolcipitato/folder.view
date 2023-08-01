@@ -13,10 +13,11 @@
     <CHANGES>
     ###2023.08.01
     - Fixed folder load on the docker tab
-    - added ability to anable/disable border on the docker/vm tab
-    - added tha ability to change the color of the border on the docker/vm tab
-    - ability to start, stop, pause, resume, restart, Hibernate and force stop all vms in a folder
+    - added ability to enable/disable border on the docker/vm tab
+    - added the ability to change the color of the border on the docker/vm tab
+    - ability to start, stop, pause, resume, restart, Hibernate and force stop all VMs in a folder
     - rework ability to start, stop, pause, resume, restart, update and force update all containers in a folder
+
 
     ###2023.07.31.1
     - hotfix, a call to function was ranamed wrongly
