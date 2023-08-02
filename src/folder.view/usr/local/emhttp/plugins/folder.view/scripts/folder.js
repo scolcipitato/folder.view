@@ -36,19 +36,14 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         const currFolder = folders[id];
         delete folders[id];
 
-        // new setting set to default if not present
-
-        currFolder.settings.preview_border = currFolder.settings.preview_border === undefined ? true : currFolder.settings.preview_border;
-        currFolder.settings.preview_border_color = currFolder.settings.preview_border_color === undefined ? "#FFFFFF" : currFolder.settings.preview_border_color;
-
         // set the value of the form
         const form = $('div.canvas > form')[0];
         form.name.value = currFolder.name;
         form.icon.value = currFolder.icon;
         form.regex.value = currFolder.regex;
         form.preview.value = currFolder.settings.preview.toString();
-        form.preview_border.checked = currFolder.settings.preview_border;
-        form.preview_border_color.value = currFolder.settings.preview_border_color;
+        form.preview_border.checked = currFolder.settings.preview_border || false;
+        form.preview_border_color.value = currFolder.settings.preview_border_color || "#FFFFFF";
         form.preview_hover.checked = currFolder.settings.preview_hover;
         form.preview_update.checked = currFolder.settings.preview_update;
         form.preview_grayscale.checked = currFolder.settings.preview_grayscale;

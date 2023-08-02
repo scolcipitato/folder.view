@@ -61,7 +61,7 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-2 preview-3">
+        <div class="basic">
             <dl>
                 <dt>Show preview border:</dt>
                 <dd>
@@ -74,7 +74,7 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-2 preview-3">
+        <div class="basic">
             <dl>
                 <dt>Preview border color:</dt>
                 <dd>

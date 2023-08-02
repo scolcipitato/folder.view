@@ -1,0 +1,58 @@
+Menu="Utilities"
+Title="FolderView"
+Icon="folder-open-o"
+Markdown="false"
+---
+
+<link rel="stylesheet" href="/plugins/folder.view/styles/folderview.css">
+
+<h2>Docker</h2>
+<button onclick="downloadDocker()">Export all</button>
+<button onclick="importDocker()">Import</button>
+<button onclick="clearDocker()">Clear</button>
+<table>
+    <thead>
+        <tr>
+            <th>
+                ID
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody id="docker">
+        
+    </tbody>
+</table>
+<hr>
+
+<h2>VMs</h2>
+<button onclick="downloadVm()">Export all</button>
+<button onclick="importVm()">Import</button>
+<button onclick="clearVm()">Clear</button>
+<table>
+    <thead>
+        <tr>
+            <th>
+                ID
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody id="vms">
+
+    </tbody>
+</table>
+
+<script src="/plugins/folder.view/scripts/folderview.js" defer></script>
+
+<input type="file" style="display: none;">

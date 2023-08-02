@@ -40,10 +40,10 @@ const createFolders = async () => {
         if(folderDebugMode) {
             let element = document.createElement('a');
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-                veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
+                veriosn: (await $.get('/plugins/folder.view/server/version.php').promise()).trim(),
                 folders,
                 unraidOrder,
-                originalOrder: await $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise(),
+                originalOrder: JSON.parse(await $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise()),
                 newOnes,
                 order,
                 containersInfo
@@ -92,7 +92,7 @@ const createFolders = async () => {
     
         // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
         for (const [id, value] of Object.entries(foldersDone)) {
-            if (value.settings.expand_dashboard) {
+            if ((globalFolders.docker && globalFolders.docker[id].status.expanded) || value.settings.expand_dashboard) {
                 expandFolderDocker(id);
             }
         }
@@ -141,10 +141,10 @@ const createFolders = async () => {
         if(folderDebugMode) {
             let element = document.createElement('a');
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-                veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
+                veriosn: (await $.get('/plugins/folder.view/server/version.php').promise()).trim(),
                 folders,
                 unraidOrder,
-                originalOrder: await $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise(),
+                originalOrder: JSON.parse(await $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()),
                 newOnes,
                 order,
                 vmInfo
@@ -193,7 +193,7 @@ const createFolders = async () => {
     
         // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
         for (const [id, value] of Object.entries(foldersDone)) {
-            if (value.settings.expand_dashboard) {
+            if ((globalFolders.vms && globalFolders.vms[id].status.expanded) || value.settings.expand_dashboard) {
                 expandFolderVM(id);
             }
         }
@@ -302,6 +302,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     folder.status = {};
     folder.status.upToDate = upToDate;
     folder.status.started = started;
+    folder.status.expanded = false;
 };
 
 /**
@@ -384,6 +385,11 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         sel.next('span.inner').children('i').replaceWith($('<i class="fa fa-play started green-text"></i>'));
         sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} started`);
     }
+
+    // set the status
+    folder.status = {};
+    folder.status.started = started;
+    folder.status.expanded = false;
 };
 
 /**
@@ -400,7 +406,9 @@ const expandFolderDocker = (id) => {
         el.parent().after(el.siblings('div.folder_storage').children());
         el.attr('expanded', 'true');
     }
-
+    if(globalFolders.docker) {
+        globalFolders.docker[id].status.expanded = !state;
+    }
 };
 
 /**
@@ -417,7 +425,9 @@ const expandFolderVM = (id) => {
         el.parent().after(el.siblings('div.folder_storage').children());
         el.attr('expanded', 'true');
     }
-
+    if(globalFolders.vms) {
+        globalFolders.vms[id].status.expanded = !state;
+    }
 };
 
 /**
@@ -453,7 +463,7 @@ const rmVMFolder = (id) => {
     // Ask for a confirmation
     swal({
         title: 'Are you sure?',
-        text: `Remove folder: ${globalFolders.vm[id].name}`,
+        text: `Remove folder: ${globalFolders.vms[id].name}`,
         type: 'warning',
         html: true,
         showCancelButton: true,

@@ -34,10 +34,10 @@ const createFolders = async () => {
     if(folderDebugMode) {
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-            veriosn: await $.get('/plugins/folder.view/server/version.php').promise(),
+            veriosn: (await $.get('/plugins/folder.view/server/version.php').promise()).trim(),
             folders,
             unraidOrder,
-            originalOrder: await $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise(),
+            originalOrder: JSON.parse(await $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()),
             newOnes,
             order,
             vmInfo
@@ -81,7 +81,7 @@ const createFolders = async () => {
 
     // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
     for (const [id, value] of Object.entries(foldersDone)) {
-        if(value.settings.expand_tab) {
+        if((globalFolders[id] && globalFolders[id].status.expanded) || value.settings.expand_tab) {
             dropDownButton(id);
         }
     }
@@ -125,6 +125,10 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     // create the *cool* unraid button for the autostart
     $(`#folder-${id}-auto`).switchButton({ labels_placement: 'right', off_label: "Off", on_label: "On", checked: false });
 
+    // Set the border if enabled and set the color
+    if(folder.settings.preview_border) {
+        $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
+    }
 
     // select the preview function to use
     let addPreview;
@@ -133,28 +137,16 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=5] > .folder_storage > tr > td.vm-name > span.outer:last`).clone());
             };
-            // Set the border if enabled and set the color
-            if(folder.settings.preview_border) {
-                $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
-            }
             break;
         case 2:
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=5] > .folder_storage > tr > td.vm-name > span.outer > span.hand:last`).clone());
             };
-            // Set the border if enabled and set the color
-            if(folder.settings.preview_border) {
-                $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
-            }
             break;
         case 3:
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=5] > .folder_storage > tr > td.vm-name > span.outer > span.inner:last`).clone());
             };
-            // Set the border if enabled and set the color
-            if(folder.settings.preview_border) {
-                $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
-            }
             break;
         default:
             addPreview = (id) => { };
@@ -237,6 +229,12 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
         $(`#folder-${id}-auto`).next().click();
     }
 
+    // set the status
+    folder.status = {};
+    folder.status.started = started;
+    folder.status.autostart = autostart;
+    folder.status.expanded = false;
+
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before
     $(`#folder-${id}-auto`).on("change", folderAutostart);
 };
@@ -281,6 +279,9 @@ const dropDownButton = (id) => {
         $(`.folder-${id}-element > td > i.fa-arrows-v`).remove();
         $(`.folder-${id}-element:last`).css('border-bottom', '1px solid');
         element.attr('active', 'true');
+    }
+    if(globalFolders[id]) {
+        globalFolders[id].status.expanded = !state;
     }
 };
 

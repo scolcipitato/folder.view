@@ -3,49 +3,57 @@
 <!ENTITY name "folder.view">
 <!ENTITY author "scolcipitato">
 <!ENTITY github "&author;/&name;">
+<!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.01">
-<!ENTITY md5 "2ad99c84871bda440016edb610002db7">
+<!ENTITY version "2023.08.02">
+<!ENTITY md5 "fbc9c91b3cec533aa1980edc61fb37d7">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
-    ###2023.08.01
-    - Fixed folder load on the docker tab
-    - added ability to enable/disable border on the docker/vm tab
-    - added the ability to change the color of the border on the docker/vm tab
-    - ability to start, stop, pause, resume, restart, Hibernate and force stop all VMs in a folder
-    - rework ability to start, stop, pause, resume, restart, update and force update all containers in a folder
+###2023.08.02
+- Renamed the pages to the updated plugin name
+- Added import, export and clear in the settings
+- Folders now remain open when making changes to docker/VM/dashboard, if opened before
+- Fixed debug mode parsing error
+- Now the border setting is visible even when no preview is selected
+- Now the setting reflect the old setting behavior in the docker/Vm pages
 
+###2023.08.01
+- Fixed folder load on the docker tab
+- added ability to enable/disable border on the docker/vm tab
+- added the ability to change the color of the border on the docker/vm tab
+- ability to start, stop, pause, resume, restart, Hibernate and force stop all VMs in a folder
+- rework ability to start, stop, pause, resume, restart, update and force update all containers in a folder
 
-    ###2023.07.31.1
-    - hotfix, a call to function was ranamed wrongly
+###2023.07.31.1
+- hotfix, a call to function was renamed wrongly
 
-    ###2023.07.31
-    - order rework
-    - ability to start, stop, pause, resume, restart, update and force update all containers in a folder
-    - added a counter of started container when a folder is marked as started
+###2023.07.31
+- order rework
+- ability to start, stop, pause, resume, restart, update and force update all containers in a folder
+- added a counter of started container when a folder is marked as started
 
-    ###2023.07.28
-    - Fixed a issue where folder where offseting index on the grabbing
-    - A little CSS work, is still really hard
-    - UX on the folder creation/edit page
-    - debug mode
-    - ability to set the folder icon from a docker container or VM
+###2023.07.28
+- Fixed am issue where folder were offsetting index on the grabbing
+- A little CSS work, is still really hard
+- UX on the folder creation/edit page
+- debug mode
+- ability to set the folder icon from a docker container or VM
 
-    ###2023.07.27.1
-    - Bug fix
-    - New container/vm now are counted in the order
+###2023.07.27.1
+- Bug fix
+- New container/vm now are counted in the order
 
-    ###2023.07.27
-    - VM now WORK!
+###2023.07.27
+- VM now WORK!
 
-    ###2023.07.26.1
-    - Bug fix
+###2023.07.26.1
+- Bug fix
 
-    ###2023.07.26
-    - Initial Release
+###2023.07.26
+- Initial Release
     </CHANGES>
 
     <!-- New source file -->
