@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.02">
-<!ENTITY md5 "fbc9c91b3cec533aa1980edc61fb37d7">
+<!ENTITY version "2023.08.04">
+<!ENTITY md5 "412eea2d11d3adb64f82f856b8f7994f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.04
+- Fix a small issue with new containers and iterating over the order
+
 ###2023.08.02
 - Renamed the pages to the updated plugin name
 - Added import, export and clear in the settings

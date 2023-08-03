@@ -61,6 +61,7 @@ const createFolders = async () => {
             let id = container.replace(folderRegex, '');
             if (folders[id]) {
                 createFolder(folders[id], id, key, order, containersInfo, Object.keys(foldersDone));
+                key -= newOnes.length;
                 // Move the folder to the done object and delete it from the undone one
                 foldersDone[id] = folders[id];
                 delete folders[id];
