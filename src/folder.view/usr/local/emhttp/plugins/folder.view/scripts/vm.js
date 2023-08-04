@@ -62,6 +62,7 @@ const createFolders = async () => {
             let id = container.replace(folderRegex, '');
             if (folders[id]) {
                 createFolder(folders[id], id, key, order, vmInfo, Object.keys(foldersDone));
+                key -= newOnes.length;
                 // Move the folder to the done object and delete it from the undone one
                 foldersDone[id] = folders[id];
                 delete folders[id];
@@ -127,7 +128,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
 
     // Set the border if enabled and set the color
     if(folder.settings.preview_border) {
-        $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
+        $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
     }
 
     // select the preview function to use

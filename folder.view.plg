@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.04">
-<!ENTITY md5 "412eea2d11d3adb64f82f856b8f7994f">
+<!ENTITY version "2023.08.04.1">
+<!ENTITY md5 "888d8778dad787c6538245dec2379a33">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.04.1
+- Same fix of previous version on VM and Dashboard
+- QoL on docker tab
+
 ###2023.08.04
 - Fix a small issue with new containers and iterating over the order
 

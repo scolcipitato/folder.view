@@ -54,6 +54,19 @@ const createFolders = async () => {
 
     let foldersDone = {};
 
+    if(folderobserver) {
+        folderobserver.disconnect();
+        folderobserver = undefined;
+    }
+
+    folderobserver = new MutationObserver((mutationList, observer) => {
+        for (const mutation of mutationList) {
+            if(/^load-/.test(mutation.target.id)) {
+                $('i#folder-' + mutation.target.id).attr('class', mutation.target.className)
+            }
+        }
+    });
+
     // Draw the folders in the order
     for (let key = 0; key < order.length; key++) {
         const container = order[key];
@@ -142,6 +155,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         case 1:
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr > td.ct-name > span.outer:last`).clone());
+                let tmpId = $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).children().last().find('i[id^="load-"]');
+                tmpId.attr("id", "folder-" + tmpId.attr("id"));
             };
             break;
         case 2:
@@ -152,6 +167,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         case 3:
             addPreview = (id) => {
                 $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=3] > .folder_storage > tr > td.ct-name > span.outer > span.inner:last`).clone());
+                let tmpId = $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview`).children().last().find('i[id^="load-"]');
+                tmpId.attr("id", "folder-" + tmpId.attr("id"));
             };
             break;
         default:
@@ -248,6 +265,10 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     // replace the old containers array with the newFolder object
     folder.containers = newFolder;
+
+    $(`tr.folder-id-${id} > td[colspan=3] > div.folder_storage > tr > td.ct-name > span.outer`).get().forEach((e) => {
+        folderobserver.observe(e, folderobserverConfig);
+    });
 
     // wrap the preview with a div
     $(`tr.folder-id-${id} > td[colspan=3] > div.folder-preview > span`).wrap('<div style="float: left; height: 100%; margin-left: 10px; margin-top: 5px;"></div>');
@@ -737,6 +758,11 @@ let globalFolders = {};
 const folderRegex = /^folder-/;
 let folderDebugMode = false;
 let folderDebugModeWindow = [];
+let folderobserver;
+let folderobserverConfig = {
+    subtree: true,
+    attributes: true
+};
 
 // Add the button for creating a folder
 const createFolderBtn = () => { location.href = "/Docker/Folder?type=docker" };
