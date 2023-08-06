@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.04.1">
-<!ENTITY md5 "888d8778dad787c6538245dec2379a33">
+<!ENTITY version "2023.08.06">
+<!ENTITY md5 "362df24e5fe0d13a81f9573dc9a418f4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.06
+- Fixed a bug in the dasboard
+
 ###2023.08.04.1
 - Same fix of previous version on VM and Dashboard
 - QoL on docker tab

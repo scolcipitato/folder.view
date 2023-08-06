@@ -68,6 +68,7 @@ const createFolders = async () => {
                 let id = container.replace(folderRegex, '');
                 if (folders[id]) {
                     createFolderDocker(folders[id], id, key, order, containersInfo, Object.keys(foldersDone));
+                    key -= newOnes.length;
                     // Move the folder to the done object and delete it from the undone one
                     foldersDone[id] = folders[id];
                     delete folders[id];
@@ -80,7 +81,6 @@ const createFolders = async () => {
             // Add the folder on top of the array
             order.unshift(`folder-${id}`);
             createFolderDocker(value, id, 0, order, containersInfo, Object.keys(foldersDone));
-            key -= newOnes.length;
             // Move the folder to the done object and delete it from the undone one
             foldersDone[id] = folders[id];
             delete folders[id];
@@ -170,6 +170,7 @@ const createFolders = async () => {
                 let id = container.replace(folderRegex, '');
                 if (folders[id]) {
                     createFolderVM(folders[id], id, key, order, vmInfo, Object.keys(foldersDone));
+                    key -= newOnes.length;
                     // Move the folder to the done object and delete it from the undone one
                     foldersDone[id] = folders[id];
                     delete folders[id];
@@ -182,7 +183,6 @@ const createFolders = async () => {
             // Add the folder on top of the array
             order.unshift(`folder-${id}`);
             createFolderVM(value, id, 0, order, vmInfo, Object.keys(foldersDone));
-            key -= newOnes.length;
             // Move the folder to the done object and delete it from the undone one
             foldersDone[id] = folders[id];
             delete folders[id];
