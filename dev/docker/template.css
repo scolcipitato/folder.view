@@ -41,6 +41,7 @@
     width: 0;
     border-right: 1px solid;
     margin-left: 5px;
+    margin-top: -7px;
 }
 
 .folder-element-webui {
