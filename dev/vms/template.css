@@ -1,11 +1,3 @@
-.hover:hover div.folder-preview div {
-    visibility: visible;
-}
-
-.hover div.folder-preview div {
-    visibility: hidden;
-}
-
 .folder-name {
     width: 220px;
     padding: 8px;
@@ -31,15 +23,13 @@
     border-radius: 4px;
     height: 3.5em;
     overflow: hidden;
-    display: flex;
-    align-items: center;
 }
 
 .folder-preview-wrapper {
     float: left;
     height: 100%;
     margin-left: 10px;
-    margin-top: 13px;
+    margin-top: 5px;
 }
 
 .folder-preview-divider {
@@ -50,13 +40,6 @@
     margin-left: 5px;
 }
 
-.folder-element .ct-name {
+.folder-element .vm-name {
     padding-left: 30px !important;
-}
-
-div.folder-preview-4 span.outer{
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    align-content: center;
 }

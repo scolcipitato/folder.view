@@ -43,8 +43,9 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         form.regex.value = currFolder.regex;
         form.preview.value = currFolder.settings.preview.toString();
         form.preview_border.checked = currFolder.settings.preview_border || false;
-        form.preview_border_color.value = currFolder.settings.preview_border_color || "#FFFFFF";
+        form.preview_border_color.value = currFolder.settings.preview_border_color || rgbToHex($('body').css('color'));
         form.preview_hover.checked = currFolder.settings.preview_hover;
+        form.preview_vertical_bars.checked = currFolder.settings.preview_vertical_bars || false;
         form.preview_update.checked = currFolder.settings.preview_update;
         form.preview_grayscale.checked = currFolder.settings.preview_grayscale;
         form.preview_webui.checked = currFolder.settings.preview_webui;
@@ -199,6 +200,7 @@ const submitForm = async (e) => {
             'preview_border': e.preview_border.checked,
             'preview_border_color': e.preview_border_color.value.toString(),
             'preview_hover': e.preview_hover.checked,
+            'preview_vertical_bars': e.preview_vertical_bars.checked,
             'preview_update': e.preview_update.checked,
             'preview_grayscale': e.preview_grayscale.checked,
             'preview_webui': e.preview_webui.checked,
@@ -217,11 +219,9 @@ const submitForm = async (e) => {
     }
 
     // return to the right tab
-    if (type === 'vm') {
-        location.href = "/VMs";
-    } else {
-        location.href = "/Docker";
-    }
+    let loc = location.pathname.split('/');
+    loc.pop();
+    location.href = loc.join('/');
     
     return false;
 }
@@ -230,11 +230,9 @@ const submitForm = async (e) => {
  * Handles the button to return to the tab
  */
 const cancelBtn = () => {
-    if (type === 'vm') {
-        location.href = "/VMs";
-    } else {
-        location.href = "/Docker";
-    }
+    let loc = location.pathname.split('/');
+    loc.pop();
+    location.href = loc.join('/');
 };
 
 /**

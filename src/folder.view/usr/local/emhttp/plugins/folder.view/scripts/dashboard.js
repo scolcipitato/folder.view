@@ -9,16 +9,7 @@ const createFolders = async () => {
     // if docker is enabled
     if($('tbody#docker_view').length > 0) {
 
-        let prom = await Promise.all([
-            // Get the folders
-            $.get('/plugins/folder.view/server/read.php?type=docker').promise(),
-            // Get the order as unraid sees it
-            $.get('/plugins/folder.view/server/read_order.php?type=docker').promise(),
-            // Get the info on containers, needed for autostart, update and started
-            $.get('/plugins/folder.view/server/read_containers_info.php').promise(),
-            // Get the order that is shown in the webui
-            $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise()
-        ]);
+        let prom = await Promise.all(folderReq.docker);
         // Parse the results
         let folders = JSON.parse(prom[0]);
         const unraidOrder = JSON.parse(prom[1]);
@@ -111,16 +102,7 @@ const createFolders = async () => {
     // if vm is enabled
     if($('tbody#vm_view').length > 0) {
 
-        const prom = await Promise.all([
-            // Get the folders
-            $.get('/plugins/folder.view/server/read.php?type=vm').promise(),
-            // Get the order as unraid sees it
-            $.get('/plugins/folder.view/server/read_order.php?type=vm').promise(),
-            // Get the info on VMs, needed for autostart and started
-            $.get('/plugins/folder.view/server/read_vms_info.php').promise(),
-            // Get the order that is shown in the webui
-            $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()
-        ]);
+        const prom = await Promise.all(folderReq.vm);
         // Parse the results
         let folders = JSON.parse(prom[0]);
         const unraidOrder = JSON.parse(prom[1]);
@@ -228,7 +210,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     }
 
     // the HTML template for the folder
-    const fld = `<span class="outer solid apps stopped"><span id="folder-id-${id}" onclick='addDockerFolderContext("${id}")' class="hand docker"><img src="${folder.icon}" class="img" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';"></span><span class="inner"><span class="">${folder.name}</span><br><i class="fa fa-square stopped red-text"></i><span class="state">stopped</span></span><div class="folder_storage" style="display:none"></div></span>`;
+    const fld = `<span class="outer solid apps stopped folder-docker"><span id="folder-id-${id}" onclick='addDockerFolderContext("${id}")' class="hand docker folder-hand-docker"><img src="${folder.icon}" class="img folder-img-docker" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';"></span><span class="inner folder-inner-docker"><span class="folder-appname-docker">${folder.name}</span><br><i class="fa fa-square stopped red-text folder-load-status-docker"></i><span class="state folder-state-docker">stopped</span></span><div class="folder-storage"></div></span>`;
 
     // insertion at position of the folder
     if (position === 0) {
@@ -260,9 +242,9 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             order.splice(offsetIndex, 1);
 
             // grab the storage folder
-            const element = $(`tbody#docker_view > tr.updated > td > span.outer.apps > span#folder-id-${id}`).siblings('div.folder_storage');
+            const element = $(`tbody#docker_view span#folder-id-${id}`).siblings('div.folder-storage');
             // grab the container and put it onto the storage
-            element.append($('tbody#docker_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`));
+            element.append($('tbody#docker_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-docker`));
             
             const ct = containersInfo[container];
 
@@ -286,7 +268,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     folder.containers = newFolder;
 
     //temp var
-    const sel = $(`tbody#docker_view > tr.updated > td > span.outer.apps > span#folder-id-${id}`)
+    const sel = $(`tbody#docker_view span#folder-id-${id}`)
     
     //set tehe status of a folder
 
@@ -327,7 +309,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
     }
 
     // the HTML template for the folder
-    const fld = `<span class="outer solid vms stopped"><span id="folder-id-${id}" onclick='addVMFolderContext("${id}")' class="hand vm"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner">${folder.name}<br><i class="fa fa-square stopped red-text"></i><span class="state">stopped</span></span><div class="folder_storage" style="display:none"></div></span>`;
+    const fld = `<span class="outer solid vms stopped folder-vm"><span id="folder-id-${id}" onclick='addVMFolderContext("${id}")' class="hand vm folder-hand-vm"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner-vm">${folder.name}<br><i class="fa fa-square stopped red-text folder-load-status-vm"></i><span class="state folder-state-vm">stopped</span></span><div class="folder-storage" style="display:none"></div></span>`;
 
     // insertion at position of the folder
     if (position === 0) {
@@ -365,7 +347,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
             newFolder[container].state = ct.state;
 
             // grab the container and put it onto the storage
-            $(`tbody#vm_view > tr.updated > td > span.outer.vms > span#folder-id-${id}`).siblings('div.folder_storage').append($('tbody#vm_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`));
+            $(`tbody#vm_view span#folder-id-${id}`).siblings('div.folder-storage').append($('tbody#vm_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-vm`));
 
             if(folderDebugMode) {
                 console.log(`VM ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -382,7 +364,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
     
     //set tehe status of a folder
     if (started) {
-        const sel = $(`tbody#vm_view > tr.updated > td > span.outer.vms > span#folder-id-${id}`);
+        const sel = $(`tbody#vm_view span#folder-id-${id}`);
         sel.parent().removeClass('stopped').addClass('started');
         sel.next('span.inner').children('i').replaceWith($('<i class="fa fa-play started green-text"></i>'));
         sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} started`);
@@ -402,10 +384,10 @@ const expandFolderDocker = (id) => {
     const el = $(`tbody#docker_view > tr.updated > td > span.outer.apps > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
-        el.siblings('div.folder_storage').append($(`tbody#docker_view > tr.updated > td > span.outer.apps.folder-${id}-element`));
+        el.siblings('div.folder-storage').append($(`tbody#docker_view > tr.updated > td > span.outer.apps.folder-${id}-element`));
         el.attr('expanded', 'false');
     } else {
-        el.parent().after(el.siblings('div.folder_storage').children());
+        el.parent().after(el.siblings('div.folder-storage').children());
         el.attr('expanded', 'true');
     }
     if(globalFolders.docker) {
@@ -421,10 +403,10 @@ const expandFolderVM = (id) => {
     const el = $(`tbody#vm_view > tr.updated > td > span.outer.vms > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
-        el.siblings('div.folder_storage').append($(`tbody#vm_view > tr.updated > td > span.outer.vms.folder-${id}-element`));
+        el.siblings('div.folder-storage').append($(`tbody#vm_view > tr.updated > td > span.outer.vms.folder-${id}-element`));
         el.attr('expanded', 'false');
     } else {
-        el.parent().after(el.siblings('div.folder_storage').children());
+        el.parent().after(el.siblings('div.folder-storage').children());
         el.attr('expanded', 'true');
     }
     if(globalFolders.vms) {
@@ -487,7 +469,7 @@ const rmVMFolder = (id) => {
  * @param {string} id the id of the folder
  */
 const editDockerFolder = (id) => {
-    location.href = "/Docker/Folder?type=docker&id=" + id;
+    location.href = location.pathname + "/Folder?type=docker&id=" + id;
 };
 
 /**
@@ -495,7 +477,7 @@ const editDockerFolder = (id) => {
  * @param {string} id the id of the folder
  */
 const editVMFolder = (id) => {
-    location.href = "/VMs/Folder?type=vm&id=" + id;
+    location.href = location.pathname + "/Folder?type=vm&id=" + id;
 };
 
 /**
@@ -1110,11 +1092,40 @@ let globalFolders = {};
 const folderRegex = /^folder-/;
 let folderDebugMode = false;
 let folderDebugModeWindow = [];
+let folderReq = {
+    docker: [],
+    vm: []
+};
 
 // Patching the original function to make sure the containers are rendered before insering the folder
 window.loadlist_original = loadlist;
 window.loadlist = (x) => {
     loadedFolder = false;
+    if($('tbody#docker_view').length > 0) { 
+        folderReq.docker = [
+            // Get the folders
+            $.get('/plugins/folder.view/server/read.php?type=docker').promise(),
+            // Get the order as unraid sees it
+            $.get('/plugins/folder.view/server/read_order.php?type=docker').promise(),
+            // Get the info on containers, needed for autostart, update and started
+            $.get('/plugins/folder.view/server/read_containers_info.php').promise(),
+            // Get the order that is shown in the webui
+            $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise()
+        ];
+    }
+
+    if($('tbody#vm_view').length > 0) {
+        folderReq.vm = [
+            // Get the folders
+            $.get('/plugins/folder.view/server/read.php?type=vm').promise(),
+            // Get the order as unraid sees it
+            $.get('/plugins/folder.view/server/read_order.php?type=vm').promise(),
+            // Get the info on VMs, needed for autostart and started
+            $.get('/plugins/folder.view/server/read_vms_info.php').promise(),
+            // Get the order that is shown in the webui
+            $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()
+        ];
+    }
     loadlist_original(x);
 };
 

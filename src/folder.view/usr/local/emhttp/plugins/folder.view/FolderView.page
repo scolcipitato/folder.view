@@ -6,6 +6,19 @@ Markdown="false"
 
 <link rel="stylesheet" href="/plugins/folder.view/styles/folderview.css">
 
+<h2>Custom CSS</h2>
+<button onclick="importCSS('docker')">Import docker</button>
+<button onclick="importCSS('vm')">Import vm</button>
+<button onclick="importCSS('dashboard')">Import dashboard</button>
+<br>
+<button onclick="exportCSS('docker')">Export docker</button>
+<button onclick="exportCSS('vm')">Export vm</button>
+<button onclick="exportCSS('dashboard')">Export dashboard</button>
+<br>
+<button onclick="clearCSS('docker')">Clear docker</button>
+<button onclick="clearCSS('vm')">Clear vm</button>
+<button onclick="clearCSS('dashboard')">Clear dashboard</button>
+
 <h2>Docker</h2>
 <button onclick="downloadDocker()">Export all</button>
 <button onclick="importDocker()">Import</button>
@@ -53,6 +66,9 @@ Markdown="false"
     </tbody>
 </table>
 
-<script src="/plugins/folder.view/scripts/folderview.js" defer></script>
+<button onclick="fileManager()">Open File Manager</button>
 
-<input type="file" style="display: none;">
+<script src="/plugins/folder.view/scripts/folderview.js"></script>
+
+<input type="file" style="display: none;" accept=".json">
+<input type="file" style="display: none;" accept=".css">

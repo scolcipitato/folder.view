@@ -2,6 +2,7 @@ Menu="VMs"
 Icon="server"
 ---
 
-<script src="/plugins/folder.view/scripts/vm.js" defer></script>
+<script src="/plugins/folder.view/scripts/vm.js"></script>
 
-<link rel="stylesheet" href="/plugins/folder.view/styles/docker.css">
+<link rel="stylesheet" href="/plugins/folder.view/styles/vm.css">
+<link rel="stylesheet" href="/boot/config/plugins/folder.view/styles/vm-custom.css">

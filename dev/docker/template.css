@@ -1,18 +1,6 @@
-.hover:hover div.folder-preview div {
-    visibility: visible;
-}
-
-.hover div.folder-preview div {
-    visibility: hidden;
-}
-
 .folder-name {
     width: 220px;
     padding: 8px;
-}
-
-.folder-appname-id {
-    display: none;
 }
 
 .folder-dropdown {
@@ -21,6 +9,10 @@
     margin: 0;
     margin-left: 1em;
     float: right;
+}
+
+.folder-update-text {
+    white-space: nowrap;
 }
 
 .folder-storage {
@@ -48,6 +40,18 @@
     width: 0;
     border-right: 1px solid;
     margin-left: 5px;
+}
+
+.folder-element-webui {
+    margin-left: 0.5em;
+}
+
+.folder-element-logs {
+    margin-left: 0.5em;
+}
+
+div.folder-preview img.img {
+    margin-right: 4px;
 }
 
 .folder-element .ct-name {

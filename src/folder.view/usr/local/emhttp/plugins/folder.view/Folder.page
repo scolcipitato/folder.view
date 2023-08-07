@@ -52,6 +52,7 @@ Markdown="false"
                         <option value="1" selected>Icon and label</option>
                         <option value="2">Only icon</option>
                         <option value="3">Only label</option>
+                        <option value="4">List</option>
                     </select>
                 </dd>
             </dl>
@@ -93,7 +94,7 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-2 preview-3">
+        <div class="basic" constraint="preview-1 preview-2 preview-3 preview-4">
             <dl>
                 <dt>Show preview only on hover:</dt>
                 <dd>
@@ -106,7 +107,20 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-3 docker">
+        <div class="basic" constraint="preview-1 preview-2 preview-3 preview-4">
+            <dl>
+                <dt>Preview vertical bars:</dt>
+                <dd>
+                    <input class="basic-switch" name="preview_vertical_bars" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will Show vertical bars between container/VM inside the folder preview.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
             <dl>
                 <dt>Orange text on update:</dt>
                 <dd>
@@ -132,7 +146,7 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-3 docker">
+        <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
             <dl>
                 <dt>Add preview open WebUI:</dt>
                 <dd>
@@ -145,7 +159,7 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-3 docker">
+        <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
             <dl>
                 <dt>Add preview open logs:</dt>
                 <dd>

@@ -5,3 +5,70 @@
 .hover div.folder-preview div {
     visibility: hidden;
 }
+
+.folder-name {
+    width: 220px;
+    padding: 8px;
+}
+
+.folder-dropdown {
+    padding: 6px;
+    min-width: 0;
+    margin: 0;
+    margin-left: 1em;
+    float: right;
+}
+
+.folder-update-text {
+    white-space: nowrap;
+}
+
+.folder-storage {
+    display: none;
+}
+
+.folder-preview {
+    border-radius: 4px;
+    height: 3.5em;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.folder-preview-wrapper {
+    float: left;
+    height: 100%;
+    margin-left: 10px;
+    margin-top: 13px;
+}
+
+.folder-preview-divider {
+    float: left;
+    height: 80%;
+    width: 0;
+    border-right: 1px solid;
+    margin-left: 5px;
+}
+
+.folder-element-webui {
+    margin-left: 0.5em;
+}
+
+.folder-element-logs {
+    margin-left: 0.5em;
+}
+
+div.folder-preview img.img {
+    margin-right: 4px;
+}
+
+.folder-element .ct-name {
+    padding-left: 30px !important;
+}
+
+div.folder-preview-4 span.outer{
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    align-content: center;
+}

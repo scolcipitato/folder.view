@@ -6,12 +6,19 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.06">
-<!ENTITY md5 "362df24e5fe0d13a81f9573dc9a418f4">
+<!ENTITY version "2023.08.07">
+<!ENTITY md5 "c12cd46005a72aea7e8e25cb143f4e78">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.07
+- Custom CSS in the settings
+- Added custom classed for the folders
+- Added vertical divider in the folder preview
+- Now folder load faster
+- NEW preview method, the list, it groups container/VM by 2
+
 ###2023.08.06
 - Fixed a bug in the dasboard
 
@@ -75,9 +82,12 @@
     <!-- Post install -->
     <FILE Run="/bin/bash">
         <INLINE>
-            mkdir -p /boot/config/plugins/&name;
+            mkdir -p /boot/config/plugins/&name;/styles
             rm -f $(ls /boot/config/plugins/&name;/&name;*.txz)
             echo "&version;" > /boot/config/plugins/&name;/version
+            echo "" > /boot/config/plugins/&name;/styles/docker-custom.css
+            echo "" > /boot/config/plugins/&name;/styles/vm-custom.css
+            echo "" > /boot/config/plugins/&name;/styles/dashboard-custom.css
             echo ""
             echo "----------------------------------------------------"
             echo " &name; has been installed."

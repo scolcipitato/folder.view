@@ -2,16 +2,7 @@
  * Handles the creation of all folders
  */
 const createFolders = async () => {
-    const prom = await Promise.all([
-        // Get the folders
-        $.get('/plugins/folder.view/server/read.php?type=vm').promise(),
-        // Get the order as unraid sees it
-        $.get('/plugins/folder.view/server/read_order.php?type=vm').promise(),
-        // Get the info on VMs, needed for autostart and started
-        $.get('/plugins/folder.view/server/read_vms_info.php').promise(),
-        // Get the order that is shown in the webui
-        $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()
-    ]);
+    const prom = await Promise.all(folderReq);
     // Parse the results
     let folders = JSON.parse(prom[0]);
     const unraidOrder = JSON.parse(prom[1]);
@@ -114,7 +105,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     }
 
     // the HTML template for the folder
-    const fld = `<tr parent-id="${id}" class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''}"><td class="vm-name" style="width:220px;padding:8px"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer"><span id="${id}" onclick='addVMFolderContext("${id}")' class="hand"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner"><a href="#" onclick='editFolder("${id}")'>${folder.name}</a><a style="display:none">folder-${id}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text"></i><span class="state">stopped</span></span></span><button class="dropDown-${id}" onclick='dropDownButton("${id}")' style="padding:6px;min-width:0;margin:0;margin-left:1em;float:right"><i class="fa fa-chevron-down" aria-hidden="true"></i></button></td><td colspan="5"><div class="folder_storage" style="display:none"></div><div class="folder-preview" style="border-radius:4px;height:3.5em;overflow:hidden"></div></td><td><input class="autostart" type="checkbox" id="folder-${id}-auto" style="display:none"></td></tr><tr child-id="${id}" id="name-${id}" style="display:none"><td colspan="8" style="margin:0;padding:0"></td></tr>`;
+    const fld = `<tr parent-id="${id}" class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder"><td class="vm-name folder-name"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer folder-outer"><span id="${id}" onclick='addVMFolderContext("${id}")' class="hand folder-hand"><img src="${folder.icon}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner"><a class="folder-appname" href="#" onclick='editFolder("${id}")'>${folder.name}</a><a class="folder-appname-id">folder-${id}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text folder-load-status"></i><span class="state folder-state">stopped</span></span></span><button class="dropDown-${id} folder-dropdown" onclick='dropDownButton("${id}")'><i class="fa fa-chevron-down" aria-hidden="true"></i></button></td><td colspan="5"><div class="folder-storage"></div><div class="folder-preview"></div></td><td class="folder-autostart"><input class="autostart" type="checkbox" id="folder-${id}-auto" style="display:none"></td></tr><tr child-id="${id}" id="name-${id}" style="display:none"><td colspan="8" style="margin:0;padding:0"></td></tr>`;
 
     // insertion at position of the folder
     if (position === 0) {
@@ -128,25 +119,38 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
 
     // Set the border if enabled and set the color
     if(folder.settings.preview_border) {
-        $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
+        $(`tr.folder-id-${id} div.folder-preview`).css('border', `solid ${folder.settings.preview_border_color} 1px`);
     }
+
+    $(`tr.folder-id-${id} div.folder-preview`).addClass(`folder-preview-${folder.settings.preview}`);
 
     // select the preview function to use
     let addPreview;
     switch (folder.settings.preview) {
         case 1:
             addPreview = (id) => {
-                $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=5] > .folder_storage > tr > td.vm-name > span.outer:last`).clone());
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer:last`).clone());
             };
             break;
         case 2:
             addPreview = (id) => {
-                $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=5] > .folder_storage > tr > td.vm-name > span.outer > span.hand:last`).clone());
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.hand:last`).clone());
             };
             break;
         case 3:
             addPreview = (id) => {
-                $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview`).append($(`tr.folder-id-${id} > td[colspan=5] > .folder_storage > tr > td.vm-name > span.outer > span.inner:last`).clone());
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.inner:last`).clone());
+            };
+            break;
+        case 4:
+            addPreview = (id) => {
+                let lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
+                if(!lstSpan[0] || lstSpan.children().length >= 2) {
+                    $(`tr.folder-id-${id} div.folder-preview`).append($('<span class="outer"></span>'));
+                    lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
+                }
+                lstSpan.append($('<span class="inner"></span>'));
+                lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.inner > a:last`).clone())
             };
             break;
         default:
@@ -183,7 +187,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
             newFolder[container].state = ct.state;
 
             // grab the container and put it onto the storage
-            $(`tr.folder-id-${id} > td[colspan=5] > .folder_storage`).append($('#kvm_list > tr.sortable').eq(index).addClass(`folder-${id}-element`).removeClass('sortable'));
+            $(`tr.folder-id-${id} div.folder-storage`).append($('#kvm_list > tr.sortable').eq(index).addClass(`folder-${id}-element`).addClass(`folder-element`).removeClass('sortable'));
 
             if(folderDebugMode) {
                 console.log(`${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -192,7 +196,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
             addPreview(id);
 
             // element to set the preview options
-            const element = $(`tr.folder-id-${id} > td[colspan=5] > .folder-preview > span.outer:last`);
+            const element = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
 
             //temp var
             let sel;
@@ -217,13 +221,17 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     folder.containers = newFolder;
 
     // wrap the preview with a div
-    $(`tr.folder-id-${id} > td[colspan=5] > div.folder-preview > span`).wrap('<div style="float: left; height: 100%; margin-left: 10px; margin-top: 5px;"></div>');
+    $(`tr.folder-id-${id} div.folder-preview > span`).wrap('<div class="folder-preview-wrapper"></div>');
+
+    if(folder.settings.preview_vertical_bars) {
+        $(`tr.folder-id-${id} div.folder-preview > div`).not(':last').after('<div class="folder-preview-divider"></div>');
+    }
 
     //set tehe status of a folder
 
     if (started) {
-        $(`tr.folder-id-${id} > td.vm-name > span.outer > span.inner > i#load-folder-${id}`).attr('class', 'fa fa-play started green-text');
-        $(`tr.folder-id-${id} > td.vm-name > span.outer > span.inner > span.state`).text(`${started}/${Object.entries(folder.containers).length} started`);
+        $(`tr.folder-id-${id} i#load-folder-${id}`).attr('class', 'fa fa-play started green-text folder-load-status');
+        $(`tr.folder-id-${id} span.folder-state`).text(`${started}/${Object.entries(folder.containers).length} started`);
     }
 
     if (autostart) {
@@ -271,7 +279,7 @@ const dropDownButton = (id) => {
     if (state) {
         element.children().removeClass('fa-chevron-up').addClass('fa-chevron-down');
         $(`tr.folder-id-${id}`).addClass('sortable');
-        $(`tr.folder-id-${id} > td[colspan=5] > .folder_storage`).append($(`.folder-${id}-element`));
+        $(`tr.folder-id-${id} > td[colspan=5] > .folder-storage`).append($(`.folder-${id}-element`));
         element.attr('active', 'false');
     } else {
         element.children().removeClass('fa-chevron-down').addClass('fa-chevron-up');
@@ -638,11 +646,22 @@ let globalFolders = {};
 const folderRegex = /^folder-/;
 let folderDebugMode  = false;
 let folderDebugModeWindow = [];
+let folderReq = [];
 
 // Patching the original function to make sure the containers are rendered before insering the folder
 window.loadlist_original = loadlist;
 window.loadlist = (x) => {
     loadedFolder = false;
+    folderReq = [
+        // Get the folders
+        $.get('/plugins/folder.view/server/read.php?type=vm').promise(),
+        // Get the order as unraid sees it
+        $.get('/plugins/folder.view/server/read_order.php?type=vm').promise(),
+        // Get the info on VMs, needed for autostart and started
+        $.get('/plugins/folder.view/server/read_vms_info.php').promise(),
+        // Get the order that is shown in the webui
+        $.get('/plugins/folder.view/server/read_vm_webui_order.php').promise()
+    ];
     loadlist_original(x);
 };
 

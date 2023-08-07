@@ -1,0 +1,14 @@
+<span class="outer solid vms stopped folder-vm">
+    <span id="folder-id-${id}" onclick='addVMFolderContext("${id}")' class="hand vm folder-hand-vm">
+        <img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'>
+    </span>
+    <span class="inner folder-inner-vm">
+        ${folder.name}
+        <br>
+        <i class="fa fa-square stopped red-text folder-load-status-vm"></i>
+        <span class="state folder-state-vm">
+            stopped
+        </span>
+    </span>
+    <div class="folder-storage" style="display:none"></div>
+</span>
