@@ -32,7 +32,7 @@
     height: 3.5em;
     overflow: hidden;
     display: flex;
-    display: flex;
+    flex-wrap: wrap;
     align-items: center;
 }
 
