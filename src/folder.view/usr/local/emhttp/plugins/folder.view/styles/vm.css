@@ -32,6 +32,7 @@
     height: 3.5em;
     overflow: hidden;
     display: flex;
+    display: flex;
     align-items: center;
 }
 
@@ -39,7 +40,7 @@
     float: left;
     height: 100%;
     margin-left: 10px;
-    margin-top: 13px;
+    margin-top: 7px;
 }
 
 .folder-preview-divider {
