@@ -270,7 +270,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     // replace the old containers array with the newFolder object
     folder.containers = newFolder;
 
-    $(`tr.folder-id-${id} span.folder-outer`).get().forEach((e) => {
+    $(`tr.folder-id-${id} div.folder-storage span.outer`).get().forEach((e) => {
         folderobserver.observe(e, folderobserverConfig);
     });
 
