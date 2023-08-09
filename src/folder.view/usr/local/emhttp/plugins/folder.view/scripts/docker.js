@@ -278,7 +278,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     $(`tr.folder-id-${id} div.folder-preview > span`).wrap('<div class="folder-preview-wrapper"></div>');
 
     if(folder.settings.preview_vertical_bars) {
-        $(`tr.folder-id-${id} div.folder-preview > div`).not(':last').after('<div class="folder-preview-divider"></div>');
+        $(`tr.folder-id-${id} div.folder-preview > div`).not(':last').after(`<div class="folder-preview-divider" style="border-color: ${folder.settings.preview_border_color};"></div>`);
     }
 
     //set tehe status of a folder
