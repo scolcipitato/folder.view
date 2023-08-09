@@ -2,7 +2,7 @@ Menu="Docker"
 Icon="server"
 ---
 
-<script src="/plugins/folder.view/scripts/docker.js"></script>
+<script src="<?autov('/plugins/folder.view/scripts/docker.js')?>"></script>
 
-<link rel="stylesheet" href="/plugins/folder.view/styles/docker.css">
-<link rel="stylesheet" href="/boot/config/plugins/folder.view/styles/docker-custom.css">
+<link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/docker.css')?>">
+<link rel="stylesheet" href="<?autov('/boot/config/plugins/folder.view/styles/docker-custom.css')?>">

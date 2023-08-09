@@ -4,7 +4,7 @@ Icon="folder-open-o"
 Markdown="false"
 ---
 
-<link rel="stylesheet" href="/plugins/folder.view/styles/folderview.css">
+<link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/folderview.css')?>">
 
 <h2>Custom CSS</h2>
 <button onclick="importCSS('docker')">Import docker</button>
@@ -68,7 +68,7 @@ Markdown="false"
 
 <button onclick="fileManager()">Open File Manager</button>
 
-<script src="/plugins/folder.view/scripts/folderview.js"></script>
+<script src="<?autov('/plugins/folder.view/scripts/folderview.js')?>"></script>
 
 <input type="file" style="display: none;" accept=".json">
 <input type="file" style="display: none;" accept=".css">

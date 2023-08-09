@@ -2,7 +2,7 @@ Menu="Dashboard"
 Icon="server"
 ---
 
-<script src="/plugins/folder.view/scripts/dashboard.js"></script>
+<script src="<?autov('/plugins/folder.view/scripts/dashboard.js')?>"></script>
 
-<link rel="stylesheet" href="/plugins/folder.view/styles/dashboard.css">
-<link rel="stylesheet" href="/boot/config/plugins/folder.view/styles/dashboard-custom.css">
+<link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/dashboard.css')?>">
+<link rel="stylesheet" href="<?autov('/boot/config/plugins/folder.view/styles/dashboard-custom.css')?>">

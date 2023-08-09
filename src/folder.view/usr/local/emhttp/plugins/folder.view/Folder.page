@@ -2,9 +2,9 @@ Title="Folder"
 Markdown="false"
 ---
 
-<script src="/webGui/javascript/jquery.switchbutton.js"></script>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
-<link type="text/css" rel="stylesheet" href="/plugins/folder.view/styles/folder.css">
+<script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
+<link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
+<link type="text/css" rel="stylesheet" href="<?autov('/plugins/folder.view/styles/folder.css')?>">
 
 <div class="canvas">
     <form onsubmit="submitForm(this); return false">
@@ -255,4 +255,4 @@ Markdown="false"
     </form>
 </div>
 
-<script src="/plugins/folder.view/scripts/folder.js" defer></script>
+<script src="<?autov('/plugins/folder.view/scripts/folder.js')?>" defer></script>

@@ -347,7 +347,7 @@ const dropDownButton = (id) => {
         $(`tr.folder-id-${id}`).removeClass('sortable').removeClass('ui-sortable-handle').off().css('cursor', '');
         $(`tr.folder-id-${id}`).after($(`.folder-${id}-element`));
         $(`.folder-${id}-element > td > i.fa-arrows-v`).remove();
-        $(`.folder-${id}-element:last`).css('border-bottom', '1px solid');
+        $(`.folder-${id}-element:last`).css('border-bottom', `1px solid ${globalFolders[id].settings.preview_border_color}`);
         element.attr('active', 'true');
     }
     if(globalFolders[id]) {

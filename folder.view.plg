@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.08">
-<!ENTITY md5 "1ab137e7ae5b44c7616742bcce82361e">
+<!ENTITY version "2023.08.09">
+<!ENTITY md5 "d98ee633daae03ac3a8706e2ce7bd83e">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.09
+- Fixed caching problem
+- Expanded folder bottom border now follows the color of the preview border
+
 ###2023.08.08
 - CSS fix
 
