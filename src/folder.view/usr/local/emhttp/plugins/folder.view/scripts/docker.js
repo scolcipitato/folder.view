@@ -24,7 +24,7 @@ const createFolders = async () => {
     if(folderDebugMode) {
         let element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify({
-            veriosn: (await $.get('/plugins/folder.view/server/version.php').promise()).trim(),
+            version: (await $.get('/plugins/folder.view/server/version.php').promise()).trim(),
             folders,
             unraidOrder,
             originalOrder: JSON.parse(await $.get('/plugins/folder.view/server/read_docker_webui_order.php').promise()),
