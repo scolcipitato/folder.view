@@ -36,7 +36,7 @@ Markdown="false"
                     <br>
                     It also supports <b>data:image/{type};base64,</b> format (<a href="https://base64.guru/converter/encode/image" target="_blank">Convert image to data strings</a>)
                     <br>
-                    <a href="https://github.com/hernandito/unRAID-Docker-Folder-Animated-Icons---Alternate-Colors" target="_blank">GitHub with some icons</a>.
+                    <a href="https://forums.unraid.net/topic/92824-icon-collections-for-docker-folder-plugin/" target="_blank">Thread with some icons</a>.
                     <br>
                     You can click the icon of the Docker/VM to set the folder icon.
                 </p>
