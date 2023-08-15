@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.11">
-<!ENTITY md5 "637c10000a9cb29370087a90b5cd092c">
+<!ENTITY version "2023.08.15">
+<!ENTITY md5 "2e4cb08fea344d21fb551564b604ee78">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.15
+- Fixed cpu load bars on docker advanced view
+    
 ###2023.08.11
 - Added a div insite the folder-name td
 
