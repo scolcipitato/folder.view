@@ -46,6 +46,7 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         form.preview_border_color.value = currFolder.settings.preview_border_color || rgbToHex($('body').css('color'));
         form.preview_hover.checked = currFolder.settings.preview_hover;
         form.preview_vertical_bars.checked = currFolder.settings.preview_vertical_bars || false;
+        form.update_column.checked = currFolder.settings.update_column || false;
         form.preview_update.checked = currFolder.settings.preview_update;
         form.preview_grayscale.checked = currFolder.settings.preview_grayscale;
         form.preview_webui.checked = currFolder.settings.preview_webui;
@@ -201,6 +202,7 @@ const submitForm = async (e) => {
             'preview_border_color': e.preview_border_color.value.toString(),
             'preview_hover': e.preview_hover.checked,
             'preview_vertical_bars': e.preview_vertical_bars.checked,
+            'update_column': e.update_column.checked,
             'preview_update': e.preview_update.checked,
             'preview_grayscale': e.preview_grayscale.checked,
             'preview_webui': e.preview_webui.checked,

@@ -22,10 +22,35 @@
         </div>
     </td>
     <td class="updatecolumn folder-update">
+
+        <!-- Up to date -->
         <span class="green-text folder-update-text">
             <i class="fa fa-check fa-fw"></i>
-            up-to-date
+             up-to-date
         </span>
+        <div class="advanced" style="display: ${advanced ? 'block' : 'none'};">
+            <a class="exec" onclick="forceUpdateFolder('${id}');">
+                <span style="white-space:nowrap;">
+                    <i class="fa fa-cloud-download fa-fw"></i>
+                     force update
+                </span>
+            </a>
+        </div>
+
+        <!-- To update -->
+        <div class="advanced" style="display: ${advanced ? 'block' : 'none'};">
+            <span class="orange-text folder-update-text" style="white-space:nowrap;">
+                <i class="fa fa-flash fa-fw"></i>
+                 update ready
+            </span>
+        </div>
+        <a class="exec" onclick="updateFolder('${id}');">
+            <span style="white-space:nowrap;">
+                <i class="fa fa-cloud-download fa-fw"></i>
+                 apply update
+            </span>
+        </a>
+        
     </td>
     <td colspan="3">
         <div class="folder-storage"></div>

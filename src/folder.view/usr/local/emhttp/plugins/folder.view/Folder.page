@@ -120,6 +120,19 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
+        <div class="basic">
+            <dl>
+                <dt>Hide update column:</dt>
+                <dd>
+                    <input class="basic-switch" name="update_column" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p>
+                    Will <b>NUKE</b> the update column for this folder.
+                </p>
+            </blockquote>
+        </div>
         <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
             <dl>
                 <dt>Orange text on update:</dt>

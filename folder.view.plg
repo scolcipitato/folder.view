@@ -6,12 +6,17 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.16">
-<!ENTITY md5 "5a0e65420803b53a4fb3d2c3214cd8c9">
+<!ENTITY version "2023.08.17">
+<!ENTITY md5 "a87c3a33e4637d614959cb5e7d89b6b4">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.17
+- Added the option to remove the update column
+- Fixed the issue where expanded folder weren't remaining open after an action
+- Update column rework, now it functions exactly how the normal container does
+
 ###2023.08.16
 - Updated the link to folder icon in the folder creation/editing page
     
@@ -107,9 +112,9 @@
             mkdir -p /boot/config/plugins/&name;/styles
             rm -f $(ls /boot/config/plugins/&name;/&name;*.txz)
             echo "&version;" > /boot/config/plugins/&name;/version
-            echo "" >> /boot/config/plugins/&name;/styles/docker-custom.css
-            echo "" >> /boot/config/plugins/&name;/styles/vm-custom.css
-            echo "" >> /boot/config/plugins/&name;/styles/dashboard-custom.css
+            touch /boot/config/plugins/&name;/styles/docker-custom.css
+            touch /boot/config/plugins/&name;/styles/vm-custom.css
+            touch /boot/config/plugins/&name;/styles/dashboard-custom.css
             echo ""
             echo "----------------------------------------------------"
             echo " &name; has been installed."
