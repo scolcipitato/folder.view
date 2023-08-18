@@ -83,16 +83,18 @@ const createFolders = async () => {
         delete folders[id];
     }
 
+    // Assing the folder done to the global object
+    globalFolders = foldersDone;
+
     // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
-    for (const [id, value] of Object.entries(foldersDone)) {
-        if ((globalFolders[id] && globalFolders[id].status.expanded) || value.settings.expand_tab) {
+    for (const [id, value] of Object.entries(globalFolders)) {
+        if (value.status.expanded || value.settings.expand_tab) {
             value.status.expanded = true;
             dropDownButton(id);
         }
     }
 
-    // Assing the folder done to the global object
-    globalFolders = foldersDone;
+    
     
     folderDebugMode = false;
 };

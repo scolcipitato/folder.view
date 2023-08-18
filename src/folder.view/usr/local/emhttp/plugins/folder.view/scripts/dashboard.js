@@ -81,17 +81,19 @@ const createFolders = async () => {
         if ($('input#apps').is(':checked')) {
             $('tbody#docker_view > tr.updated > td > span.outer.stopped').css('display', 'none');
         }
+
+        // Assing the folder done to the global object
+        globalFolders.docker = foldersDone;
     
         // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
-        for (const [id, value] of Object.entries(foldersDone)) {
-            if ((globalFolders.docker && globalFolders.docker[id].status.expanded) || value.settings.expand_dashboard) {
+        for (const [id, value] of Object.entries(globalFolders.docker)) {
+            if (value.status.expanded || value.settings.expand_dashboard) {
                 value.status.expanded = true;
                 expandFolderDocker(id);
             }
         }
     
-        // Assing the folder done to the global object
-        globalFolders.docker = foldersDone;
+        
 
     }
 
@@ -175,17 +177,16 @@ const createFolders = async () => {
         if ($('input#vms').is(':checked')) {
             $('tbody#vm_view > tr.updated > td > span.outer.stopped').css('display', 'none');
         }
+
+        globalFolders.vms = foldersDone;
     
         // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
-        for (const [id, value] of Object.entries(foldersDone)) {
-            if ((globalFolders.vms && globalFolders.vms[id].status.expanded) || value.settings.expand_dashboard) {
+        for (const [id, value] of Object.entries(globalFolders.vms)) {
+            if (value.status.expanded || value.settings.expand_dashboard) {
                 value.status.expanded = true;
                 expandFolderVM(id);
             }
         }
-    
-        globalFolders.vms = foldersDone;
-        
     }
 
     folderDebugMode  = false;

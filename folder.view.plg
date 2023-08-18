@@ -6,14 +6,17 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.18">
-<!ENTITY md5 "b5121bc24e7549a2094b983fa075f737">
+<!ENTITY version "2023.08.18.1">
+<!ENTITY md5 "0c7452d21c5d946db09bbc64c2e6e0d0">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.18.1
+- Fixed an issue with expanded folders
+
 ###2023.08.18
-- Updated template for the custom css, now vertical devider is present even for the last element
+- Updated template for the custom CSS, now vertical divider is present even for the last element
 - Backend code cleanup
 - Action function reworked
 
