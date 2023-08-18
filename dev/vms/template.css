@@ -35,7 +35,7 @@
     margin-top: 7px;
 }
 
-.folder-preview-divider {
+.folder-preview-divider:not(:last-child) {
     float: left;
     height: 80%;
     width: 0;

@@ -25,9 +25,9 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
     let folders = JSON.parse(await $.get(`/plugins/folder.view/server/read.php?type=${type}`).promise());
     // get the list of element docker/vm
     if (type === 'docker') {
-        choose = JSON.parse(await $.get('/plugins/folder.view/server/read_containers.php').promise());
+        choose = JSON.parse(await $.get('/plugins/folder.view/server/read_elements.php?type=docker').promise());
     } else if (type === 'vm') {
-        choose = JSON.parse(await $.get('/plugins/folder.view/server/read_vms.php').promise());
+        choose = JSON.parse(await $.get('/plugins/folder.view/server/read_elements.php?type=vm').promise());
     }
 
     // if editing a folder and not creating one
