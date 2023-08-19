@@ -345,7 +345,7 @@ const dropDownButton = (id) => {
     if (state) {
         element.children().removeClass('fa-chevron-up').addClass('fa-chevron-down');
         $(`tr.folder-id-${id}`).addClass('sortable');
-        $(`tr.folder-id-${id} > td[colspan=3] > .folder-storage`).append($(`.folder-${id}-element`));
+        $(`tr.folder-id-${id} .folder-storage`).append($(`.folder-${id}-element`));
         element.attr('active', 'false');
     } else {
         element.children().removeClass('fa-chevron-down').addClass('fa-chevron-up');

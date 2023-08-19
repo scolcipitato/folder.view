@@ -120,7 +120,7 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <div class="basic">
+        <div class="basic" constraint="docker">
             <dl>
                 <dt>Hide update column:</dt>
                 <dd>
