@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.19">
-<!ENTITY md5 "6b32f7006672c9d8f379f4f08b856fb8">
+<!ENTITY version "2023.08.20">
+<!ENTITY md5 "05a6d4c4752d9f752d233ccc8cf74515">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.08.20
+- Fixed another issue with expanded folders
+
 ###2023.08.19
 - Fixed an issue with expanded folders and update column hidden
 - Hide update column with vms folder

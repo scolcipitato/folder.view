@@ -212,7 +212,6 @@ const submitForm = async (e) => {
         },
         containers: [...$('input[name*="containers"]:checked').map((i, e) => $(e).val())]
     }
-    console.log(folder);
     // send the data to the right endpoint
     if (id) {
         await $.post('/plugins/folder.view/server/update.php', { type: type, content: JSON.stringify(folder), id: id });
@@ -242,7 +241,6 @@ const cancelBtn = () => {
  * @param {*} e the element
  */
 const setIconAsContainer = (e) => {
-    // console.log(e);
     $('div.canvas > form')[0].icon.value = e.firstChild.src;
     $($('div.canvas > form')[0].icon).trigger('input');
 };

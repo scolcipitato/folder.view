@@ -71,16 +71,16 @@ const createFolders = async () => {
         delete folders[id];
     }
 
-    // Assing the folder done to the global object
-    globalFolders = foldersDone;
-
     // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
     for (const [id, value] of Object.entries(foldersDone)) {
-        if(value.status.expanded || value.settings.expand_tab) {
+        if((globalFolders[id] && globalFolders[id].status.expanded) || value.settings.expand_tab) {
             value.status.expanded = true;
             dropDownButton(id);
         }
     }
+
+    // Assing the folder done to the global object
+    globalFolders = foldersDone;
 
     folderDebugMode  = false;
 };
@@ -218,6 +218,9 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
         }
     }
 
+    // set the border on the last element
+    $(`.folder-${id}-element:last`).css('border-bottom', `1px solid ${folder.settings.preview_border_color}`);
+
     // replace the old containers array with the newFolder object
     folder.containers = newFolder;
 
@@ -287,7 +290,6 @@ const dropDownButton = (id) => {
         $(`tr.folder-id-${id}`).removeClass('sortable').removeClass('ui-sortable-handle').off().css('cursor', '');
         $(`tr.folder-id-${id}`).after($(`.folder-${id}-element`));
         $(`.folder-${id}-element > td > i.fa-arrows-v`).remove();
-        $(`.folder-${id}-element:last`).css('border-bottom', `1px solid ${globalFolders[id].settings.preview_border_color}`);
         element.attr('active', 'true');
     }
     if(globalFolders[id]) {
