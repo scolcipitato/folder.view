@@ -20,6 +20,16 @@ const createFolders = async () => {
         }
     }
 
+    const autostartOrder = Object.values(containersInfo).filter(el => !(el.info.State.Autostart===false)).sort((a, b) => {
+        if(a.info.State.Autostart < b.info.State.Autostart) {
+          return -1;
+        }
+          if(a.info.State.Autostart > b.info.State.Autostart) {
+          return 1;
+        }
+          return 0;
+    }).map(el => el.info.Name);
+
     // debug mode, download the debug json file
     if(folderDebugMode) {
         let element = document.createElement('a');
@@ -95,6 +105,12 @@ const createFolders = async () => {
     globalFolders = foldersDone;
     
     folderDebugMode = false;
+
+    const autostartActual = $('.ct-name .appname').map(function() {return $(this).text()}).get().filter(x => autostartOrder.includes(x));
+
+    if(!(autostartOrder.length === autostartActual.length && autostartOrder.every((value, index) => value === autostartActual[index]))) {
+        $('.nav-item.AutostartOrder.util > a > b').removeClass('green-text').addClass('red-text');
+    }
 };
 
 /**
@@ -121,8 +137,10 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         folder.containers = folder.containers.concat(order.filter(el => regex.test(el)));
     }
 
+    folder.containers = folder.containers.concat(order.filter(el => containersInfo[el]?.Labels['folder.view'] === folder.name));
+
     // the HTML template for the folder
-    const fld = `<tr class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder"><td class="ct-name folder-name"><div class="folder-name-sub"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer folder-outer"><span id="${id}" onclick="addDockerFolderContext('${id}')" class="hand folder-hand"><img src="${folder.icon}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner"><span class="appname" style="display: none;"><a>folder-${id}</a></span><a class="exec folder-appname" onclick='editFolder("${id}")'>${folder.name}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text folder-load-status"></i><span class="state folder-state">stopped</span></span></span><button class="dropDown-${id} folder-dropdown" onclick="dropDownButton('${id}')" ><i class="fa fa-chevron-down" aria-hidden="true"></i></button></div></td><td class="updatecolumn folder-update"><span class="green-text folder-update-text"><i class="fa fa-check fa-fw"></i> up-to-date</span><div class="advanced" style="display: ${advanced ? 'block' : 'none'};"><a class="exec" onclick="forceUpdateFolder('${id}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i> force update</span></a></div></td><td colspan="3"><div class="folder-storage"></div><div class="folder-preview"></div></td><td class="advanced folder-advanced" ${advanced ? 'style="display: table-cell;"' : ''}><span class="cpu-folder-${id} folder-cpu">0%</span><div class="usage-disk mm folder-load"><span id="cpu-folder-${id}" class="folder-cpu-bar" style="width:0%"></span><span></span></div><br><span class="mem-folder-${id} folder-mem">0B / 0B</span></td><td class="folder-autostart"><input type="checkbox" id="folder-${id}-auto" class="autostart" style="display:none"><div style="clear:left"></div></td><td></td></tr>`;
+    const fld = `<tr class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder"><td class="ct-name folder-name"><div class="folder-name-sub"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer folder-outer"><span id="${id}" onclick="addDockerFolderContext('${id}')" class="hand folder-hand"><img src="${folder.icon}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner"><span class="appname" style="display: none;"><a>folder-${id}</a></span><a class="exec folder-appname" onclick='editFolder("${id}")'>${folder.name}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text folder-load-status"></i><span class="state folder-state"> ${$.i18n('stopped')}</span></span></span><button class="dropDown-${id} folder-dropdown" onclick="dropDownButton('${id}')" ><i class="fa fa-chevron-down" aria-hidden="true"></i></button></div></td><td class="updatecolumn folder-update"><span class="green-text folder-update-text"><i class="fa fa-check fa-fw"></i> ${$.i18n('up-to-date')}</span><div class="advanced" style="display: ${advanced ? 'block' : 'none'};"><a class="exec" onclick="forceUpdateFolder('${id}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i> ${$.i18n('force-update')}</span></a></div></td><td colspan="3"><div class="folder-storage"></div><div class="folder-preview"></div></td><td class="advanced folder-advanced" ${advanced ? 'style="display: table-cell;"' : ''}><span class="cpu-folder-${id} folder-cpu">0%</span><div class="usage-disk mm folder-load"><span id="cpu-folder-${id}" class="folder-cpu-bar" style="width:0%"></span><span></span></div><br><span class="mem-folder-${id} folder-mem">0 / 0</span></td><td class="folder-autostart"><input type="checkbox" id="folder-${id}-auto" class="autostart" style="display:none"><div style="clear:left"></div></td><td></td></tr>`;
 
     // insertion at position of the folder
     if (position === 0) {
@@ -145,33 +163,68 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     let addPreview;
     switch (folder.settings.preview) {
         case 1:
-            addPreview = (id) => {
+            addPreview = (id, ctid) => {
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer:last`).clone());
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
+                if(folder.settings.context === 2 || folder.settings.context === 0) {
+                    tmpId = $(`tr.folder-id-${id} div.folder-preview > span.outer:last > span.hand`);
+                    tmpId.attr("id", "folder-preview-" + ctid);
+                    tmpId.removeAttr("onclick");
+                    if(folder.settings.context === 2) {
+                        return tmpId;
+                    }
+                }
             };
             break;
         case 2:
-            addPreview = (id) => {
+            addPreview = (id, ctid) => {
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.hand:last`).clone());
+
+                if(folder.settings.context === 2 || folder.settings.context === 0) {
+                    let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.hand:last`);
+                    tmpId.attr("id", "folder-preview-" + ctid);
+                    tmpId.removeAttr("onclick");
+                    if(folder.settings.context === 2) {
+                        return tmpId;
+                    }
+                }
             };
             break;
         case 3:
-            addPreview = (id) => {
+            addPreview = (id, ctid) => {
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner:last`).clone());
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.inner:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
+
+                if(folder.settings.context === 2 || folder.settings.context === 0) {
+                    tmpId = $(`tr.folder-id-${id} div.folder-preview > span.inner:last > span.appname > a.exec`);
+                    tmpId.attr("id", "folder-preview-" + ctid);
+                    tmpId.removeAttr("onclick");
+                    if(folder.settings.context === 2) {
+                        return tmpId;
+                    }
+                }
             };
             break;
         case 4:
-                addPreview = (id) => {
+                addPreview = (id, ctid) => {
                     let lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
                     if(!lstSpan[0] || lstSpan.children().length >= 2) {
                         $(`tr.folder-id-${id} div.folder-preview`).append($('<span class="outer"></span>'));
                         lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
                     }
                     lstSpan.append($('<span class="inner"></span>'));
-                    lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner > span.appname:last`).clone())
+                    lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner > span.appname:last`).clone());
+
+                    if(folder.settings.context === 2 || folder.settings.context === 0) {
+                        let tmpId = $(`tr.folder-id-${id} div.folder-preview span.inner:last > span.appname > a.exec`);
+                        tmpId.attr("id", "folder-preview-" + ctid);
+                        tmpId.removeAttr("onclick");
+                        if(folder.settings.context === 2) {
+                            return tmpId;
+                        }
+                    }
                 };
                 break;
         default:
@@ -204,15 +257,233 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             // grab the container and put it onto the storage
             $(`tr.folder-id-${id} div.folder-storage`).append($('#docker_list > tr.sortable').eq(index).addClass(`folder-${id}-element`).addClass(`folder-element`).removeClass('sortable'));
             
-            addPreview(id);
-
             const ct = containersInfo[container];
 
+            let CPU = [];
+            let MEM = [];
+            let charts = [];
+
+            const graphListener = (e) => {
+                let now = Date.now();
+                try {
+                    let load = e.match(new RegExp(`^${ct.shortId}\;.*\;.*\ \/\ .*$`, 'm'))[0].split(';');
+                    load = {
+                        cpu: parseFloat(load[1].replace('%', ''))/cpus,
+                        mem: load[2].split(' / ')
+                    }
+                    load.mem = memToB(load.mem[0]) / memToB(load.mem[1]) * 100;
+                    CPU.push({
+                        x: now,
+                        y: load.cpu
+                    });
+                    MEM.push({
+                        x: now,
+                        y: load.mem
+                    });
+                } catch (error) {
+                    CPU.push({
+                        x: now,
+                        y: 0
+                    });
+                    MEM.push({
+                        x: now,
+                        y: 0
+                    });
+                }
+                
+                for (const chart of charts) {
+                    chart.update('quiet');
+                }
+            };
+
+            const tooltip = addPreview(id, ct.shortId);
+            if(tooltip) {
+                $(tooltip).tooltipster({
+                    interactive: true,
+                    theme: ['tooltipster-docker-folder'],
+                    trigger: folder.settings.context_trigger || 'click',
+                    zIndex: 99999999,
+                    functionReady: () => {
+                        let diabled = [];
+                        let active = 0;
+                        const options = {
+                            scales: {
+                                x: {
+                                    type: 'realtime',
+                                    realtime: {
+                                        duration: 1000*(folder.settings.context_graph_time || 60)
+                                    },
+                                    time: {
+                                        tooltipFormat: 'dd MMM, yyyy, HH:mm:ss',
+                                        displayFormats: {
+                                            millisecond: 'H:mm:ss.SSS',
+                                            second: 'H:mm:ss',
+                                            minute: 'H:mm',
+                                            hour: 'H',
+                                            day: 'MMM D',
+                                            week: 'll',
+                                            month: 'MMM YYYY',
+                                            quarter: '[Q]Q - YYYY',
+                                            year: 'YYYY'
+                                        },
+                                    },
+                                },
+                                y: {
+                                    min: 0
+                                }
+                            },
+                            interaction: {
+                                intersect: false,
+                                mode: 'index',
+                            },
+                            plugins: {
+                                tooltip: {
+                                    position: 'nearest'
+                                }
+                            }
+                        };
+    
+                        switch (folder.settings.context_graph) {
+                            case 0:
+                                diabled = [0, 1, 2];
+                                active = 3;
+                                break;
+                            case 2:
+                                diabled = [0];
+                                active = 1;
+                                charts.push(new Chart($(`.cpu-grapth-${ct.shortId} > canvas`)[0], {
+                                    type: 'line',
+                                    data: {
+                                        datasets: [
+                                            {
+                                                label: 'CPU',
+                                                data: CPU,
+                                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-cpu'),
+                                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-cpu'),
+                                                tension: 0.4,
+                                                pointRadius: 0
+                                            }
+                                        ]
+                                    },
+                                    options: options
+                                }));
+                                charts.push(new Chart($(`.mem-grapth-${ct.shortId} > canvas`)[0], {
+                                    type: 'line',
+                                    data: {
+                                        datasets: [
+                                            {
+                                                label: 'MEM',
+                                                data: MEM,
+                                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-mem'),
+                                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-mem'),
+                                                tension: 0.4,
+                                                pointRadius: 0
+                                            }
+                                        ]
+                                    },
+                                    options: options
+                                }));
+                                break;
+                            case 3:
+                                diabled = [0, 2];
+                                active = 1;
+                                charts.push(new Chart($(`.cpu-grapth-${ct.shortId} > canvas`)[0], {
+                                    type: 'line',
+                                    data: {
+                                        datasets: [
+                                            {
+                                                label: 'CPU',
+                                                data: CPU,
+                                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-cpu'),
+                                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-cpu'),
+                                                tension: 0.4,
+                                                pointRadius: 0
+                                            }
+                                        ]
+                                    },
+                                    options: options
+                                }));
+                                break;
+                            case 4:
+                                diabled = [0, 1];
+                                active = 2;
+                                charts.push(new Chart($(`.mem-grapth-${ct.shortId} > canvas`)[0], {
+                                    type: 'line',
+                                    data: {
+                                        datasets: [
+                                            {
+                                                label: 'MEM',
+                                                data: MEM,
+                                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-mem'),
+                                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-mem'),
+                                                tension: 0.4,
+                                                pointRadius: 0
+                                            }
+                                        ]
+                                    },
+                                    options: options
+                                }));
+                                break;
+                            case 1:
+                            default:
+                                diabled = [1, 2];
+                                active = 0;
+                                charts.push(new Chart($(`.comb-grapth-${ct.shortId} > canvas`)[0], {
+                                    type: 'line',
+                                    data: {
+                                        datasets: [
+                                            {
+                                                label: 'CPU',
+                                                data: CPU,
+                                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-cpu'),
+                                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-cpu'),
+                                                tension: 0.4,
+                                                pointRadius: 0
+                                            },
+                                            {
+                                                label: 'MEM',
+                                                data: MEM,
+                                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-mem'),
+                                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--folder-view-graph-mem'),
+                                                tension: 0.4,
+                                                pointRadius: 0
+                                            }
+                                        ]
+                                    },
+                                    options: options
+                                }));
+                                break;
+                        }
+    
+                        if($(`.preview-outbox-${ct.shortId} .status-autostart`).children().length === 1) {
+                            $(`.preview-outbox-${ct.shortId} .status-autostart > input[type='checkbox']`).switchButton({ labels_placement: 'right', off_label: "Off", on_label: "On", checked: !(ct.info.State.Autostart === false) });
+                            $(`.preview-outbox-${ct.shortId} .info-section`).tabs({
+                                heightStyle: 'auto',
+                                disabled: diabled,
+                                active: active
+                            });
+                            $(`.preview-outbox-${ct.shortId} table > tbody div.status-autostart > input[type="checkbox"]`).on("change", advancedAutostart);
+                        }
+
+    
+                        dockerload.addEventListener('message', graphListener);
+                    },
+                    functionAfter: () => {
+                        dockerload.removeEventListener('message', graphListener);
+                        for (const chart of charts) {
+                            chart.destroy();
+                        }
+                        charts = [];
+                    },
+                    content: $(`<div class="preview-outbox-${ct.shortId} preview-outbox"><div class="first-row"><div class="preview-name"><div class="preview-img"><img src="${ct.Labels['net.unraid.docker.icon']}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></div><div class="preview-actual-name"><span class="blue-text appname">${ct.info.Name}</span><br><i class="fa fa-${ct.info.State.Running ? (ct.info.State.Paused ? 'pause' : 'play') : 'square'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'paused' : 'started') : 'stopped'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'orange-text' : 'green-text') : 'red-text'}"></i><span class="state"> ${ct.info.State.Running ? (ct.info.State.Paused ? $.i18n('paused') : $.i18n('started')) : $.i18n('stopped')}</span></div></div><table class="preview-status"><thead class="status-header"><tr><th class="status-header-version">${$.i18n('version')}</th><th class="status-header-stats">CPU/MEM</th><th class="status-header-autostart">${$.i18n('autostart')}</th></tr></thead><tbody><tr><td><div class="status-version">${!ct.info.State.Updated === false ? `<span class="green-text folder-update-text"><i class="fa fa-check fa-fw"></i>${$.i18n('up-to-date')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('force-update')}</span></a>`:`<span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i>${$.i18n('update-ready')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('apply-update')}</span></a>`}<br><i class="fa fa-info-circle fa-fw"></i> ${ct.info.Config.Image.split(':').pop()}</div></td><td><div class="status-stats"><span class="cpu-${ct.shortId}">0%</span><div class="usage-disk mm"><span id="cpu-${ct.shortId}" style="width: 0%;"></span><span></span></div><br><span class="mem-${ct.shortId}">0 / 0</span></div></td><td><div class="status-autostart"><input type="checkbox" style="display:none" class="staus-autostart-checkbox"></div></td></tr></tbody></table></div><div class="second-row"><div class="action-info"><div class="action"><div class="action-left"><ul class="fa-ul">${(ct.info.State.Running && !ct.info.State.Paused) ?  `${ct.info.State.WebUi ? `<li><a href="${ct.info.State.WebUi}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i> ${$.i18n('webui')}</a></li>` : ''}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '${ct.info.Shell}');"><i class="fa fa-terminal" aria-hidden="true"></i> ${$.i18n('console')}</a></li>` : ''}${!ct.info.State.Running ? `<li><a onclick="event.preventDefault(); eventControl({action:'start', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('start')}</a></li>` : `${ct.info.State.Paused ? `<li><a onclick="event.preventDefault(); eventControl({action:'resume', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('resume')}</a></li>` : `<li><a onclick="event.preventDefault(); eventControl({action:'stop', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-stop" aria-hidden="true"></i> ${$.i18n('stop')}</a></li><li><a onclick="event.preventDefault(); eventControl({action:'pause', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-pause" aria-hidden="true"></i> ${$.i18n('pause')}</a></li>`}<li><a onclick="event.preventDefault(); eventControl({action:'restart', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-refresh" aria-hidden="true"></i> ${$.i18n('restart')}</a></li>`}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '.log');"><i class="fa fa-navicon" aria-hidden="true"></i> ${$.i18n('logs')}</a></li>${ct.info.template ? `<li><a onclick="event.preventDefault(); editContainer('${ct.info.Name}', '${ct.info.template.path}');"><i class="fa fa-wrench" aria-hidden="true"></i> ${$.i18n('edit')}</a></li>` : ''}<li><a onclick="event.preventDefault(); rmContainer('${ct.info.Name}', '${ct.shortImageId}', '${ct.shortId}');"><i class="fa fa-trash" aria-hidden="true"></i> ${$.i18n('remove')}</a></li></ul></div><div class="action-right"><ul class="fa-ul">${ct.info.ReadMe ? `<li><a href="${ct.info.ReadMe}" target="_blank"><i class="fa fa-book" aria-hidden="true"></i> ${$.i18n('read-me-first')}</a></li>` : ''}${ct.info.Project ? `<li><a href="${ct.info.Project}" target="_blank"><i class="fa fa-life-ring" aria-hidden="true"></i> ${$.i18n('project-page')}</a></li>` : ''}${ct.info.Support ? `<li><a href="${ct.info.Support}" target="_blank"><i class="fa fa-question" aria-hidden="true"></i> ${$.i18n('support')}</a></li>` : ''}${ct.info.registry ? `<li><a href="${ct.info.registry}" target="_blank"><i class="fa fa-info-circle" aria-hidden="true"></i> ${$.i18n('more-info')}</a></li>` : ''}${ct.info.DonateLink ? `<li><a href="${ct.info.DonateLink}" target="_blank"><i class="fa fa-usd" aria-hidden="true"></i> ${$.i18n('donate')}</a></li>` : ''}</ul></div></div><div class="info-ct"><span class="container-id">${$.i18n('container-id')}: ${ct.shortId}</span><br><span class="repo">${$.i18n('by')}: <a ${ct.info.registry ? `href="${ct.info.registry}"` : ''} >${ct.info.Config.Image.split(':').shift()}</a></span></div></div><div class="info-section"><ul class="info-tabs"><li><a class="tabs-graph" href="#comb-grapth-${ct.shortId}">${$.i18n('graph')}</a></li><li><a class="tabs-cpu-graph" href="#cpu-grapth-${ct.shortId}">${$.i18n('cpu-graph')}</a></li><li><a class="tabs-mem-graph" href="#mem-grapth-${ct.shortId}">${$.i18n('mem-graph')}</a></li><li><a class="tabs-ports" href="#info-ports-${ct.shortId}">${$.i18n('port-mappings')}</a></li><li><a class="tabs-volumes" href="#info-volumes-${ct.shortId}">${$.i18n('volume-mappings')}</a></li></ul><div class="comb-grapth-${ct.shortId} comb-stat-grapth" id="comb-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="cpu-grapth-${ct.shortId} cpu-stat-grapth" id="cpu-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="mem-grapth-${ct.shortId} mem-stat-grapth" id="mem-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="info-ports" id="info-ports-${ct.shortId}" style="display: none;">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}</div><div class="info-volumes" id="info-volumes-${ct.shortId}" style="display: none;">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}</div></div></div></div>`)
+                });
+            }
+
             newFolder[container] = {};
-            newFolder[container].id = $(`tr.folder-id-${id} div.folder-storage > tr:last > td.ct-name > span.outer > span.hand`)[0].id;
-            newFolder[container].pause = ct.paused ? 1 : 0;
-            newFolder[container].state = ct.running ? 1 : 0;
-            newFolder[container].update = ct.updated === "false" ? 1 : 0;
+            newFolder[container].id = ct.shortId;
+            newFolder[container].pause = ct.info.State.Paused;
+            newFolder[container].state = ct.info.State.Running;
+            newFolder[container].update = ct.info.State.Updated === false;
 
             if(folderDebugMode) {
                 console.log(`${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -234,7 +505,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 sel.css('filter', 'grayscale(100%)');
             }
 
-            if (folder.settings.preview_update && ct.updated === "false") {
+            if (folder.settings.preview_update && !ct.info.State.Updated) {
                 sel = element.children('span.inner').children('span.blue-text');
                 if (!sel.length) {
                     sel = element.children('span.blue-text');
@@ -243,12 +514,12 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 sel.children('a.exec').addClass('orange-text');
             }
 
-            if (folder.settings.preview_webui && ct.url) {
+            if (folder.settings.preview_webui && ct.info.State.WebUi) {
                 sel = element.children('span.inner').last();
                 if (!sel.length) {
                     sel = element;
                 }
-                sel.append($(`<span class="folder-element-webui"><a href="${ct.url}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i></a></span>`));
+                sel.append($(`<span class="folder-element-custom-btn folder-element-webui"><a href="${ct.info.State.WebUi}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i></a></span>`));
             }
 
             if (folder.settings.preview_logs) {
@@ -256,13 +527,21 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 if (!sel.length) {
                     sel = element;
                 }
-                sel.append($(`<span class="folder-element-logs"><a href="#" onclick="openTerminal('docker', '${container}', '.log')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
+                sel.append($(`<span class="folder-element-custom-btn folder-element-logs"><a href="#" onclick="openTerminal('docker', '${container}', '.log')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
+            }
+
+            if (folder.settings.preview_console) {
+                sel = element.children('span.inner').last();
+                if (!sel.length) {
+                    sel = element;
+                }
+                sel.append($(`<span class="folder-element-custom-btn folder-element-console"><a href="#" onclick="openTerminal('docker', '${ct.info.Name}', '${ct.info.Shell}')"><i class="fa fa-terminal" aria-hidden="true"></i></a></span>`));
             }
 
             // set the status of the folder
-            upToDate = upToDate && ct.updated !== "false";
-            started += ct.running ? 1 : 0;
-            autostart = autostart || ct.autostart;
+            upToDate = upToDate && !newFolder[container].update;
+            started += newFolder[container].state ? 1 : 0;
+            autostart = autostart || !(ct.info.State.Autostart === false);
         }
     }
 
@@ -290,14 +569,14 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     //set tehe status of a folder
 
     if (!upToDate) {
-        $(`tr.folder-id-${id} > td.updatecolumn > span`).replaceWith($(`<div class="advanced" style="display: ${advanced ? 'block' : 'none'};"><span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i> update ready</span></div>`));
+        $(`tr.folder-id-${id} > td.updatecolumn > span`).replaceWith($(`<div class="advanced" style="display: ${advanced ? 'block' : 'none'};"><span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i> ${$.i18n('update-ready')}</span></div>`));
         $(`tr.folder-id-${id} > td.updatecolumn > div.advanced:has(a)`).remove();
-        $(`tr.folder-id-${id} > td.updatecolumn`).append($(`<a class="exec" onclick="updateFolder('${id}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i> apply update</span></a>`));
+        $(`tr.folder-id-${id} > td.updatecolumn`).append($(`<a class="exec" onclick="updateFolder('${id}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i> ${$.i18n('apply-update')}</span></a>`));
     }
 
     if (started) {
         $(`tr.folder-id-${id} i#load-folder-${id}`).attr('class', 'fa fa-play started green-text folder-load-status');
-        $(`tr.folder-id-${id} span.folder-state`).text(`${started}/${Object.entries(folder.containers).length} started`);
+        $(`tr.folder-id-${id} span.folder-state`).text(`${started}/${Object.entries(folder.containers).length} ${$.i18n('started')}`);
     }
 
     if (autostart) {
@@ -313,6 +592,26 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before
     $(`#folder-${id}-auto`).on("change", folderAutostart);
+};
+
+/**
+ * Function to hide all tooltips
+ */
+const hideAllTips = () => {
+    let tips = $.tooltipster.instances();
+    $.each(tips, function(i, instance){
+        instance.close();
+    });
+};
+
+/**
+ * Function to set the atuostart of a container in the advanced tooltip
+ * @param {*} el element passed by the event caller
+ */
+const advancedAutostart = (el) => {
+    const outbox = $(el.target).parents('.preview-outbox')[0];
+    const ctid = outbox.className.match(/preview-outbox-[a-zA-Z0-9]*/)[0].replace('preview-outbox-', '');
+    $(`#${ctid}`).parents('.folder-element').find('.switch-button-background').click();
 };
 
 /**
@@ -367,13 +666,13 @@ const dropDownButton = (id) => {
 const rmFolder = (id) => {
     // Ask for a confirmation
     swal({
-        title: 'Are you sure?',
-        text: `Remove folder: ${globalFolders[id].name}`,
+        title: $.i18n('are-you-sure'),
+        text: `${$.i18n('remove-folder')}: ${globalFolders[id].name}`,
         type: 'warning',
         html: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: $.i18n('yes-delete'),
+        cancelButtonText: $.i18n('cancel'),
         showLoaderOnConfirm: true
     },
     async (c) => {
@@ -397,8 +696,9 @@ const editFolder = (id) => {
  * @param {string} id the id of the folder
  */
 const forceUpdateFolder = (id) => {
+    hideAllTips();
     const folder = globalFolders[id];
-    openDocker('update_container ' + Object.keys(folder.containers).join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+    openDocker('update_container ' + Object.keys(folder.containers).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -406,14 +706,15 @@ const forceUpdateFolder = (id) => {
  * @param {string} id the id of the folder
  */
 const updateFolder = (id) => {
+    hideAllTips();
     const folder = globalFolders[id];
     let toUpdate = [];
     for (const name of Object.keys(folder.containers)) {
-        if(folder.containers[name].update > 0) {
+        if(folder.containers[name].update) {
             toUpdate.push(name);
         }
     }
-    openDocker('update_container ' + toUpdate.join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+    openDocker('update_container ' + toUpdate.join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -436,18 +737,18 @@ const actionFolder = async (id, action) => {
         let pass;
         switch (action) {
             case "start":
-                pass = ct.state === 0;
+                pass = !ct.state;
                 break;
             case "stop":
-                pass = ct.state === 1;
+                pass = ct.state;
                 break;
             case "pause":
-                pass = ct.state === 1 && ct.pause === 0;
+                pass = ct.state && !ct.pause;
                 break;
             case "resume":
-                pass = ct.state === 1 && ct.pause === 1;
+                pass = ct.state && ct.pause;
                 break;
-            case "resume":
+            case "restart":
                 pass = true;
                 break;
             default:
@@ -465,7 +766,7 @@ const actionFolder = async (id, action) => {
 
     if(errors.length > 0) {
         swal({
-            title:'Execution error',
+            title: $.i18n('exec-error'),
             text:errors.join('<br>'),
             type:'error',
             html:true,
@@ -490,30 +791,30 @@ const addDockerFolderContext = (id) => {
     });
 
     opts.push({
-        text: 'Start',
+        text: $.i18n('start'),
         icon: 'fa-play',
         action: (e) => { e.preventDefault(); actionFolder(id, "start"); }
     });
     opts.push({
-        text: 'Stop',
+        text: $.i18n('stop'),
         icon: 'fa-stop',
         action: (e) => { e.preventDefault(); actionFolder(id, "stop"); }
     });
     
     opts.push({
-        text: 'Pause',
+        text: $.i18n('pause'),
         icon: 'fa-pause',
         action: (e) => { e.preventDefault(); actionFolder(id, "pause"); }
     });
 
     opts.push({
-        text: 'Resume',
+        text: $.i18n('resume'),
         icon: 'fa-play-circle',
         action: (e) => { e.preventDefault(); actionFolder(id, "resume"); }
     });
 
     opts.push({
-        text: 'Restart',
+        text: $.i18n('restart'),
         icon: 'fa-refresh',
         action: (e) => { e.preventDefault(); actionFolder(id, "restart"); }
     });
@@ -524,13 +825,13 @@ const addDockerFolderContext = (id) => {
 
     if(!globalFolders[id].status.upToDate) {
         opts.push({
-            text: 'Update',
+            text: $.i18n('update'),
             icon: 'fa-cloud-download',
             action: (e) => { e.preventDefault();  updateFolder(id); }
         });
     } else {
         opts.push({
-            text: 'Force update',
+            text: $.i18n('update-force'),
             icon: 'fa-cloud-download',
             action: (e) => { e.preventDefault(); forceUpdateFolder(id); }
         });
@@ -541,13 +842,13 @@ const addDockerFolderContext = (id) => {
     });
 
     opts.push({
-        text: 'Edit',
+        text: $.i18n('edit'),
         icon: 'fa-wrench',
         action: (e) => { e.preventDefault(); editFolder(id); }
     });
 
     opts.push({
-        text: 'Remove',
+        text: $.i18n('remove'),
         icon: 'fa-trash',
         action: (e) => { e.preventDefault(); rmFolder(id); }
     });
@@ -684,7 +985,8 @@ let folderReq = [];
 
 // Add the button for creating a folder
 const createFolderBtn = () => { location.href = "/Docker/Folder?type=docker" };
-$('<input type="button" onclick="createFolderBtn()" value="Add Folder" style="display:none">').insertAfter('table#docker_containers');
+$(`<input type="button" onclick="createFolderBtn()" value="Add Folder" data-i18n="[value]add-folder" style="display:none">`).insertAfter('table#docker_containers');
+$(`<div class="nav-item AutostartOrder util"><a 'href="#" class="hand" onclick="return false;" title="Autostart order"><b class="fa fa-rocket system green-text"></b><span>Autostart order</span></a></div>`).insertBefore('div.nav-item.LockButton.util');
 
 // This is needed because unraid don't like the folder and the number are set incorrectly, this intercept the request and change the numbers to make the order appear right, this is important for the autostart and to draw the folders
 $.ajaxPrefilter((options, originalOptions, jqXHR) => {

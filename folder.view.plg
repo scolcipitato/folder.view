@@ -6,12 +6,20 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.08.20">
-<!ENTITY md5 "05a6d4c4752d9f752d233ccc8cf74515">
+<!ENTITY version "2023.09.15">
+<!ENTITY md5 "82eefd13cb07c08a3d8dc4eb1124d574">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.09.15
+- Added an advanced context menu for the docker preview.
+- Added support for internationalization(i18n).
+- Added a button to open the console in the preview, alongside the button for opening the webui and logs.
+- Added the ability to add containers to a folder by using docker labels (folder.view).
+- Added a button in the header to verify the autostart order.
+- Fixed plugin giving error when installing without internet.
+
 ###2023.08.20
 - Fixed another issue with expanded folders
 
@@ -125,7 +133,7 @@
     <FILE Run="/bin/bash">
         <INLINE>
             mkdir -p /boot/config/plugins/&name;/styles
-            rm -f $(ls /boot/config/plugins/&name;/&name;*.txz)
+            rm -f $(ls /boot/config/plugins/&name;/&name;*.txz | grep -v '&version;')
             echo "&version;" > /boot/config/plugins/&name;/version
             touch /boot/config/plugins/&name;/styles/docker-custom.css
             touch /boot/config/plugins/&name;/styles/vm-custom.css

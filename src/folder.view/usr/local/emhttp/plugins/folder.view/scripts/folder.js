@@ -40,19 +40,24 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         const form = $('div.canvas > form')[0];
         form.name.value = currFolder.name;
         form.icon.value = currFolder.icon;
-        form.regex.value = currFolder.regex;
         form.preview.value = currFolder.settings.preview.toString();
-        form.preview_border.checked = currFolder.settings.preview_border || false;
-        form.preview_border_color.value = currFolder.settings.preview_border_color || rgbToHex($('body').css('color'));
         form.preview_hover.checked = currFolder.settings.preview_hover;
-        form.preview_vertical_bars.checked = currFolder.settings.preview_vertical_bars || false;
-        form.update_column.checked = currFolder.settings.update_column || false;
         form.preview_update.checked = currFolder.settings.preview_update;
         form.preview_grayscale.checked = currFolder.settings.preview_grayscale;
         form.preview_webui.checked = currFolder.settings.preview_webui;
         form.preview_logs.checked = currFolder.settings.preview_logs;
+        form.preview_console.checked = currFolder.settings.preview_console || false;
+        form.preview_vertical_bars.checked = currFolder.settings.preview_vertical_bars || false;
+        form.context.value = currFolder.settings.context?.toString() || '1';
+        form.context_trigger.value = currFolder.settings.context_trigger?.toString() || '0';
+        form.context_graph.value = currFolder.settings.context_graph?.toString() || '1';
+        form.context_graph_time.value = currFolder.settings.context_graph_time?.toString() || '60';
+        form.preview_border.checked = currFolder.settings.preview_border || false;
+        form.preview_border_color.value = currFolder.settings.preview_border_color || rgbToHex($('body').css('color'));
+        form.update_column.checked = currFolder.settings.update_column || false;
         form.expand_tab.checked = currFolder.settings.expand_tab;
         form.expand_dashboard.checked = currFolder.settings.expand_dashboard;
+        form.regex.value = currFolder.regex;
         for (const ct of currFolder.containers) {
             const index = choose.findIndex((e) => e.Name === ct);
             if (index > -1) {
@@ -60,7 +65,7 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
             }
         };
         // make the ui respond to the previus changes
-        previewChange(form.preview);
+        updateForm();
         updateRegex(form.regex);
         updateIcon(form.icon);
     }
@@ -132,6 +137,26 @@ const previewChange = (e) => {
 };
 
 /**
+ * Update the setting visibility according to the changin of settings
+ */
+const updateForm = () => {
+    const form = $('div.canvas > form')[0];
+    $('[constraint*="preview-"]').hide();
+    $(`[constraint*="preview-${form.preview.value}"]`).show();
+    $('[constraint*="context-"]').hide();
+    $(`[constraint*="context-${form.context.value}"]`).show();
+    if(!form.preview_border.checked && !form.preview_vertical_bars.checked) {
+        $('[constraint*="color"]').hide();
+    } else {
+        $('[constraint*="color"]').show();
+    }
+
+    if (type !== 'docker') {
+        $('[constraint*="docker"]').hide();
+    }
+};
+
+/**
  * Create the element select table
  */
 const updateList = () => {
@@ -195,21 +220,26 @@ const submitForm = async (e) => {
     const folder = {
         name: e.name.value.toString(),
         icon: e.icon.value.toString(),
-        regex: e.regex.value.toString(),
         settings: {
             'preview': parseInt(e.preview.value.toString()),
-            'preview_border': e.preview_border.checked,
-            'preview_border_color': e.preview_border_color.value.toString(),
             'preview_hover': e.preview_hover.checked,
-            'preview_vertical_bars': e.preview_vertical_bars.checked,
-            'update_column': e.update_column.checked,
             'preview_update': e.preview_update.checked,
             'preview_grayscale': e.preview_grayscale.checked,
             'preview_webui': e.preview_webui.checked,
             'preview_logs': e.preview_logs.checked,
+            'preview_console': e.preview_console.checked,
+            'preview_vertical_bars': e.preview_vertical_bars.checked,
+            'context': parseInt(e.context.value.toString()),
+            'context_trigger': parseInt(e.context_trigger.value.toString()),
+            'context_graph': parseInt(e.context_graph.value.toString()),
+            'context_graph_time': parseInt(e.context_graph_time.value.toString()),
+            'preview_border': e.preview_border.checked,
+            'preview_border_color': e.preview_border_color.value.toString(),
+            'update_column': e.update_column.checked,
             'expand_tab': e.expand_tab.checked,
             'expand_dashboard': e.expand_dashboard.checked,
         },
+        regex: e.regex.value.toString(),
         containers: [...$('input[name*="containers"]:checked').map((i, e) => $(e).val())]
     }
     // send the data to the right endpoint

@@ -212,14 +212,16 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         folder.containers = folder.containers.concat(order.filter(el => regex.test(el)));
     }
 
+    folder.containers = folder.containers.concat(order.filter(el => containersInfo[el]?.Labels['folder.view'] === folder.name));
+
     // the HTML template for the folder
-    const fld = `<span class="outer solid apps stopped folder-docker"><span id="folder-id-${id}" onclick='addDockerFolderContext("${id}")' class="hand docker folder-hand-docker"><img src="${folder.icon}" class="img folder-img-docker" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';"></span><span class="inner folder-inner-docker"><span class="folder-appname-docker">${folder.name}</span><br><i class="fa fa-square stopped red-text folder-load-status-docker"></i><span class="state folder-state-docker">stopped</span></span><div class="folder-storage"></div></span>`;
+    const fld = `<div class="folder-showcase-outer-${id} folder-showcase-outer"><span class="outer solid apps stopped folder-docker"><span id="folder-id-${id}" onclick='addDockerFolderContext("${id}")' class="hand docker folder-hand-docker"><img src="${folder.icon}" class="img folder-img-docker" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';"></span><span class="inner folder-inner-docker"><span class="folder-appname-docker">${folder.name}</span><br><i class="fa fa-square stopped red-text folder-load-status-docker"></i><span class="state folder-state-docker">${$.i18n('stopped')}</span></span><div class="folder-storage"></div></span><div class="folder-showcase-${id} folder-showcase"></div></div>`;
 
     // insertion at position of the folder
     if (position === 0) {
-        $('tbody#docker_view > tr.updated > td > span.outer').eq(position).before($(fld));
+        $('tbody#docker_view > tr.updated > td').children().eq(position).before($(fld));
     } else {
-        $('tbody#docker_view > tr.updated > td > span.outer').eq(position - 1).after($(fld));
+        $('tbody#docker_view > tr.updated > td').children().eq(position - 1).after($(fld));
     }
 
     // new folder is needed for not altering the old containers
@@ -247,23 +249,23 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             // grab the storage folder
             const element = $(`tbody#docker_view span#folder-id-${id}`).siblings('div.folder-storage');
             // grab the container and put it onto the storage
-            element.append($('tbody#docker_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-docker`));
+            element.append($('tbody#docker_view > tr.updated > td').children().eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-docker`));
             
             const ct = containersInfo[container];
 
             newFolder[container] = {};
-            newFolder[container].id = element.children('span.outer').children('span.hand').last()[0].id;
-            newFolder[container].pause = ct.paused ? 1 : 0;
-            newFolder[container].state = ct.running ? 1 : 0;
-            newFolder[container].update = ct.updated === "false" ? 1 : 0;
+            newFolder[container].id = ct.shortId;
+            newFolder[container].pause = ct.info.State.Paused;
+            newFolder[container].state = ct.info.State.Running;
+            newFolder[container].update = ct.info.State.Updated === false;
 
             if(folderDebugMode) {
                 console.log(`Docker ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
             }
 
             // set the status of the folder
-            upToDate = upToDate && ct.updated !== "false";
-            started += ct.running ? 1 : 0;
+            upToDate = upToDate && !newFolder[container].update;
+            started += newFolder[container].state ? 1 : 0;
         }
     }
 
@@ -282,7 +284,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     if (started) {
         sel.parent().removeClass('stopped').addClass('started');
         sel.next('span.inner').children('i').replaceWith($('<i class="fa fa-play started green-text"></i>'));
-        sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} started`);
+        sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} ${$.i18n('started')}`);
     }
 
     // set the status
@@ -312,13 +314,13 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
     }
 
     // the HTML template for the folder
-    const fld = `<span class="outer solid vms stopped folder-vm"><span id="folder-id-${id}" onclick='addVMFolderContext("${id}")' class="hand vm folder-hand-vm"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner-vm">${folder.name}<br><i class="fa fa-square stopped red-text folder-load-status-vm"></i><span class="state folder-state-vm">stopped</span></span><div class="folder-storage" style="display:none"></div></span>`;
+    const fld = `<div class="folder-showcase-outer-${id} folder-showcase-outer"><span class="outer solid vms stopped folder-vm"><span id="folder-id-${id}" onclick='addVMFolderContext("${id}")' class="hand vm folder-hand-vm"><img src="${folder.icon}" class="img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner-vm">${folder.name}<br><i class="fa fa-square stopped red-text folder-load-status-vm"></i><span class="state folder-state-vm">${$.i18n('stopped')}</span></span><div class="folder-storage" style="display:none"></div></span><div class="folder-showcase-${id} folder-showcase"></div></div>`;
 
     // insertion at position of the folder
     if (position === 0) {
-        $('tbody#vm_view > tr.updated > td > span.outer').eq(position).before($(fld));
+        $('tbody#vm_view > tr.updated > td').children().eq(position).before($(fld));
     } else {
-        $('tbody#vm_view > tr.updated > td > span.outer').eq(position - 1).after($(fld));
+        $('tbody#vm_view > tr.updated > td').children().eq(position - 1).after($(fld));
     }
 
     // new folder is needed for not altering the old containers
@@ -350,7 +352,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
             newFolder[container].state = ct.state;
 
             // grab the container and put it onto the storage
-            $(`tbody#vm_view span#folder-id-${id}`).siblings('div.folder-storage').append($('tbody#vm_view > tr.updated > td > span.outer').eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-vm`));
+            $(`tbody#vm_view span#folder-id-${id}`).siblings('div.folder-storage').append($('tbody#vm_view > tr.updated > td').children().eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-vm`));
 
             if(folderDebugMode) {
                 console.log(`VM ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -370,7 +372,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         const sel = $(`tbody#vm_view span#folder-id-${id}`);
         sel.parent().removeClass('stopped').addClass('started');
         sel.next('span.inner').children('i').replaceWith($('<i class="fa fa-play started green-text"></i>'));
-        sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} started`);
+        sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} ${$.i18n('started')}`);
     }
 
     // set the status
@@ -384,15 +386,16 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
  * @param {string} id the id of the folder
  */
 const expandFolderDocker = (id) => {
-    const el = $(`tbody#docker_view > tr.updated > td > span.outer.apps > span#folder-id-${id}`);
+    const el = $(`tbody#docker_view > tr.updated > td span.outer.apps > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
-        el.siblings('div.folder-storage').append($(`tbody#docker_view > tr.updated > td > span.outer.apps.folder-${id}-element`));
+        el.siblings('div.folder-storage').append(el.parents().siblings('div.folder-showcase').children());
         el.attr('expanded', 'false');
     } else {
-        el.parent().after(el.siblings('div.folder-storage').children());
+        el.parents().siblings('div.folder-showcase').append(el.siblings('div.folder-storage').children());
         el.attr('expanded', 'true');
     }
+    $(`tbody#docker_view .folder-showcase-outer-${id}`).attr('expanded', !state ? 'true' : 'false');
     if(globalFolders.docker) {
         globalFolders.docker[id].status.expanded = !state;
     }
@@ -403,15 +406,16 @@ const expandFolderDocker = (id) => {
  * @param {string} id the id of the folder
  */
 const expandFolderVM = (id) => {
-    const el = $(`tbody#vm_view > tr.updated > td > span.outer.vms > span#folder-id-${id}`);
+    const el = $(`tbody#vm_view > tr.updated > td span.outer.vms > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
-        el.siblings('div.folder-storage').append($(`tbody#vm_view > tr.updated > td > span.outer.vms.folder-${id}-element`));
+        el.siblings('div.folder-storage').append(el.parents().siblings('div.folder-showcase').children());
         el.attr('expanded', 'false');
     } else {
-        el.parent().after(el.siblings('div.folder-storage').children());
+        el.parents().siblings('div.folder-showcase').append(el.siblings('div.folder-storage').children());
         el.attr('expanded', 'true');
     }
+    $(`tbody#vm_view .folder-showcase-outer-${id}`).attr('expanded', !state ? 'true' : 'false');
     if(globalFolders.vms) {
         globalFolders.vms[id].status.expanded = !state;
     }
@@ -424,13 +428,13 @@ const expandFolderVM = (id) => {
 const rmDockerFolder = (id) => {
     // Ask for a confirmation
     swal({
-        title: 'Are you sure?',
-        text: `Remove folder: ${globalFolders.docker[id].name}`,
+        title: $.i18n('are-you-sure'),
+        text: `${$.i18n('remove-folder')}: ${globalFolders.docker[id].name}`,
         type: 'warning',
         html: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: $.i18n('yes-delete'),
+        cancelButtonText: $.i18n('cancel'),
         showLoaderOnConfirm: true
     },
     async (c) => {
@@ -449,13 +453,13 @@ const rmDockerFolder = (id) => {
 const rmVMFolder = (id) => {
     // Ask for a confirmation
     swal({
-        title: 'Are you sure?',
-        text: `Remove folder: ${globalFolders.vms[id].name}`,
+        title: $.i18n('are-you-sure'),
+        text: `${$.i18n('remove-folder')}: ${globalFolders.vms[id].name}`,
         type: 'warning',
         html: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: $.i18n('yes-delete'),
+        cancelButtonText: $.i18n('cancel'),
         showLoaderOnConfirm: true
     },
     async (c) => {
@@ -489,7 +493,7 @@ const editVMFolder = (id) => {
  */
 const addDockerFolderContext = (id) => {
     // get the expanded status, needed to swap expand/ compress
-    const exp = $(`tbody#docker_view > tr.updated > td > span.outer.apps > #folder-id-${id}`).attr('expanded') === "true";
+    const exp = $(`tbody#docker_view .folder-showcase-outer-${id}`).attr('expanded') === "true";
     let opts = [];
     context.settings({
         right: false,
@@ -497,7 +501,7 @@ const addDockerFolderContext = (id) => {
     });
 
     opts.push({
-        text: exp ? 'Compress' : 'Expand',
+        text: exp ? $.i18n('compress') : $.i18n('expand'),
         icon: exp ? 'fa-minus' : 'fa-plus',
         action: (e) => { e.preventDefault(); expandFolderDocker(id); }
     });
@@ -507,30 +511,30 @@ const addDockerFolderContext = (id) => {
     });
     
     opts.push({
-        text: 'Start',
+        text: $.i18n('start'),
         icon: 'fa-play',
         action: (e) => { e.preventDefault(); actionFolderDocker(id, "start"); }
     });
     opts.push({
-        text: 'Stop',
+        text: $.i18n('stop'),
         icon: 'fa-stop',
         action: (e) => { e.preventDefault(); actionFolderDocker(id, "stop"); }
     });
     
     opts.push({
-        text: 'Pause',
+        text: $.i18n('pause'),
         icon: 'fa-pause',
         action: (e) => { e.preventDefault(); actionFolderDocker(id, "pause"); }
     });
 
     opts.push({
-        text: 'Resume',
+        text: $.i18n('resume'),
         icon: 'fa-play-circle',
         action: (e) => { e.preventDefault(); actionFolderDocker(id, "resume"); }
     });
 
     opts.push({
-        text: 'Restart',
+        text: $.i18n('restart'),
         icon: 'fa-refresh',
         action: (e) => { e.preventDefault(); actionFolderDocker(id, "restart"); }
     });
@@ -541,13 +545,13 @@ const addDockerFolderContext = (id) => {
 
     if(!globalFolders.docker[id].status.upToDate) {
         opts.push({
-            text: 'Update',
+            text: $.i18n('update'),
             icon: 'fa-cloud-download',
             action: (e) => { e.preventDefault();  updateFolderDocker(id); }
         });
     } else {
         opts.push({
-            text: 'Force update',
+            text: $.i18n('update-force'),
             icon: 'fa-cloud-download',
             action: (e) => { e.preventDefault(); forceUpdateFolderDocker(id); }
         });
@@ -558,13 +562,13 @@ const addDockerFolderContext = (id) => {
     });
 
     opts.push({
-        text: 'Edit',
+        text: $.i18n('edit'),
         icon: 'fa-wrench',
         action: (e) => { e.preventDefault(); editDockerFolder(id); }
     });
 
     opts.push({
-        text: 'Remove',
+        text: $.i18n('remove'),
         icon: 'fa-trash',
         action: (e) => { e.preventDefault(); rmDockerFolder(id); }
     });
@@ -579,7 +583,7 @@ const addDockerFolderContext = (id) => {
  */
 const forceUpdateFolderDocker = (id) => {
     const folder = globalFolders.docker[id];
-    openDocker('update_container ' + Object.keys(folder.containers).join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+    openDocker('update_container ' + Object.keys(folder.containers).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -594,7 +598,7 @@ const updateFolderDocker = (id) => {
             toUpdate.push(name);
         }
     }
-    openDocker('update_container ' + toUpdate.join('*'),`Updating ${folder.name} folder containers`,'','loadlist');
+    openDocker('update_container ' + toUpdate.join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -617,16 +621,16 @@ const actionFolderDocker = async (id, action) => {
         let pass;
         switch (action) {
             case "start":
-                pass = ct.state === 0;
+                pass = !ct.state;
                 break;
             case "stop":
-                pass = ct.state === 1;
+                pass = ct.state;
                 break;
             case "pause":
-                pass = ct.state === 1 && ct.pause === 0;
+                pass = ct.state && !ct.pause;
                 break;
             case "resume":
-                pass = ct.state === 1 && ct.pause === 1;
+                pass = ct.state && ct.pause;
                 break;
             case "resume":
                 pass = true;
@@ -646,7 +650,7 @@ const actionFolderDocker = async (id, action) => {
 
     if(errors.length > 0) {
         swal({
-            title:'Execution error',
+            title: $.i18n('exec-error'),
             text:errors.join('<br>'),
             type:'error',
             html:true,
@@ -664,7 +668,7 @@ const actionFolderDocker = async (id, action) => {
  */
 const addVMFolderContext = (id) => {
     // get the expanded status, needed to swap expand/ compress
-    const exp = $(`tbody#vm_view > tr.updated > td > span.outer.vms > #folder-id-${id}`).attr('expanded') === "true";
+    const exp = $(`tbody#vm_view .folder-showcase-outer-${id}`).attr('expanded') === "true";
     let opts = [];
     context.settings({
         right: false,
@@ -672,7 +676,7 @@ const addVMFolderContext = (id) => {
     });
 
     opts.push({
-        text: exp ? 'Compress' : 'Expand',
+        text: exp ? $.i18n('compress') : $.i18n('expand'),
         icon: exp ? 'fa-minus' : 'fa-plus',
         action: (e) => { e.preventDefault(); expandFolderVM(id); }
     });
@@ -682,45 +686,45 @@ const addVMFolderContext = (id) => {
     });
 
     opts.push({
-        text:"Start",
-        icon:"fa-play",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-start'); }
+        text: $.i18n('start'),
+        icon: "fa-play",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-start'); }
     });
 
     opts.push({
-        text:"Stop",
-        icon:"fa-stop",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-stop'); }
+        text: $.i18n('stop'),
+        icon: "fa-stop",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-stop'); }
     });
 
     opts.push({
-        text:"Pause",
-        icon:"fa-pause",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-pause'); }
+        text: $.i18n('pause'),
+        icon: "fa-pause",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-pause'); }
     });
 
     opts.push({
-        text:"Resume",
-        icon:"fa-play-circle",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-resume'); }
+        text: $.i18n('resume'),
+        icon: "fa-play-circle",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-resume'); }
     });
 
     opts.push({
-        text:"Restart",
-        icon:"fa-refresh",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-restart'); }
+        text: $.i18n('restart'),
+        icon: "fa-refresh",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-restart'); }
     });
 
     opts.push({
-        text:"Hibernate",
-        icon:"fa-bed",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-pmsuspend'); }
+        text: $.i18n('hibernate'),
+        icon: "fa-bed",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-pmsuspend'); }
     });
 
     opts.push({
-        text:"Force Stop",
-        icon:"fa-bomb",
-        action:(e) => { e.preventDefault(); actionFolderVM(id, 'domain-destroy'); }
+        text: $.i18n('force-stop'),
+        icon: "fa-bomb",
+        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-destroy'); }
     });
 
     opts.push({
@@ -728,13 +732,13 @@ const addVMFolderContext = (id) => {
     });
 
     opts.push({
-        text: 'Edit',
+        text: $.i18n('edit'),
         icon: 'fa-wrench',
         action: (e) => { e.preventDefault(); editVMFolder(id); }
     });
 
     opts.push({
-        text: 'Remove',
+        text: $.i18n('remove'),
         icon: 'fa-trash',
         action: (e) => { e.preventDefault(); rmVMFolder(id); }
     });
@@ -798,7 +802,7 @@ const actionFolderVM = async (id, action) => {
 
     if(errors.length > 0) {
         swal({
-            title:'Execution error',
+            title: $.i18n('exec-error'),
             text:errors.join('<br>'),
             type:'error',
             html:true,

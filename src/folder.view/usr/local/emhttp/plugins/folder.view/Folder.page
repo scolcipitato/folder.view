@@ -2,6 +2,12 @@ Title="Folder"
 Markdown="false"
 ---
 
+<script>
+    folderi18n = () => {
+        $('body').i18n();
+    }
+</script>
+<? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <link type="text/css" rel="stylesheet" href="<?autov('/webGui/styles/jquery.switchbutton.css')?>">
 <link type="text/css" rel="stylesheet" href="<?autov('/plugins/folder.view/styles/folder.css')?>">
@@ -10,28 +16,28 @@ Markdown="false"
     <form onsubmit="submitForm(this); return false">
         <div class="basic">
             <dl>
-                <dt>Name:</dt>
+                <dt data-i18n="name">Name:</dt>
                 <dd>
                     <img class="img" style="visibility: hidden;">
                     <input type="text" name="name" pattern="[a-zA-Z0-9_.\ \-]+" value="" required>
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]name-tooltip">
                     The name of the folder, not that difficult.
                 </p>
             </blockquote>
         </div>
         <div class="basic">
             <dl>
-                <dt>Icon:</dt>
+                <dt data-i18n="icon">Icon:</dt>
                 <dd>
                     <img src="/plugins/dynamix.docker.manager/images/question.png" class="img" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';">
                     <input type="text" name="icon" value=""  oninput="updateIcon(this)">
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]icon-tooltip">
                     A link to an image (<a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#supported_image_formats" target="_blank">Supported formats</a>)
                     <br>
                     It also supports <b>data:image/{type};base64,</b> format (<a href="https://base64.guru/converter/encode/image" target="_blank">Convert image to data strings</a>)
@@ -44,40 +50,227 @@ Markdown="false"
         </div>
         <div class="basic">
             <dl>
-                <dt>Preview:</dt>
+                <dt data-i18n="preview">Preview:</dt>
                 <dd>
                     <img class="img" style="visibility: hidden;">
-                    <select name="preview" onchange="previewChange(this)">
-                        <option value="0">None</option>
-                        <option value="1" selected>Icon and label</option>
-                        <option value="2">Only icon</option>
-                        <option value="3">Only label</option>
-                        <option value="4">List</option>
+                    <select name="preview" onchange="updateForm()">
+                        <option value="0" data-i18n="preview-option-0">None</option>
+                        <option value="1" data-i18n="preview-option-1" selected>Icon and label</option>
+                        <option value="2" data-i18n="preview-option-2">Only icon</option>
+                        <option value="3" data-i18n="preview-option-3">Only label</option>
+                        <option value="4" data-i18n="preview-option-4">List</option>
                     </select>
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]preview-tooltip">
                     The preview type, not that difficult.
                 </p>
             </blockquote>
         </div>
+        <ul>
+            <li constraint="preview-1 preview-2 preview-3 preview-4">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-hover">Show preview only on hover:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_hover" type="checkbox" style="display: none;" />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-hover-tooltip">
+                            Will make the preview only show when mouse is hovering over.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="preview-1 preview-3 preview-4 docker">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-update">Orange text on update:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_update" type="checkbox" style="display: none;" checked />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-update-tooltip">
+                            Will make the name of the container in the preview orange if an update is available.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="preview-1 preview-2">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-grayscale">Preview icon grayscale:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_grayscale" type="checkbox" style="display: none;" />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-grayscale-tooltip">
+                            Will make the preview icons grayscaled.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="preview-1 preview-3 preview-4 docker">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-webui">Add preview open WebUI:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_webui" type="checkbox" style="display: none;" checked />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-webui-tooltip">
+                            Will add a little globe icon that opens the webUI.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="preview-1 preview-3 preview-4 docker">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-logs">Add preview open logs:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_logs" type="checkbox" style="display: none;" checked />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-logs-tooltip">
+                            Will add a little log icon that opens the log menu.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="preview-1 preview-3 preview-4 docker">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-console">Add preview open console:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_console" type="checkbox" style="display: none;" checked />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-console-tooltip">
+                            Will add a little console icon that opens the console window.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="preview-1 preview-2 preview-3 preview-4">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="preview-vertical-bars">Preview vertical bars:</dt>
+                        <dd>
+                            <input class="basic-switch" name="preview_vertical_bars" type="checkbox" style="display: none;" onchange="updateForm()" />
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]preview-vertical-bars-tooltip">
+                            Will Show vertical bars between container/VM inside the folder preview.
+                        </p>
+                    </blockquote>
+                </div>
+            </li>
+            <li constraint="docker preview-1 preview-2 preview-3 preview-4">
+                <div class="basic">
+                    <dl>
+                        <dt data-i18n="context">Preview Context:</dt>
+                        <dd>
+                            <img class="img" style="visibility: hidden;">
+                            <select name="context" onchange="updateForm()">
+                                <option value="0" data-i18n="context-option-0">None</option>
+                                <option value="1" data-i18n="context-option-1" selected>Default</option>
+                                <option value="2" data-i18n="context-option-2">Advanced</option>
+                            </select>
+                        </dd>
+                    </dl>
+                    <blockquote class="inline_help">
+                        <p data-i18n="[html]context-tooltip">
+                            Will show the preview context type you choose.
+                        </p>
+                    </blockquote>
+                </div>
+                <ul constraint="context-2 docker" style="display: none;">
+                    <li>
+                        <div class="basic">
+                            <dl>
+                                <dt data-i18n="context-trigger">Activation mode:</dt>
+                                <dd>
+                                    <img class="img" style="visibility: hidden;">
+                                    <select name="context_trigger">
+                                        <option value="0" data-i18n="context-trigger-option-0" selected>Click</option>
+                                        <option value="1" data-i18n="context-trigger-option-1">Hover</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                            <blockquote class="inline_help">
+                                <p data-i18n="[html]context-trigger-tooltip">
+                                    How the advanced preview will be shown.
+                                </p>
+                            </blockquote>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="basic">
+                            <dl>
+                                <dt data-i18n="context-graph">Graph mode:</dt>
+                                <dd>
+                                    <img class="img" style="visibility: hidden;">
+                                    <select name="context_graph">
+                                        <option value="0" data-i18n="context-graph-option-0">None</option>
+                                        <option value="1" data-i18n="context-graph-option-1" selected>Combined</option>
+                                        <option value="2" data-i18n="context-graph-option-2">Split</option>
+                                        <option value="3" data-i18n="context-graph-option-3">CPU only</option>
+                                        <option value="4" data-i18n="context-graph-option-4">MEM only</option>
+                                    </select>
+                                </dd>
+                            </dl>
+                            <blockquote class="inline_help">
+                                <p data-i18n="[html]context-graph-tooltip">
+                                    Which graph to show.
+                                </p>
+                            </blockquote>
+                        </div>
+                    </li>
+                    <li constraint="context_graph-1 context_graph-2 context_graph-3 context_graph-4 docker">
+                        <div class="basic">
+                            <dl>
+                                <dt data-i18n="context-graph-time">Time Frame (s):</dt>
+                                <dd>
+                                    <img class="img" style="visibility: hidden;">
+                                    <input type="number" name="context_graph_time" value="60">
+                                </dd>
+                            </dl>
+                            <blockquote class="inline_help">
+                                <p data-i18n="[html]context-graph-time-tooltip">
+                                    Time frame for the graph(s) in seconds.
+                                </p>
+                            </blockquote>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        
         <div class="basic">
             <dl>
-                <dt>Show preview border:</dt>
+                <dt data-i18n="border">Show preview border:</dt>
                 <dd>
-                    <input class="basic-switch" checked name="preview_border" type="checkbox" style="display: none;" />
+                    <input class="basic-switch" checked name="preview_border" type="checkbox" style="display: none;" onchange="updateForm()" />
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]border-tooltip">
                     Will Show a border on the preview box.
                 </p>
             </blockquote>
         </div>
-        <div class="basic">
+        <div class="basic" constraint="color">
             <dl>
-                <dt>Preview border color:</dt>
+                <dt data-i18n="border-color">Preview border and vertical bars color:</dt>
                 <dd>
                     <input type="color" name="preview_border_color">
                     <button onclick="event.preventDefault(); $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('color'));" style="padding:6px;min-width:0;margin:0;margin-left: 1em; position: relative;
@@ -87,139 +280,61 @@ Markdown="false"
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
-                    Will make the preview border a specific color.
+                <p data-i18n="[html]border-color-tooltip">
+                    Will make the preview border and vertical bars a specific color.
                     <br>
                     The <i class="fa fa-repeat" aria-hidden="true"></i> button will set the color to the current font color.
                 </p>
             </blockquote>
         </div>
-        <div class="basic" constraint="preview-1 preview-2 preview-3 preview-4">
-            <dl>
-                <dt>Show preview only on hover:</dt>
-                <dd>
-                    <input class="basic-switch" name="preview_hover" type="checkbox" style="display: none;" />
-                </dd>
-            </dl>
-            <blockquote class="inline_help">
-                <p>
-                    Will make the preview only show when mouse is hovering over.
-                </p>
-            </blockquote>
-        </div>
-        <div class="basic" constraint="preview-1 preview-2 preview-3 preview-4">
-            <dl>
-                <dt>Preview vertical bars:</dt>
-                <dd>
-                    <input class="basic-switch" name="preview_vertical_bars" type="checkbox" style="display: none;" />
-                </dd>
-            </dl>
-            <blockquote class="inline_help">
-                <p>
-                    Will Show vertical bars between container/VM inside the folder preview.
-                </p>
-            </blockquote>
-        </div>
         <div class="basic" constraint="docker">
             <dl>
-                <dt>Hide update column:</dt>
+                <dt data-i18n="update-column">Hide update column:</dt>
                 <dd>
                     <input class="basic-switch" name="update_column" type="checkbox" style="display: none;" />
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]update-column-tooltip">
                     Will <b>NUKE</b> the update column for this folder.
-                </p>
-            </blockquote>
-        </div>
-        <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
-            <dl>
-                <dt>Orange text on update:</dt>
-                <dd>
-                    <input class="basic-switch" name="preview_update" type="checkbox" style="display: none;" checked />
-                </dd>
-            </dl>
-            <blockquote class="inline_help">
-                <p>
-                    Will make the name of the container in the preview orange if an update is available.
-                </p>
-            </blockquote>
-        </div>
-        <div class="basic" constraint="preview-1 preview-2">
-            <dl>
-                <dt>Preview icon grayscale:</dt>
-                <dd>
-                    <input class="basic-switch" name="preview_grayscale" type="checkbox" style="display: none;" />
-                </dd>
-            </dl>
-            <blockquote class="inline_help">
-                <p>
-                    Will make the preview icons grayscaled.
-                </p>
-            </blockquote>
-        </div>
-        <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
-            <dl>
-                <dt>Add preview open WebUI:</dt>
-                <dd>
-                    <input class="basic-switch" name="preview_webui" type="checkbox" style="display: none;" checked />
-                </dd>
-            </dl>
-            <blockquote class="inline_help">
-                <p>
-                    Will add a little globe icon that opens the webUI.
-                </p>
-            </blockquote>
-        </div>
-        <div class="basic" constraint="preview-1 preview-3 preview-4 docker">
-            <dl>
-                <dt>Add preview open logs:</dt>
-                <dd>
-                    <input class="basic-switch" name="preview_logs" type="checkbox" style="display: none;" checked />
-                </dd>
-            </dl>
-            <blockquote class="inline_help">
-                <p>
-                    Will add a little log icon that opens the log menu.
                 </p>
             </blockquote>
         </div>
         <div class="basic">
             <dl>
-                <dt>Expanded on Docker/VM tab:</dt>
+                <dt data-i18n="expand-tab">Expanded on Docker/VM tab:</dt>
                 <dd>
                     <input class="basic-switch" name="expand_tab" type="checkbox" style="display: none;" />
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]expand-tab-tooltip">
                     Will make the folder start expanded on the Docker/VMs tab.
                 </p>
             </blockquote>
         </div>
         <div class="basic">
             <dl>
-                <dt>Expanded on Dashboard tab:</dt>
+                <dt data-i18n="expand-dashboard">Expanded on Dashboard tab:</dt>
                 <dd>
                     <input class="basic-switch" name="expand_dashboard" type="checkbox" style="display: none;" />
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]expand-dashboard-tooltip">
                     Will make the folder start expanded on the Dashboard.
                 </p>
             </blockquote>
         </div>
         <div class="basic">
             <dl>
-                <dt>Regex:</dt>
+                <dt data-i18n="regex">Regex:</dt>
                 <dd>
                     <input type="text" name="regex" oninput="updateRegex(this)" value="">
                 </dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]regex-tooltip">
                     Regex... <b>Lasciate ogne speranza, voi ch'intrate</b>
                     <br>
                     Any container name the regex matches will be added to folder.
@@ -232,15 +347,15 @@ Markdown="false"
                 </p>
             </blockquote>
         </div>
-        <input type="submit" value="Submit">
-        <input type="button" value="Cancel" onclick="cancelBtn()">
+        <input type="submit" value="Submit" data-i18n="[value]submit">
+        <input type="button" value="Cancel" data-i18n="[value]cancel" onclick="cancelBtn()">
         <div class="basic">
             <dl>
-                <dt>Order:</dt>
+                <dt data-i18n="order">Order:</dt>
                 <dd></dd>
             </dl>
             <blockquote class="inline_help">
-                <p>
+                <p data-i18n="[html]order-tooltip">
                     Drag and drop to make your desired order, if you edit the regex the selection will be deselected.
                 </p>
             </blockquote>
@@ -251,10 +366,10 @@ Markdown="false"
                     <table class="sortable">
                         <thead>
                             <tr>
-                                <th>
+                                <th data-i18n="table-name">
                                     Name
                                 </th>
-                                <th>
+                                <th data-i18n="table-included">
                                     Included
                                 </th>
                             </tr>

@@ -2,6 +2,7 @@ Menu="Dashboard"
 Icon="server"
 ---
 
+<? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
 <script src="<?autov('/plugins/folder.view/scripts/dashboard.js')?>"></script>
 
 <link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/dashboard.css')?>">

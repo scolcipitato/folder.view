@@ -77,8 +77,76 @@
     function readInfo(string $type): array {
         $info = [];
         if ($type == "docker") {
+            global $dockerManPaths;
+            $dockerClient = new DockerClient();
+            $DockerUpdate = new DockerUpdate();
             $dockerTemplates = new DockerTemplates();
-            $info = $dockerTemplates->getAllInfo();
+            $cts = $dockerClient->getDockerJSON("/containers/json?all=1");
+            $autoStart = array_map('var_split', file($dockerManPaths['autostart-file'],FILE_IGNORE_NEW_LINES) ?: []);
+            $templates = $dockerTemplates->getTemplates('all');
+            foreach ($cts as $key => &$ct) {
+                $ct['info'] = $dockerClient->getContainerDetails($ct['Id']);
+
+                $ct['info']['Name'] = substr($ct['info']['Name'], 1);
+                $ct['info']['State']['Autostart'] = array_search($ct['info']['Name'], $autoStart);
+                $ct['info']['Config']['Image'] = DockerUtil::ensureImageTag($ct['info']['Config']['Image']);
+                $ct['info']['State']['Updated'] = $DockerUpdate->getUpdateStatus($ct['info']['Config']['Image']);
+                $template = $templates[array_key_first(preg_grep("/{$ct['info']['Name']}/i", array_column($templates, 'name')))];
+                $doc = new DOMDocument();
+                if(!is_null($template) && $doc->load($template['path']??'') && DockerUtil::ensureImageTag($doc->getElementsByTagName('Repository')->item(0)->nodeValue??'') == $ct['info']['Config']['Image']) {
+                    $ct['info']['State']['WebUi'] = trim($doc->getElementsByTagName('WebUI')->item(0)->nodeValue??'');
+                    $ct['info']['registry'] = trim($doc->getElementsByTagName('Registry')->item(0)->nodeValue??'');
+                    $ct['info']['Support'] = trim($doc->getElementsByTagName('Support')->item(0)->nodeValue??'');
+                    $ct['info']['Project'] = trim($doc->getElementsByTagName('Project')->item(0)->nodeValue??'');
+                    $ct['info']['DonateLink'] = trim($doc->getElementsByTagName('DonateLink')->item(0)->nodeValue??'');
+                    $ct['info']['ReadMe'] = trim($doc->getElementsByTagName('ReadMe')->item(0)->nodeValue??'');
+                    $ct['info']['Shell'] = trim($doc->getElementsByTagName('Shell')->item(0)->nodeValue??'');
+                    $ct['info']['template'] = $template;
+                } else {
+                    $ct['info']['State']['WebUi'] = '';
+                }
+
+                // extractID in /usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php edited
+                $ct['shortId'] = substr(str_replace('sha256:', '', $ct['Id']), 0, 12);
+                $ct['shortImageId'] = substr(str_replace('sha256:', '', $ct['ImageID']), 0, 12);
+
+                // getDockerContainers in /usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php edited
+                [$net, $id] = array_pad(explode(':',$ct['HostConfig']['NetworkMode']),2,'');
+                if ($id) $ct['HostConfig']['NetworkMode'] = $net.str_replace('/',':',DockerUtil::ctMap($id)?:'/???');
+                if (isset($driver[$ct['HostConfig']['NetworkMode']])) {
+                    if ($driver[$ct['HostConfig']['NetworkMode']]=='bridge') {
+                        $ports = &$ct['info']['HostConfig']['PortBindings'];
+                        $nat = true;
+                    } else {
+                        $ports = &$ct['info']['Config']['ExposedPorts'];
+                        $nat = false;
+                    }
+                    $ip = $ct['NetworkSettings']['Networks'][$ct['HostConfig']['NetworkMode']]['IPAddress'];
+                }
+                $ports = (isset($ports) && is_array($ports)) ? $ports : [];
+                foreach ($ports as $port => $value) {
+                    [$PrivatePort, $PType] = array_pad(explode('/', $port),2,'');
+                    $ct['info']['Ports'][] = ['PrivateIP' => $ip, 'PrivatePort' => $PrivatePort, 'PublicIP' => $nat ? $host : $ip,'PublicPort' => $nat ? $value[0]['HostPort'] : $PrivatePort, 'NAT' => $nat, 'Type' => $PType];
+                }
+
+                if (strlen($ct['info']['State']['WebUi']) > 0 && preg_match("%\[(IP|PORT:(\d+))\]%", $ct['info']['State']['WebUi'])) {
+                    if (preg_match("%\[PORT:(\d+)\]%", $ct['info']['State']['WebUi'], $matches)) {
+                        $ConfigPort = $matches[1] ?? '';
+                        foreach ($ct['info']['Ports'] as $port) {
+                            if($port['PrivatePort'] == $ConfigPort) {
+                                $ConfigPort = $port;
+                                break;
+                            }
+                        }
+                        if(is_array($ConfigPort)) {
+                            $ct['info']['State']['WebUi'] = preg_replace("%\[PORT:\d+\]%", $ConfigPort['PublicPort'], $ct['info']['State']['WebUi']);
+                            $ct['info']['State']['WebUi'] = preg_replace("%\[IP\]%", $nat ? $host : $ConfigPort['PublicIP'], $ct['info']['State']['WebUi']);
+                        }
+                    }
+                }
+
+                $info[$ct['info']['Name']] = $ct;
+            }
         } elseif ($type == "vm") {
             global $lv;
             $vms = $lv->get_domains();

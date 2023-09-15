@@ -4,69 +4,80 @@ Icon="folder-open-o"
 Markdown="false"
 ---
 
+<script>
+    folderi18n = () => {
+        $('body').i18n();
+    }
+</script>
+<? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
 <link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/folderview.css')?>">
 
-<h2>Custom CSS</h2>
-<button onclick="importCSS('docker')">Import docker</button>
-<button onclick="importCSS('vm')">Import vm</button>
-<button onclick="importCSS('dashboard')">Import dashboard</button>
-<br>
-<button onclick="exportCSS('docker')">Export docker</button>
-<button onclick="exportCSS('vm')">Export vm</button>
-<button onclick="exportCSS('dashboard')">Export dashboard</button>
-<br>
-<button onclick="clearCSS('docker')">Clear docker</button>
-<button onclick="clearCSS('vm')">Clear vm</button>
-<button onclick="clearCSS('dashboard')">Clear dashboard</button>
+<h2 data-i18n="custom-css">Custom CSS</h2>
+<div class="custom-css">
+    <button data-i18n="[html]import-css-docker" onclick="importCSS('docker')"><i class="fa fa-upload" aria-hidden="true"></i> Import docker</button>
+    <button data-i18n="[html]import-css-vm" onclick="importCSS('vm')"><i class="fa fa-upload" aria-hidden="true"></i> Import vm</button>
+    <button data-i18n="[html]import-css-dashboard" onclick="importCSS('dashboard')"><i class="fa fa-upload" aria-hidden="true"></i> Import dashboard</button>
+    <button data-i18n="[html]export-css-docker" onclick="exportCSS('docker')"><i class="fa fa-download" aria-hidden="true"></i> Export docker</button>
+    <button data-i18n="[html]export-css-vm" onclick="exportCSS('vm')"><i class="fa fa-download" aria-hidden="true"></i> Export vm</button>
+    <button data-i18n="[html]export-css-dashboard" onclick="exportCSS('dashboard')"><i class="fa fa-download" aria-hidden="true"></i> Export dashboard</button>
+    <button data-i18n="[html]clear-css-docker" onclick="clearCSS('docker')"><i class="fa fa-ban" aria-hidden="true"></i> Clear docker</button>
+    <button data-i18n="[html]clear-css-vm" onclick="clearCSS('vm')"><i class="fa fa-ban" aria-hidden="true"></i> Clear vm</button>
+    <button data-i18n="[html]clear-css-dashboard" onclick="clearCSS('dashboard')"><i class="fa fa-ban" aria-hidden="true"></i> Clear dashboard</button>
+</div>
 
-<h2>Docker</h2>
-<button onclick="downloadDocker()">Export all</button>
-<button onclick="importDocker()">Import</button>
-<button onclick="clearDocker()">Clear</button>
-<table>
-    <thead>
-        <tr>
-            <th>
-                ID
-            </th>
-            <th>
-                Name
-            </th>
-            <th>
-                Actions
-            </th>
-        </tr>
-    </thead>
-    <tbody id="docker">
-        
-    </tbody>
-</table>
+<h2 data-i18n="docker">Docker</h2>
+<div class="folder-table">
+    <button data-i18n="[html]export-all" onclick="downloadDocker()"><i class="fa fa-download" aria-hidden="true"></i> Export all</button>
+    <button data-i18n="[html]import-all" onclick="importDocker()"><i class="fa fa-upload" aria-hidden="true"></i> Import</button>
+    <button data-i18n="[html]clear-all" onclick="clearDocker()"><i class="fa fa-ban" aria-hidden="true"></i> Clear</button>
+    <table>
+        <thead>
+            <tr>
+                <th data-i18n="el-id">
+                    ID
+                </th>
+                <th data-i18n="el-name">
+                    Name
+                </th>
+                <th data-i18n="el-actions">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody id="docker">
+            
+        </tbody>
+    </table>
+</div>
 <hr>
 
-<h2>VMs</h2>
-<button onclick="downloadVm()">Export all</button>
-<button onclick="importVm()">Import</button>
-<button onclick="clearVm()">Clear</button>
-<table>
-    <thead>
-        <tr>
-            <th>
-                ID
-            </th>
-            <th>
-                Name
-            </th>
-            <th>
-                Actions
-            </th>
-        </tr>
-    </thead>
-    <tbody id="vms">
+<h2 data-i18n="vms">VMs</h2>
+<div class="folder-table">
+    <button data-i18n="[html]export-all" onclick="downloadVm()"><i class="fa fa-download" aria-hidden="true"></i> Export all</button>
+    <button data-i18n="[html]import-all" onclick="importVm()"><i class="fa fa-upload" aria-hidden="true"></i> Import</button>
+    <button data-i18n="[html]clear-all" onclick="clearVm()"><i class="fa fa-ban" aria-hidden="true"></i> Clear</button>
+    <table>
+        <thead>
+            <tr>
+                <th data-i18n="el-id">
+                    ID
+                </th>
+                <th data-i18n="el-name">
+                    Name
+                </th>
+                <th data-i18n="el-actions">
+                    Actions
+                </th>
+            </tr>
+        </thead>
+        <tbody id="vms">
+    
+        </tbody>
+    </table>
+</div>
+<hr>
 
-    </tbody>
-</table>
-
-<button onclick="fileManager()">Open File Manager</button>
+<button data-i18n="file-manager" onclick="fileManager()">Open File Manager</button>
 
 <script src="<?autov('/plugins/folder.view/scripts/folderview.js')?>"></script>
 
