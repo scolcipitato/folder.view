@@ -132,6 +132,7 @@
                 }
 
                 if (strlen($ct['info']['State']['WebUi']) > 0 && preg_match("%\[(IP|PORT:(\d+))\]%", $ct['info']['State']['WebUi'])) {
+                    $ConfigPort = "";
                     if (preg_match("%\[PORT:(\d+)\]%", $ct['info']['State']['WebUi'], $matches)) {
                         $ConfigPort = $matches[1] ?? '';
                         foreach ($ct['info']['Ports'] as $port) {
@@ -140,10 +141,13 @@
                                 break;
                             }
                         }
-                        if(is_array($ConfigPort)) {
-                            $ct['info']['State']['WebUi'] = preg_replace("%\[PORT:\d+\]%", $ConfigPort['PublicPort'], $ct['info']['State']['WebUi']);
-                            $ct['info']['State']['WebUi'] = preg_replace("%\[IP\]%", $nat ? $host : $ConfigPort['PublicIP'], $ct['info']['State']['WebUi']);
-                        }
+                    }
+                    if(is_array($ConfigPort)) {
+                        $ct['info']['State']['WebUi'] = preg_replace("%\[PORT:\d+\]%", $ConfigPort['PublicPort'], $ct['info']['State']['WebUi']);
+                        $ct['info']['State']['WebUi'] = preg_replace("%\[IP\]%", $nat ? $host : $ConfigPort['PublicIP'], $ct['info']['State']['WebUi']);
+                    } else {
+                        $ct['info']['State']['WebUi'] = preg_replace("%\[PORT:\d+\]%", $ConfigPort, $ct['info']['State']['WebUi']);
+                        $ct['info']['State']['WebUi'] = preg_replace("%\[IP\]%", $nat ? $host : $ip, $ct['info']['State']['WebUi']);
                     }
                 }
 
