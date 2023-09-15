@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.09.15">
-<!ENTITY md5 "82eefd13cb07c08a3d8dc4eb1124d574">
+<!ENTITY version "2023.09.15.1">
+<!ENTITY md5 "7c763792c120925f31279bcad03a448a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.09.15.1
+- Fixed an issue with php global variables
+
 ###2023.09.15
 - Added an advanced context menu for the docker preview.
 - Added support for internationalization(i18n).

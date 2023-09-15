@@ -78,6 +78,8 @@
         $info = [];
         if ($type == "docker") {
             global $dockerManPaths;
+            global $driver;
+            global $host;
             $dockerClient = new DockerClient();
             $DockerUpdate = new DockerUpdate();
             $dockerTemplates = new DockerTemplates();
