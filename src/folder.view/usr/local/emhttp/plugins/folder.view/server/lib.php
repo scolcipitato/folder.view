@@ -86,6 +86,18 @@
             $cts = $dockerClient->getDockerJSON("/containers/json?all=1");
             $autoStart = array_map('var_split', file($dockerManPaths['autostart-file'],FILE_IGNORE_NEW_LINES) ?: []);
             $templates = $dockerTemplates->getTemplates('all');
+            foreach($templates as &$tmp) {
+                $doc = new DOMDocument();
+                $doc->load($tmp['path']??'');
+                $tmp['image'] = DockerUtil::ensureImageTag($doc->getElementsByTagName('Repository')->item(0)->nodeValue??'');
+                $tmp['WebUi'] = trim($doc->getElementsByTagName('WebUI')->item(0)->nodeValue??'');
+                $tmp['registry'] = trim($doc->getElementsByTagName('Registry')->item(0)->nodeValue??'');
+                $tmp['Support'] = trim($doc->getElementsByTagName('Support')->item(0)->nodeValue??'');
+                $tmp['Project'] = trim($doc->getElementsByTagName('Project')->item(0)->nodeValue??'');
+                $tmp['DonateLink'] = trim($doc->getElementsByTagName('DonateLink')->item(0)->nodeValue??'');
+                $tmp['ReadMe'] = trim($doc->getElementsByTagName('ReadMe')->item(0)->nodeValue??'');
+                $tmp['Shell'] = trim($doc->getElementsByTagName('Shell')->item(0)->nodeValue??'');
+            }
             foreach ($cts as $key => &$ct) {
                 $ct['info'] = $dockerClient->getContainerDetails($ct['Id']);
 
@@ -93,16 +105,15 @@
                 $ct['info']['State']['Autostart'] = array_search($ct['info']['Name'], $autoStart);
                 $ct['info']['Config']['Image'] = DockerUtil::ensureImageTag($ct['info']['Config']['Image']);
                 $ct['info']['State']['Updated'] = $DockerUpdate->getUpdateStatus($ct['info']['Config']['Image']);
-                $template = $templates[array_key_first(preg_grep("/{$ct['info']['Name']}/i", array_column($templates, 'name')))];
-                $doc = new DOMDocument();
-                if(!is_null($template) && $doc->load($template['path']??'') && DockerUtil::ensureImageTag($doc->getElementsByTagName('Repository')->item(0)->nodeValue??'') == $ct['info']['Config']['Image']) {
-                    $ct['info']['State']['WebUi'] = trim($doc->getElementsByTagName('WebUI')->item(0)->nodeValue??'');
-                    $ct['info']['registry'] = trim($doc->getElementsByTagName('Registry')->item(0)->nodeValue??'');
-                    $ct['info']['Support'] = trim($doc->getElementsByTagName('Support')->item(0)->nodeValue??'');
-                    $ct['info']['Project'] = trim($doc->getElementsByTagName('Project')->item(0)->nodeValue??'');
-                    $ct['info']['DonateLink'] = trim($doc->getElementsByTagName('DonateLink')->item(0)->nodeValue??'');
-                    $ct['info']['ReadMe'] = trim($doc->getElementsByTagName('ReadMe')->item(0)->nodeValue??'');
-                    $ct['info']['Shell'] = trim($doc->getElementsByTagName('Shell')->item(0)->nodeValue??'');
+                $template = $templates[array_search($ct['info']['Config']['Image'], array_column($templates, 'image'))];
+                if(!is_null($template)) {
+                    $ct['info']['State']['WebUi'] = $template['WebUi'];
+                    $ct['info']['registry'] = $template['registry'];
+                    $ct['info']['Support'] = $template['Support'];
+                    $ct['info']['Project'] = $template['Project'];
+                    $ct['info']['DonateLink'] = $template['DonateLink'];
+                    $ct['info']['ReadMe'] = $template['ReadMe'];
+                    $ct['info']['Shell'] = $template['Shell'];
                     $ct['info']['template'] = $template;
                 } else {
                     $ct['info']['State']['WebUi'] = '';
@@ -124,6 +135,7 @@
                         $nat = false;
                     }
                     $ip = $ct['NetworkSettings']['Networks'][$ct['HostConfig']['NetworkMode']]['IPAddress'];
+                    if(strlen($ip) == 0) $ip = $host;
                 }
                 $ports = (isset($ports) && is_array($ports)) ? $ports : [];
                 foreach ($ports as $port => $value) {
@@ -142,6 +154,7 @@
                             }
                         }
                     }
+                    
                     if(is_array($ConfigPort)) {
                         $ct['info']['State']['WebUi'] = preg_replace("%\[PORT:\d+\]%", $ConfigPort['PublicPort'], $ct['info']['State']['WebUi']);
                         $ct['info']['State']['WebUi'] = preg_replace("%\[IP\]%", $nat ? $host : $ConfigPort['PublicIP'], $ct['info']['State']['WebUi']);
