@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.09.17">
-<!ENTITY md5 "b39f320538cb6511925f07860e8fcfa9">
+<!ENTITY version "2023.09.17.1">
+<!ENTITY md5 "b00740d1b95ca8e3df46b833205c4459">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.09.17.1
+- Same fix of 2023.09.17 but for a specific case.
+
 ###2023.09.17
 - Hopefully fixed an issue with template detection and WebUi missing.
 

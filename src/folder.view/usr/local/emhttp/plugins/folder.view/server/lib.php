@@ -91,6 +91,7 @@
                 $doc->load($tmp['path']??'');
                 $tmp['image'] = DockerUtil::ensureImageTag($doc->getElementsByTagName('Repository')->item(0)->nodeValue??'');
                 $tmp['WebUi'] = trim($doc->getElementsByTagName('WebUI')->item(0)->nodeValue??'');
+                $tmp['Name'] = trim($doc->getElementsByTagName('Name')->item(0)->nodeValue??'');
                 $tmp['registry'] = trim($doc->getElementsByTagName('Registry')->item(0)->nodeValue??'');
                 $tmp['Support'] = trim($doc->getElementsByTagName('Support')->item(0)->nodeValue??'');
                 $tmp['Project'] = trim($doc->getElementsByTagName('Project')->item(0)->nodeValue??'');
@@ -105,7 +106,10 @@
                 $ct['info']['State']['Autostart'] = array_search($ct['info']['Name'], $autoStart);
                 $ct['info']['Config']['Image'] = DockerUtil::ensureImageTag($ct['info']['Config']['Image']);
                 $ct['info']['State']['Updated'] = $DockerUpdate->getUpdateStatus($ct['info']['Config']['Image']);
-                $template = $templates[array_search($ct['info']['Config']['Image'], array_column($templates, 'image'))];
+                $template = array_filter($templates, function($el) use ($ct) {
+                    return $el['image'] == $ct['info']['Config']['Image'] && $el['Name'] == $ct['info']['Name'];
+                });
+                $template = $template[array_key_first($template)];
                 if(!is_null($template)) {
                     $ct['info']['State']['WebUi'] = $template['WebUi'];
                     $ct['info']['registry'] = $template['registry'];
