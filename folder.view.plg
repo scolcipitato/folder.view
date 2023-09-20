@@ -7,11 +7,15 @@
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
 <!ENTITY version "2023.09.17.1">
-<!ENTITY md5 "b00740d1b95ca8e3df46b833205c4459">
+<!ENTITY md5 "50eb31dc475eb13f670922746eff72cc">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.09.20
+- Added autostart class for docker conainers.
+- Reordered shortcut icons on dokcer tab.
+
 ###2023.09.17.1
 - Same fix of 2023.09.17 but for a specific case.
 

@@ -245,13 +245,13 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             // remove the containers from the order
             cutomOrder.splice(index, 1);
             order.splice(offsetIndex, 1);
+            const ct = containersInfo[container];
 
             // grab the storage folder
             const element = $(`tbody#docker_view span#folder-id-${id}`).siblings('div.folder-storage');
             // grab the container and put it onto the storage
-            element.append($('tbody#docker_view > tr.updated > td').children().eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-docker`));
+            element.append($('tbody#docker_view > tr.updated > td').children().eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-docker`).addClass(`${!(ct.info.State.Autostart === false) ? 'autostart' : ''}`));
             
-            const ct = containersInfo[container];
 
             newFolder[container] = {};
             newFolder[container].id = ct.shortId;

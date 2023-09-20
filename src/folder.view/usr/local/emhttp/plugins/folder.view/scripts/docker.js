@@ -163,8 +163,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     let addPreview;
     switch (folder.settings.preview) {
         case 1:
-            addPreview = (id, ctid) => {
-                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer:last`).clone());
+            addPreview = (id, ctid, autostart) => {
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
                 if(folder.settings.context === 2 || folder.settings.context === 0) {
@@ -179,7 +179,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             break;
         case 2:
             addPreview = (id, ctid) => {
-                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.hand:last`).clone());
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.hand:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
 
                 if(folder.settings.context === 2 || folder.settings.context === 0) {
                     let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.hand:last`);
@@ -193,7 +193,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             break;
         case 3:
             addPreview = (id, ctid) => {
-                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner:last`).clone());
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.inner:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
 
@@ -215,7 +215,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                         lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
                     }
                     lstSpan.append($('<span class="inner"></span>'));
-                    lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner > span.appname:last`).clone());
+                    lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner > span.appname:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
 
                     if(folder.settings.context === 2 || folder.settings.context === 0) {
                         let tmpId = $(`tr.folder-id-${id} div.folder-preview span.inner:last > span.appname > a.exec`);
@@ -296,7 +296,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 }
             };
 
-            const tooltip = addPreview(id, ct.shortId);
+            const tooltip = addPreview(id, ct.shortId, !(ct.info.State.Autostart === false));
             if(tooltip) {
                 $(tooltip).tooltipster({
                     interactive: true,
@@ -522,20 +522,20 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 sel.append($(`<span class="folder-element-custom-btn folder-element-webui"><a href="${ct.info.State.WebUi}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i></a></span>`));
             }
 
-            if (folder.settings.preview_logs) {
-                sel = element.children('span.inner').last();
-                if (!sel.length) {
-                    sel = element;
-                }
-                sel.append($(`<span class="folder-element-custom-btn folder-element-logs"><a href="#" onclick="openTerminal('docker', '${container}', '.log')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
-            }
-
             if (folder.settings.preview_console) {
                 sel = element.children('span.inner').last();
                 if (!sel.length) {
                     sel = element;
                 }
                 sel.append($(`<span class="folder-element-custom-btn folder-element-console"><a href="#" onclick="openTerminal('docker', '${ct.info.Name}', '${ct.info.Shell}')"><i class="fa fa-terminal" aria-hidden="true"></i></a></span>`));
+            }
+
+            if (folder.settings.preview_logs) {
+                sel = element.children('span.inner').last();
+                if (!sel.length) {
+                    sel = element;
+                }
+                sel.append($(`<span class="folder-element-custom-btn folder-element-logs"><a href="#" onclick="openTerminal('docker', '${container}', '.log')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
             }
 
             // set the status of the folder
