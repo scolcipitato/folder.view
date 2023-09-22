@@ -205,6 +205,8 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     // default varibles
     let upToDate = true;
     let started = 0;
+    let autostart = 0;
+    let autostartStarted = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -266,6 +268,8 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             // set the status of the folder
             upToDate = upToDate && !newFolder[container].update;
             started += newFolder[container].state ? 1 : 0;
+            autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
+            autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
         }
     }
 
@@ -287,10 +291,22 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} ${$.i18n('started')}`);
     }
 
+    if(autostart === 0) {
+        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('no-autostart');
+    } else if (autostart > 0 && autostartStarted === 0) {
+        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('autostart-off');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart !== autostartStarted) {
+        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('autostart-partial');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart === autostartStarted) {
+        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('autostart-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.upToDate = upToDate;
     folder.status.started = started;
+    folder.status.autostart = autostart;
+    folder.status.autostartStarted = autostartStarted;
     folder.status.expanded = false;
 };
 

@@ -1,4 +1,11 @@
 <div class="folder-showcase-outer-${id} folder-showcase-outer">
+    <!-- 
+        span.outer also have one of 4 classes applied
+        - no-autostart is applied when the folder doesn't have any container set to autostart.
+        - autostart-off is applied when the folder does have some container to autostart, but ALL the autostart containers are stopped.
+        - autostart-partial is applied when the folder does have some container to autostart, but NOT ALL the autostart containers are started.
+        - autostart-full is applied when the folder does have some container to autostart, but ALL the autostart containers are started.
+    -->
     <span class="outer solid apps stopped folder-docker">
         <span id="folder-id-${id}" onclick='addDockerFolderContext("${id}")' class="hand docker folder-hand-docker">
             <img src="${folder.icon}" class="img folder-img-docker" onerror="this.src='/plugins/dynamix.docker.manager/images/question.png';">
@@ -11,5 +18,9 @@
         </span>
         <div class="folder-storage"></div>
     </span>
-    <div class="folder-showcase-${id} folder-showcase"></div>
+    <div class="folder-showcase-${id} folder-showcase">
+        <!-- 
+            Containers inside here have applied a class named "autostart" if they are set to autostart
+         -->
+    </div>
 </div>

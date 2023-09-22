@@ -126,7 +126,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     // default varibles
     let upToDate = true;
     let started = 0;
-    let autostart = false;
+    let autostart = 0;
+    let autostartStarted = 0;
 
     // Get if the advanced view is enabled
     const advanced = $.cookie('docker_listview_mode') == 'advanced';
@@ -541,7 +542,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             // set the status of the folder
             upToDate = upToDate && !newFolder[container].update;
             started += newFolder[container].state ? 1 : 0;
-            autostart = autostart || !(ct.info.State.Autostart === false);
+            autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
+            autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
         }
     }
 
@@ -583,11 +585,22 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         $(`#folder-${id}-auto`).next().click();
     }
 
+    if(autostart === 0) {
+        $(`tr.folder-id-${id}`).addClass('no-autostart');
+    } else if (autostart > 0 && autostartStarted === 0) {
+        $(`tr.folder-id-${id}`).addClass('autostart-off');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart !== autostartStarted) {
+        $(`tr.folder-id-${id}`).addClass('autostart-partial');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart === autostartStarted) {
+        $(`tr.folder-id-${id}`).addClass('autostart-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.upToDate = upToDate;
     folder.status.started = started;
     folder.status.autostart = autostart;
+    folder.status.autostartStarted = autostartStarted;
     folder.status.expanded = false;
 
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before

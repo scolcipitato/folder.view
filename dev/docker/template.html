@@ -1,3 +1,10 @@
+<!-- 
+    tr.folder also have one of 4 classes applied
+    - no-autostart is applied when the folder doesn't have any container set to autostart.
+    - autostart-off is applied when the folder does have some container to autostart, but ALL the autostart containers are stopped.
+    - autostart-partial is applied when the folder does have some container to autostart, but NOT ALL the autostart containers are started.
+    - autostart-full is applied when the folder does have some container to autostart, but ALL the autostart containers are started.
+ -->
 <tr class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder">
     <td class="ct-name folder-name">
         <div class="folder-name-sub">
@@ -69,7 +76,11 @@
 </tr>
 
 <div class="folder-preview">
-    <div class="folder-preview-wrapper"></div>
+    <div class="folder-preview-wrapper">
+        <!-- 
+            Containers inside here have applied a class named "autostart" if they are set to autostart
+         -->
+    </div>
     <div class="folder-preview-divider"></div>
 </div>
 

@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.09.21">
-<!ENTITY md5 "36ff6c87db5b4ea126e3358096c4ad2a">
+<!ENTITY version "2023.09.22">
+<!ENTITY md5 "8eae2083c760db6d85760bd5b3638304">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.09.22
+- Added classes to describe autostart status (see templates).
+
 ###2023.09.21
 - Added Deutsche translation.
 
