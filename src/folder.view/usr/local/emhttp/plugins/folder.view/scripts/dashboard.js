@@ -292,13 +292,13 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     }
 
     if(autostart === 0) {
-        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('no-autostart');
+        $(`div.folder-showcase-outer-${id}`).addClass('no-autostart').children('span.outer').addClass('no-autostart');
     } else if (autostart > 0 && autostartStarted === 0) {
-        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('autostart-off');
+        $(`div.folder-showcase-outer-${id}`).addClass('autostart-off').children('span.outer').addClass('autostart-off');
     } else if (autostart > 0 && autostartStarted > 0 && autostart !== autostartStarted) {
-        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('autostart-partial');
+        $(`div.folder-showcase-outer-${id}`).addClass('autostart-partial').children('span.outer').addClass('autostart-partial');
     } else if (autostart > 0 && autostartStarted > 0 && autostart === autostartStarted) {
-        $(`div.folder-showcase-outer-${id} > span.outer`).addClass('autostart-full');
+        $(`div.folder-showcase-outer-${id}`).addClass('autostart-full').children('span.outer').addClass('autostart-full');
     }
 
     // set the status
