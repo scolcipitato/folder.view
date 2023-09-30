@@ -88,8 +88,8 @@ div.folder-preview-4 span.outer {
 }
 
 .preview-outbox {
-    width: 40vw;
-    height: 44vh;
+    min-width: 40vw;
+    min-height: 44vh;
     padding: 5px;
     background-color: #fff;
     border-radius: 5px;
