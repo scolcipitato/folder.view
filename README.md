@@ -17,3 +17,4 @@ This plugin support custom CSS rules, you can check out some user made rules [he
 - [Moment.js](https://momentjs.com/)
 - [chartjs-plugin-streaming](https://github.com/nagix/chartjs-plugin-streaming)
 - [jquery.i18n](https://github.com/wikimedia/jquery.i18n)
+- [jQuery UI MultiSelect](https://github.com/ehynds/jquery-ui-multiselect-widget)

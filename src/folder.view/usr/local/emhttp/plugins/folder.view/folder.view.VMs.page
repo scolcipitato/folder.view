@@ -1,8 +1,19 @@
 Menu="VMs"
 Icon="server"
 ---
+<? $type = 'vm' ?>
+
+<script>
+    folderi18n = () => {
+        $('<input type="button" onclick="createFolderBtn()" value="Add Folder" data-i18n="[value]add-folder" style="display:none">').insertAfter('table#kvm_table');
+        $('[type="button"]').i18n();
+    }
+</script>
+<? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
+<script src="/plugins/folder.view/scripts/include/customEvents.js"></script>
+<? require_once('/usr/local/emhttp/plugins/folder.view/scripts/custom.php') ?>
 
 <script src="<?autov('/plugins/folder.view/scripts/vm.js')?>"></script>
 
 <link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/vm.css')?>">
-<link rel="stylesheet" href="<?autov('/boot/config/plugins/folder.view/styles/vm-custom.css')?>">
+<? require_once('/usr/local/emhttp/plugins/folder.view/styles/custom.php') ?>

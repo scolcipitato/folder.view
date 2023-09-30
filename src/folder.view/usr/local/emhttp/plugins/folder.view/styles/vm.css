@@ -62,3 +62,7 @@ div.folder-preview-4 span.outer{
     align-items: left;
     align-content: center;
 }
+
+.folder-element-custom-btn {
+    margin-left: 0.5em;
+}

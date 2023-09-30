@@ -18,3 +18,13 @@ table.sortable {
 .dragging {
     opacity: 20%;
 }
+
+.custom-action-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.multiselect-container {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -205,35 +205,6 @@ const downloadFile = (name, content) => {
     element.click();
 };
 
-const importCSS = (type) => {
-    let input = $('input[type*=file]')[1];
-    input.onchange = (e) => {
-
-        // getting a hold of the file reference
-        let file = e.target.files[0];
-
-        // setting up the reader
-        let reader = new FileReader();
-        reader.readAsText(file, 'UTF-8');
-
-        // here we tell the reader what to do when it's done reading...
-        reader.onload = async (readerEvent) => {
-            let content = readerEvent.target.result; // this is the content!
-            $(input).off();
-            await $.post('/plugins/folder.view/server/import_css.php', { type: type, content: content });
-        }
-    }
-    input.click();
-};
-
-const exportCSS = async (type) => {
-    downloadFile(`${type}.css`, await $.get(`/plugins/folder.view/server/export_css.php?type=${type}`).promise());
-};
-
-const clearCSS = async (type) => {
-    await $.post('/plugins/folder.view/server/import_css.php', { type: type, content: '' });
-};
-
 const fileManager = async (type) => {
     location.href = location.pathname + '/Browse?dir=/boot/config/plugins/folder.view';
 };

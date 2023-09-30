@@ -179,8 +179,12 @@
                     $dom = $lv->domain_get_info($res);
                     $info[$vm] = [
                         'uuid' => $lv->domain_get_uuid($res),
+                        'name' => $vm,
+                        'description' => $lv->domain_get_description($res),
                         'autostart' => $lv->domain_get_autostart($res),
-                        'state' => $lv->domain_state_translate($dom['state'])
+                        'state' => $lv->domain_state_translate($dom['state']),
+                        'icon' => $lv->domain_get_icon_url($res),
+                        'logs' => (is_file("/var/log/libvirt/qemu/$vm.log") ? "libvirt/qemu/$vm.log" : '')
                     ];
                 }
             }
@@ -188,33 +192,13 @@
         return $info;
     }
 
-    function readElements(string $type): array {
-        $elements = [];
-        if ($type == "docker") {
-            $dockerClient = new DockerClient();
-            $elements = $dockerClient->getDockerContainers();
-        } elseif ($type == "vm") {
-            global $lv;
-            $vms = $lv->get_domains();
-            if (!empty($vms)) {
-                foreach ($vms as $vm) {
-                    $res = $lv->get_domain_by_name($vm);
-                    array_push($elements, [
-                        'Name' => $vm,
-                        'Icon' => $lv->domain_get_icon_url($res),
-                    ]);
-                }
-            }
-        }
-        return $elements;
-    }
-
     function readUnraidOrder(string $type): array {
         $user_prefs = "/boot/config/plugins";
         $order = [];
         if ($type == "docker") {
             // /usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerContainers.php
-            $containers = readElements($type);
+            $dockerClient = new DockerClient();
+            $containers = $dockerClient->getDockerContainers();
             $user_prefs = "$user_prefs/dockerMan/userprefs.cfg";
 
             if (file_exists($user_prefs)) {
@@ -255,5 +239,40 @@
             }
         }
         return $order;
+    }
+
+    function pathToMultiDimArray($dir) {
+        $final = [];
+        try {
+            $elements = array_diff(scandir($dir), ['.', '..']);
+            foreach ($elements as $el) {
+                $newEl = "{$dir}/{$el}";
+                if(is_dir($newEl)) {
+                    array_push($final, [
+                        "name" => $el,
+                        "path" => $newEl,
+                        "sub" => pathToMultiDimArray($newEl)
+                    ]);
+                } else if(is_file($newEl)) {
+                    array_push($final, [
+                        "name" => $el,
+                        "path" => $newEl
+                    ]);
+                }
+            }
+        } catch (Throwable $err) {}
+        return $final;
+    }
+
+    function dirToArrayOfFiles($dir, $fileFilter = NULL, $folderFilter = NULL) {
+        $final = [];
+        foreach ($dir as $el) {
+            if(isset($el['sub']) && (!isset($folderFilter) || (isset($folderFilter) && !preg_match($folderFilter, $el['name'])))) {
+                $final = array_merge($final, dirToArrayOfFiles($el['sub'], $filter));
+            } else if(!isset($fileFilter) || (isset($fileFilter) && preg_match($fileFilter, $el['name']))) {
+                array_push($final, $el);
+            }
+        }
+        return $final;
     }
 ?>

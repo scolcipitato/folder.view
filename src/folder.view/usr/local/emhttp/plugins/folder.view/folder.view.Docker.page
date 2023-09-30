@@ -2,12 +2,18 @@ Menu="Docker"
 Icon="server"
 ---
 
+<? $type = 'docker' ?>
+
 <script>
     folderi18n = () => {
+        $(`<input type="button" onclick="createFolderBtn()" value="Add Folder" data-i18n="[value]add-folder" style="display:none">`).insertAfter('table#docker_containers');
         $('[type="button"]').i18n();
     }
 </script>
 <? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
+<script src="/plugins/folder.view/scripts/include/customEvents.js"></script>
+<? require_once('/usr/local/emhttp/plugins/folder.view/scripts/custom.php') ?>
+
 <script src="/plugins/folder.view/scripts/include/chart.min.js"></script>
 <script src="/plugins/folder.view/scripts/include/moment.min.js"></script>
 <script src="/plugins/folder.view/scripts/include/chartjs-adapter-moment.min.js"></script>
@@ -15,4 +21,4 @@ Icon="server"
 <script defer src="<?autov('/plugins/folder.view/scripts/docker.js')?>"></script>
 
 <link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/docker.css')?>">
-<link rel="stylesheet" href="<?autov('/boot/config/plugins/folder.view/styles/docker-custom.css')?>">
+<? require_once('/usr/local/emhttp/plugins/folder.view/styles/custom.php') ?>

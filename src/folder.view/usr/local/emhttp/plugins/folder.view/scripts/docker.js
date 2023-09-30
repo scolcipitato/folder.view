@@ -68,6 +68,12 @@ const createFolders = async () => {
         }
     });
 
+    folderEvents.dispatchEvent(new CustomEvent('docker-pre-folders-creation', {detail: {
+        folders: folders,
+        order: order,
+        containersInfo: containersInfo
+    }}));
+
     // Draw the folders in the order
     for (let key = 0; key < order.length; key++) {
         const container = order[key];
@@ -101,6 +107,12 @@ const createFolders = async () => {
         }
     }
 
+    folderEvents.dispatchEvent(new CustomEvent('docker-post-folders-creation', {detail: {
+        folders: folders,
+        order: order,
+        containersInfo: containersInfo
+    }}));
+
     // Assing the folder done to the global object
     globalFolders = foldersDone;
     
@@ -123,6 +135,16 @@ const createFolders = async () => {
  * @param {Array<string>} foldersDone folders that are done
  */
 const createFolder = (folder, id, position, order, containersInfo, foldersDone) => {
+
+    folderEvents.dispatchEvent(new CustomEvent('docker-pre-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        containersInfo: containersInfo,
+        foldersDone: foldersDone
+    }}));
+
     // default varibles
     let upToDate = true;
     let started = 0;
@@ -151,7 +173,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     }
 
     // create the *cool* unraid button for the autostart
-    $(`#folder-${id}-auto`).switchButton({ labels_placement: 'right', off_label: "Off", on_label: "On", checked: false });
+    $(`#folder-${id}-auto`).switchButton({ labels_placement: 'right', off_label: $.i18n('off'), on_label: $.i18n('on'), checked: false });
 
     // Set the border if enabled and set the color
     if(folder.settings.preview_border) {
@@ -179,7 +201,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             };
             break;
         case 2:
-            addPreview = (id, ctid) => {
+            addPreview = (id, ctid, autostart) => {
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.hand:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
 
                 if(folder.settings.context === 2 || folder.settings.context === 0) {
@@ -193,7 +215,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             };
             break;
         case 3:
-            addPreview = (id, ctid) => {
+            addPreview = (id, ctid, autostart) => {
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.inner:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
@@ -209,7 +231,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             };
             break;
         case 4:
-                addPreview = (id, ctid) => {
+                addPreview = (id, ctid, autostart) => {
                     let lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
                     if(!lstSpan[0] || lstSpan.children().length >= 2) {
                         $(`tr.folder-id-${id} div.folder-preview`).append($('<span class="outer"></span>'));
@@ -246,9 +268,25 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     // loop over the containers
     for (const container of folder.containers) {
+
         // get both index, tis is needed for removing from the orders later
         const index = cutomOrder.indexOf(container);
         const offsetIndex = order.indexOf(container);
+
+        folderEvents.dispatchEvent(new CustomEvent('docker-pre-folder-preview', {detail: {
+            folder: folder,
+            id: id,
+            position: position,
+            order: order,
+            containersInfo: containersInfo,
+            foldersDone: foldersDone,
+            container: container,
+            ct: containersInfo[container],
+            index: index,
+            offsetIndex: offsetIndex
+        }}));
+
+
         
         if (index > -1) {
             // remove the containers from the order
@@ -263,6 +301,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             let CPU = [];
             let MEM = [];
             let charts = [];
+            let tootltipObserver;
 
             const graphListener = (e) => {
                 let now = Date.now();
@@ -304,7 +343,33 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                     theme: ['tooltipster-docker-folder'],
                     trigger: folder.settings.context_trigger || 'click',
                     zIndex: 99999999,
-                    functionReady: () => {
+                    functionBefore: (origin, continueTooltip) => {
+                        folderEvents.dispatchEvent(new CustomEvent('docker-tooltip-before', {detail: {
+                            folder: folder,
+                            id: id,
+                            containerInfo: ct,
+                            origin,
+                            continueTooltip,
+                            charts,
+                            stats: {
+                                CPU,
+                                MEM
+                            }
+                        }}));
+                    },
+                    functionReady: (origin, tooltip) => {
+                        folderEvents.dispatchEvent(new CustomEvent('docker-tooltip-ready-start', {detail: {
+                            folder: folder,
+                            id: id,
+                            containerInfo: ct,
+                            origin,
+                            tooltip,
+                            charts,
+                            stats: {
+                                CPU,
+                                MEM
+                            }
+                        }}));
                         let diabled = [];
                         let active = 0;
                         const options = {
@@ -454,10 +519,18 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                                     options: options
                                 }));
                                 break;
-                        }
+                        };
+
+                        tootltipObserver = new MutationObserver((mutationList, observer) => {
+                            for (const mutation of mutationList) {
+                                $(`.preview-outbox-${ct.shortId} span#cpu-${ct.shortId}`).css('width',  mutation.target.textContent)
+                            }
+                        });
+
+                        tootltipObserver.observe($(`.preview-outbox-${ct.shortId} span.cpu-${ct.shortId}`)[0], {childList: true});
     
                         if($(`.preview-outbox-${ct.shortId} .status-autostart`).children().length === 1) {
-                            $(`.preview-outbox-${ct.shortId} .status-autostart > input[type='checkbox']`).switchButton({ labels_placement: 'right', off_label: "Off", on_label: "On", checked: !(ct.info.State.Autostart === false) });
+                            $(`.preview-outbox-${ct.shortId} .status-autostart > input[type='checkbox']`).switchButton({ labels_placement: 'right', off_label: $.i18n('off'), on_label: $.i18n('on'), checked: !(ct.info.State.Autostart === false) });
                             $(`.preview-outbox-${ct.shortId} .info-section`).tabs({
                                 heightStyle: 'auto',
                                 disabled: diabled,
@@ -468,13 +541,42 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     
                         dockerload.addEventListener('message', graphListener);
+
+                        folderEvents.dispatchEvent(new CustomEvent('docker-tooltip-ready-end', {detail: {
+                            folder: folder,
+                            id: id,
+                            containerInfo: ct,
+                            origin,
+                            tooltip,
+                            charts,
+                            tootltipObserver,
+                            stats: {
+                                CPU,
+                                MEM
+                            }
+                        }}));
                     },
-                    functionAfter: () => {
+                    functionAfter: (origin) => {
+                        folderEvents.dispatchEvent(new CustomEvent('docker-tooltip-after', {detail: {
+                            folder: folder,
+                            id: id,
+                            containerInfo: ct,
+                            origin,
+                            charts,
+                            tootltipObserver,
+                            charts,
+                            stats: {
+                                CPU,
+                                MEM
+                            }
+                        }}));
                         dockerload.removeEventListener('message', graphListener);
                         for (const chart of charts) {
                             chart.destroy();
                         }
                         charts = [];
+                        tootltipObserver.disconnect();
+                        tootltipObserver = undefined;
                     },
                     content: $(`<div class="preview-outbox-${ct.shortId} preview-outbox"><div class="first-row"><div class="preview-name"><div class="preview-img"><img src="${ct.Labels['net.unraid.docker.icon']}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></div><div class="preview-actual-name"><span class="blue-text appname">${ct.info.Name}</span><br><i class="fa fa-${ct.info.State.Running ? (ct.info.State.Paused ? 'pause' : 'play') : 'square'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'paused' : 'started') : 'stopped'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'orange-text' : 'green-text') : 'red-text'}"></i><span class="state"> ${ct.info.State.Running ? (ct.info.State.Paused ? $.i18n('paused') : $.i18n('started')) : $.i18n('stopped')}</span></div></div><table class="preview-status"><thead class="status-header"><tr><th class="status-header-version">${$.i18n('version')}</th><th class="status-header-stats">CPU/MEM</th><th class="status-header-autostart">${$.i18n('autostart')}</th></tr></thead><tbody><tr><td><div class="status-version">${!ct.info.State.Updated === false ? `<span class="green-text folder-update-text"><i class="fa fa-check fa-fw"></i>${$.i18n('up-to-date')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('force-update')}</span></a>`:`<span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i>${$.i18n('update-ready')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('apply-update')}</span></a>`}<br><i class="fa fa-info-circle fa-fw"></i> ${ct.info.Config.Image.split(':').pop()}</div></td><td><div class="status-stats"><span class="cpu-${ct.shortId}">0%</span><div class="usage-disk mm"><span id="cpu-${ct.shortId}" style="width: 0%;"></span><span></span></div><br><span class="mem-${ct.shortId}">0 / 0</span></div></td><td><div class="status-autostart"><input type="checkbox" style="display:none" class="staus-autostart-checkbox"></div></td></tr></tbody></table></div><div class="second-row"><div class="action-info"><div class="action"><div class="action-left"><ul class="fa-ul">${(ct.info.State.Running && !ct.info.State.Paused) ?  `${ct.info.State.WebUi ? `<li><a href="${ct.info.State.WebUi}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i> ${$.i18n('webui')}</a></li>` : ''}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '${ct.info.Shell}');"><i class="fa fa-terminal" aria-hidden="true"></i> ${$.i18n('console')}</a></li>` : ''}${!ct.info.State.Running ? `<li><a onclick="event.preventDefault(); eventControl({action:'start', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('start')}</a></li>` : `${ct.info.State.Paused ? `<li><a onclick="event.preventDefault(); eventControl({action:'resume', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('resume')}</a></li>` : `<li><a onclick="event.preventDefault(); eventControl({action:'stop', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-stop" aria-hidden="true"></i> ${$.i18n('stop')}</a></li><li><a onclick="event.preventDefault(); eventControl({action:'pause', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-pause" aria-hidden="true"></i> ${$.i18n('pause')}</a></li>`}<li><a onclick="event.preventDefault(); eventControl({action:'restart', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-refresh" aria-hidden="true"></i> ${$.i18n('restart')}</a></li>`}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '.log');"><i class="fa fa-navicon" aria-hidden="true"></i> ${$.i18n('logs')}</a></li>${ct.info.template ? `<li><a onclick="event.preventDefault(); editContainer('${ct.info.Name}', '${ct.info.template.path}');"><i class="fa fa-wrench" aria-hidden="true"></i> ${$.i18n('edit')}</a></li>` : ''}<li><a onclick="event.preventDefault(); rmContainer('${ct.info.Name}', '${ct.shortImageId}', '${ct.shortId}');"><i class="fa fa-trash" aria-hidden="true"></i> ${$.i18n('remove')}</a></li></ul></div><div class="action-right"><ul class="fa-ul">${ct.info.ReadMe ? `<li><a href="${ct.info.ReadMe}" target="_blank"><i class="fa fa-book" aria-hidden="true"></i> ${$.i18n('read-me-first')}</a></li>` : ''}${ct.info.Project ? `<li><a href="${ct.info.Project}" target="_blank"><i class="fa fa-life-ring" aria-hidden="true"></i> ${$.i18n('project-page')}</a></li>` : ''}${ct.info.Support ? `<li><a href="${ct.info.Support}" target="_blank"><i class="fa fa-question" aria-hidden="true"></i> ${$.i18n('support')}</a></li>` : ''}${ct.info.registry ? `<li><a href="${ct.info.registry}" target="_blank"><i class="fa fa-info-circle" aria-hidden="true"></i> ${$.i18n('more-info')}</a></li>` : ''}${ct.info.DonateLink ? `<li><a href="${ct.info.DonateLink}" target="_blank"><i class="fa fa-usd" aria-hidden="true"></i> ${$.i18n('donate')}</a></li>` : ''}</ul></div></div><div class="info-ct"><span class="container-id">${$.i18n('container-id')}: ${ct.shortId}</span><br><span class="repo">${$.i18n('by')}: <a ${ct.info.registry ? `href="${ct.info.registry}"` : ''} >${ct.info.Config.Image.split(':').shift()}</a></span></div></div><div class="info-section"><ul class="info-tabs"><li><a class="tabs-graph" href="#comb-grapth-${ct.shortId}">${$.i18n('graph')}</a></li><li><a class="tabs-cpu-graph" href="#cpu-grapth-${ct.shortId}">${$.i18n('cpu-graph')}</a></li><li><a class="tabs-mem-graph" href="#mem-grapth-${ct.shortId}">${$.i18n('mem-graph')}</a></li><li><a class="tabs-ports" href="#info-ports-${ct.shortId}">${$.i18n('port-mappings')}</a></li><li><a class="tabs-volumes" href="#info-volumes-${ct.shortId}">${$.i18n('volume-mappings')}</a></li></ul><div class="comb-grapth-${ct.shortId} comb-stat-grapth" id="comb-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="cpu-grapth-${ct.shortId} cpu-stat-grapth" id="cpu-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="mem-grapth-${ct.shortId} mem-stat-grapth" id="mem-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="info-ports" id="info-ports-${ct.shortId}" style="display: none;">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}</div><div class="info-volumes" id="info-volumes-${ct.shortId}" style="display: none;">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}</div></div></div></div>`)
                 });
@@ -491,7 +593,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             }
 
             // element to set the preview options
-            const element = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
+            const element = $(`tr.folder-id-${id} div.folder-preview > span:last`);
 
             //temp var
             let sel;
@@ -544,6 +646,25 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             started += newFolder[container].state ? 1 : 0;
             autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
             autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
+
+            folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-preview', {detail: {
+                folder: folder,
+                id: id,
+                position: position,
+                order: order,
+                containersInfo: containersInfo,
+                foldersDone: foldersDone,
+                container: container,
+                ct: containersInfo[container],
+                index: index,
+                offsetIndex: offsetIndex,
+                states: {
+                    upToDate,
+                    started,
+                    autostart,
+                    autostartStarted
+                }
+            }}));
         }
     }
 
@@ -605,6 +726,15 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before
     $(`#folder-${id}-auto`).on("change", folderAutostart);
+
+    folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        containersInfo: containersInfo,
+        foldersDone: foldersDone
+    }}));
 };
 
 /**
@@ -653,6 +783,7 @@ const folderAutostart = (el) => {
  * @param {string} id the id of the folder
  */
 const dropDownButton = (id) => {
+    folderEvents.dispatchEvent(new CustomEvent('docker-pre-folder-expansion', {detail: { id }}));
     const element = $(`.dropDown-${id}`);
     const state = element.attr('active') === "true";
     if (state) {
@@ -670,6 +801,7 @@ const dropDownButton = (id) => {
     if(globalFolders[id]) {
         globalFolders[id].status.expanded = !state;
     }
+    folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-expansion', {detail: { id }}));
 };
 
 /**
@@ -789,7 +921,92 @@ const actionFolder = async (id, action) => {
 
     loadlist();
     $('div.spinner.fixed').hide('slow');
-}
+};
+
+/**
+ * Execute the desired custom action
+ * @param {string} id 
+ * @param {number} action 
+ */
+const folderCustomAction = async (id, action) => {
+    $('div.spinner.fixed').show('slow');
+    const folder = globalFolders[id];
+    let act = folder.actions[action];
+    let prom = [];
+    if(act.type === 0) {
+        const cts = act.conatiners.map(e => folder.containers[e]).filter(e => e);
+        let ctAction = (e) => {};
+        if(act.action === 0) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(e.state) {
+                        prom.push($.post(eventURL, {action: 'stop', container:e.id}, null,'json').promise());
+                    } else {
+                        prom.push($.post(eventURL, {action: 'start', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state) {
+                        if(e.pause) {
+                            prom.push($.post(eventURL, {action: 'resume', container:e.id}, null,'json').promise());
+                        } else {
+                            prom.push($.post(eventURL, {action: 'pause', container:e.id}, null,'json').promise());
+                        }
+                    }
+                };
+            }
+
+        } else if(act.action === 1) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(!e.state) {
+                        prom.push($.post(eventURL, {action: 'start', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state) {
+                        prom.push($.post(eventURL, {action: 'stop', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 2) {
+                ctAction = (e) => {
+                    if(e.state && !e.pause) {
+                        prom.push($.post(eventURL, {action: 'pause', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 3) {
+                ctAction = (e) => {
+                    if(e.state && e.pause) {
+                        prom.push($.post(eventURL, {action: 'resume', container:e.id}, null,'json').promise());
+                    }
+                };
+            }
+
+        } else if(act.action === 2) {
+
+            ctAction = (e) => {
+                prom.push($.post(eventURL, {action: 'restart', container:e.id}, null,'json').promise());
+            };
+
+        }
+
+        cts.forEach((e) => {
+            ctAction(e);
+        });
+    } else if(act.type === 1) {
+        const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+        prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+    }
+
+    await Promise.all(prom);
+
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
 
 /**
  * Atach the menu when clicking the folder icon
@@ -803,38 +1020,40 @@ const addDockerFolderContext = (id) => {
         above: false
     });
 
-    opts.push({
-        text: $.i18n('start'),
-        icon: 'fa-play',
-        action: (e) => { e.preventDefault(); actionFolder(id, "start"); }
-    });
-    opts.push({
-        text: $.i18n('stop'),
-        icon: 'fa-stop',
-        action: (e) => { e.preventDefault(); actionFolder(id, "stop"); }
-    });
+    if(!globalFolders[id].settings.default_action) {
+        opts.push({
+            text: $.i18n('start'),
+            icon: 'fa-play',
+            action: (e) => { e.preventDefault(); actionFolder(id, "start"); }
+        });
+        opts.push({
+            text: $.i18n('stop'),
+            icon: 'fa-stop',
+            action: (e) => { e.preventDefault(); actionFolder(id, "stop"); }
+        });
+        
+        opts.push({
+            text: $.i18n('pause'),
+            icon: 'fa-pause',
+            action: (e) => { e.preventDefault(); actionFolder(id, "pause"); }
+        });
     
-    opts.push({
-        text: $.i18n('pause'),
-        icon: 'fa-pause',
-        action: (e) => { e.preventDefault(); actionFolder(id, "pause"); }
-    });
-
-    opts.push({
-        text: $.i18n('resume'),
-        icon: 'fa-play-circle',
-        action: (e) => { e.preventDefault(); actionFolder(id, "resume"); }
-    });
-
-    opts.push({
-        text: $.i18n('restart'),
-        icon: 'fa-refresh',
-        action: (e) => { e.preventDefault(); actionFolder(id, "restart"); }
-    });
-
-    opts.push({
-        divider: true
-    });
+        opts.push({
+            text: $.i18n('resume'),
+            icon: 'fa-play-circle',
+            action: (e) => { e.preventDefault(); actionFolder(id, "resume"); }
+        });
+    
+        opts.push({
+            text: $.i18n('restart'),
+            icon: 'fa-refresh',
+            action: (e) => { e.preventDefault(); actionFolder(id, "restart"); }
+        });
+    
+        opts.push({
+            divider: true
+        });
+    }
 
     if(!globalFolders[id].status.upToDate) {
         opts.push({
@@ -865,6 +1084,26 @@ const addDockerFolderContext = (id) => {
         icon: 'fa-trash',
         action: (e) => { e.preventDefault(); rmFolder(id); }
     });
+
+    if(globalFolders[id].actions && globalFolders[id].actions.length) {
+        opts.push({
+            divider: true
+        });
+
+        opts.push({
+            text: $.i18n('custom-actions'),
+            icon: 'fa-bars',
+            subMenu: globalFolders[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
+                }
+            })
+        });
+    }
+
+    folderEvents.dispatchEvent(new CustomEvent('docker-folder-context', {detail: { id, opts }}));
 
     context.attach('#' + id, opts);
 };
@@ -998,7 +1237,6 @@ let folderReq = [];
 
 // Add the button for creating a folder
 const createFolderBtn = () => { location.href = "/Docker/Folder?type=docker" };
-$(`<input type="button" onclick="createFolderBtn()" value="Add Folder" data-i18n="[value]add-folder" style="display:none">`).insertAfter('table#docker_containers');
 $(`<div class="nav-item AutostartOrder util"><a 'href="#" class="hand" onclick="return false;" title="Autostart order"><b class="fa fa-rocket system green-text"></b><span>Autostart order</span></a></div>`).insertBefore('div.nav-item.LockButton.util');
 
 // This is needed because unraid don't like the folder and the number are set incorrectly, this intercept the request and change the numbers to make the order appear right, this is important for the autostart and to draw the folders

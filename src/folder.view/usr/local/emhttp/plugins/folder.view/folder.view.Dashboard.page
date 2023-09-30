@@ -1,9 +1,12 @@
 Menu="Dashboard"
 Icon="server"
 ---
-
+<? $type = 'dashboard' ?>
 <? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
+<script src="/plugins/folder.view/scripts/include/customEvents.js"></script>
+<? require_once('/usr/local/emhttp/plugins/folder.view/scripts/custom.php') ?>
+
 <script src="<?autov('/plugins/folder.view/scripts/dashboard.js')?>"></script>
 
 <link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/dashboard.css')?>">
-<link rel="stylesheet" href="<?autov('/boot/config/plugins/folder.view/styles/dashboard-custom.css')?>">
+<? require_once('/usr/local/emhttp/plugins/folder.view/styles/custom.php') ?>

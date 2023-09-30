@@ -52,6 +52,12 @@ const createFolders = async () => {
     
         let foldersDone = {};
 
+        folderEvents.dispatchEvent(new CustomEvent('docker-pre-folders-creation', {detail: {
+            folders: folders,
+            order: order,
+            containersInfo: containersInfo
+        }}));
+
         // Draw the folders in the order
         for (let key = 0; key < order.length; key++) {
             const container = order[key];
@@ -91,6 +97,12 @@ const createFolders = async () => {
                 expandFolderDocker(id);
             }
         }
+
+        folderEvents.dispatchEvent(new CustomEvent('docker-post-folders-creation', {detail: {
+            folders: folders,
+            order: order,
+            containersInfo: containersInfo
+        }}));
     
         // Assing the folder done to the global object
         globalFolders.docker = foldersDone;
@@ -148,6 +160,12 @@ const createFolders = async () => {
     
         let foldersDone = {};
 
+        folderEvents.dispatchEvent(new CustomEvent('vm-pre-folders-creation', {detail: {
+            folders: folders,
+            order: order,
+            vmInfo: vmInfo
+        }}));
+
         // Draw the folders in the order
         for (let key = 0; key < order.length; key++) {
             const container = order[key];
@@ -186,6 +204,12 @@ const createFolders = async () => {
             }
         }
 
+        folderEvents.dispatchEvent(new CustomEvent('vm-post-folders-creation', {detail: {
+            folders: folders,
+            order: order,
+            vmInfo: vmInfo
+        }}));
+
         globalFolders.vms = foldersDone;
     }
 
@@ -202,6 +226,16 @@ const createFolders = async () => {
  * @param {Array<string>} foldersDone folders that are done
  */
 const createFolderDocker = (folder, id, position, order, containersInfo, foldersDone) => {
+
+    folderEvents.dispatchEvent(new CustomEvent('docker-pre-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        containersInfo: containersInfo,
+        foldersDone: foldersDone
+    }}));
+
     // default varibles
     let upToDate = true;
     let started = 0;
@@ -243,6 +277,19 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         const index = cutomOrder.indexOf(container);
         const offsetIndex = order.indexOf(container);
 
+        folderEvents.dispatchEvent(new CustomEvent('docker-pre-folder-preview', {detail: {
+            folder: folder,
+            id: id,
+            position: position,
+            order: order,
+            containersInfo: containersInfo,
+            foldersDone: foldersDone,
+            container: container,
+            ct: containersInfo[container],
+            index: index,
+            offsetIndex: offsetIndex
+        }}));
+
         if (index > -1) {
             // remove the containers from the order
             cutomOrder.splice(index, 1);
@@ -270,6 +317,25 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             started += newFolder[container].state ? 1 : 0;
             autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
             autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
+
+            folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-preview', {detail: {
+                folder: folder,
+                id: id,
+                position: position,
+                order: order,
+                containersInfo: containersInfo,
+                foldersDone: foldersDone,
+                container: container,
+                ct: containersInfo[container],
+                index: index,
+                offsetIndex: offsetIndex,
+                states: {
+                    upToDate,
+                    started,
+                    autostart,
+                    autostartStarted
+                }
+            }}));
         }
     }
 
@@ -292,13 +358,13 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     }
 
     if(autostart === 0) {
-        $(`div.folder-showcase-outer-${id}`).addClass('no-autostart').children('span.outer').addClass('no-autostart');
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('no-autostart');
     } else if (autostart > 0 && autostartStarted === 0) {
-        $(`div.folder-showcase-outer-${id}`).addClass('autostart-off').children('span.outer').addClass('autostart-off');
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-off');
     } else if (autostart > 0 && autostartStarted > 0 && autostart !== autostartStarted) {
-        $(`div.folder-showcase-outer-${id}`).addClass('autostart-partial').children('span.outer').addClass('autostart-partial');
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-partial');
     } else if (autostart > 0 && autostartStarted > 0 && autostart === autostartStarted) {
-        $(`div.folder-showcase-outer-${id}`).addClass('autostart-full').children('span.outer').addClass('autostart-full');
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-full');
     }
 
     // set the status
@@ -308,6 +374,15 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     folder.status.autostart = autostart;
     folder.status.autostartStarted = autostartStarted;
     folder.status.expanded = false;
+
+    folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        containersInfo: containersInfo,
+        foldersDone: foldersDone
+    }}));
 };
 
 /**
@@ -320,8 +395,20 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
  * @param {Array<string>} foldersDone folders that are done
  */
 const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
+
+    folderEvents.dispatchEvent(new CustomEvent('vm-pre-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        vmInfo: vmInfo,
+        foldersDone: foldersDone
+    }}));
+
     // default varibles
     let started = 0;
+    let autostart = 0;
+    let autostartStarted = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -356,6 +443,19 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         const index = cutomOrder.indexOf(container);
         const offsetIndex = order.indexOf(container);
 
+        folderEvents.dispatchEvent(new CustomEvent('vm-pre-folder-preview', {detail: {
+            folder: folder,
+            id: id,
+            position: position,
+            order: order,
+            vmInfo: vmInfo,
+            foldersDone: foldersDone,
+            vm: container,
+            ct: vmInfo[container],
+            index: index,
+            offsetIndex: offsetIndex
+        }}));
+
         if (index > -1) {
             // remove the containers from the order
             cutomOrder.splice(index, 1);
@@ -368,7 +468,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
             newFolder[container].state = ct.state;
 
             // grab the container and put it onto the storage
-            $(`tbody#vm_view span#folder-id-${id}`).siblings('div.folder-storage').append($('tbody#vm_view > tr.updated > td').children().eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-vm`));
+            $(`tbody#vm_view span#folder-id-${id}`).siblings('div.folder-storage').append($('tbody#vm_view > tr.updated > td').children().eq(index).addClass(`folder-${id}-element`).addClass(`folder-element-vm`).addClass(`${ct.autostart ? 'autostart' : ''}`));
 
             if(folderDebugMode) {
                 console.log(`VM ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -376,6 +476,26 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
             
             // set the status of the folder
             started += ct.state!=="shutoff" ? 1 : 0;
+            autostart += ct.autostart ? 1 : 0;
+            autostartStarted += (ct.autostart && ct.state!=="shutoff") ? 1 : 0;
+
+            folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-preview', {detail: {
+                folder: folder,
+                id: id,
+                position: position,
+                order: order,
+                vmInfo: vmInfo,
+                foldersDone: foldersDone,
+                vm: container,
+                ct: vmInfo[container],
+                index: index,
+                offsetIndex: offsetIndex,
+                states: {
+                    started,
+                    autostart,
+                    autostartStarted
+                }
+            }}));
         }
     }
 
@@ -391,10 +511,30 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         sel.next('span.inner').children('span.state').text(`${started}/${Object.entries(folder.containers).length} ${$.i18n('started')}`);
     }
 
+    if(autostart === 0) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('no-autostart');
+    } else if (autostart > 0 && autostartStarted === 0) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-off');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart !== autostartStarted) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-partial');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart === autostartStarted) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.started = started;
+    folder.status.autostart = autostart;
+    folder.status.autostartStarted = autostartStarted;
     folder.status.expanded = false;
+    folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        vmInfo: vmInfo,
+        foldersDone: foldersDone
+    }}));
 };
 
 /**
@@ -402,6 +542,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
  * @param {string} id the id of the folder
  */
 const expandFolderDocker = (id) => {
+    folderEvents.dispatchEvent(new CustomEvent('docker-pre-folder-expansion', {detail: { id }}));
     const el = $(`tbody#docker_view > tr.updated > td span.outer.apps > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
@@ -415,6 +556,7 @@ const expandFolderDocker = (id) => {
     if(globalFolders.docker) {
         globalFolders.docker[id].status.expanded = !state;
     }
+    folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-expansion', {detail: { id }}));
 };
 
 /**
@@ -422,6 +564,7 @@ const expandFolderDocker = (id) => {
  * @param {string} id the id of the folder
  */
 const expandFolderVM = (id) => {
+    folderEvents.dispatchEvent(new CustomEvent('vm-pre-folder-expansion', {detail: { id }}));
     const el = $(`tbody#vm_view > tr.updated > td span.outer.vms > span#folder-id-${id}`);
     const state = el.attr('expanded') === "true";
     if (state) {
@@ -435,6 +578,7 @@ const expandFolderVM = (id) => {
     if(globalFolders.vms) {
         globalFolders.vms[id].status.expanded = !state;
     }
+    folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-expansion', {detail: { id }}));
 };
 
 /**
@@ -504,6 +648,91 @@ const editVMFolder = (id) => {
 };
 
 /**
+ * Execute the desired custom action
+ * @param {string} id 
+ * @param {number} action 
+ */
+const folderDockerCustomAction = async (id, action) => {
+    $('div.spinner.fixed').show('slow');
+    const folder = globalFolders.docker[id];
+    let act = folder.actions[action];
+    let prom = [];
+    if(act.type === 0) {
+        const cts = act.conatiners.map(e => folder.containers[e]).filter(e => e);
+        let ctAction = (e) => {};
+        if(act.action === 0) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(e.state) {
+                        prom.push($.post(eventURL, {action: 'stop', container:e.id}, null,'json').promise());
+                    } else {
+                        prom.push($.post(eventURL, {action: 'start', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state) {
+                        if(e.pause) {
+                            prom.push($.post(eventURL, {action: 'resume', container:e.id}, null,'json').promise());
+                        } else {
+                            prom.push($.post(eventURL, {action: 'pause', container:e.id}, null,'json').promise());
+                        }
+                    }
+                };
+            }
+
+        } else if(act.action === 1) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(!e.state) {
+                        prom.push($.post(eventURL, {action: 'start', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state) {
+                        prom.push($.post(eventURL, {action: 'stop', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 2) {
+                ctAction = (e) => {
+                    if(e.state && !e.pause) {
+                        prom.push($.post(eventURL, {action: 'pause', container:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 3) {
+                ctAction = (e) => {
+                    if(e.state && e.pause) {
+                        prom.push($.post(eventURL, {action: 'resume', container:e.id}, null,'json').promise());
+                    }
+                };
+            }
+
+        } else if(act.action === 2) {
+
+            ctAction = (e) => {
+                prom.push($.post(eventURL, {action: 'restart', container:e.id}, null,'json').promise());
+            };
+
+        }
+
+        cts.forEach((e) => {
+            ctAction(e);
+        });
+    } else if(act.type === 1) {
+        const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+        prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+    }
+
+    await Promise.all(prom);
+
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
  * Atach the menu when clicking the folder icon
  * @param {string} id the id of the folder
  */
@@ -525,39 +754,41 @@ const addDockerFolderContext = (id) => {
     opts.push({
         divider: true
     });
+
+    if(!globalFolders.docker[id].settings.default_action) {
+        opts.push({
+            text: $.i18n('start'),
+            icon: 'fa-play',
+            action: (e) => { e.preventDefault(); actionFolderDocker(id, "start"); }
+        });
+        opts.push({
+            text: $.i18n('stop'),
+            icon: 'fa-stop',
+            action: (e) => { e.preventDefault(); actionFolderDocker(id, "stop"); }
+        });
+        
+        opts.push({
+            text: $.i18n('pause'),
+            icon: 'fa-pause',
+            action: (e) => { e.preventDefault(); actionFolderDocker(id, "pause"); }
+        });
     
-    opts.push({
-        text: $.i18n('start'),
-        icon: 'fa-play',
-        action: (e) => { e.preventDefault(); actionFolderDocker(id, "start"); }
-    });
-    opts.push({
-        text: $.i18n('stop'),
-        icon: 'fa-stop',
-        action: (e) => { e.preventDefault(); actionFolderDocker(id, "stop"); }
-    });
+        opts.push({
+            text: $.i18n('resume'),
+            icon: 'fa-play-circle',
+            action: (e) => { e.preventDefault(); actionFolderDocker(id, "resume"); }
+        });
     
-    opts.push({
-        text: $.i18n('pause'),
-        icon: 'fa-pause',
-        action: (e) => { e.preventDefault(); actionFolderDocker(id, "pause"); }
-    });
-
-    opts.push({
-        text: $.i18n('resume'),
-        icon: 'fa-play-circle',
-        action: (e) => { e.preventDefault(); actionFolderDocker(id, "resume"); }
-    });
-
-    opts.push({
-        text: $.i18n('restart'),
-        icon: 'fa-refresh',
-        action: (e) => { e.preventDefault(); actionFolderDocker(id, "restart"); }
-    });
-
-    opts.push({
-        divider: true
-    });
+        opts.push({
+            text: $.i18n('restart'),
+            icon: 'fa-refresh',
+            action: (e) => { e.preventDefault(); actionFolderDocker(id, "restart"); }
+        });
+    
+        opts.push({
+            divider: true
+        });
+    }
 
     if(!globalFolders.docker[id].status.upToDate) {
         opts.push({
@@ -589,6 +820,25 @@ const addDockerFolderContext = (id) => {
         action: (e) => { e.preventDefault(); rmDockerFolder(id); }
     });
 
+    if(globalFolders.docker[id].actions && globalFolders.docker[id].actions.length) {
+        opts.push({
+            divider: true
+        });
+
+        opts.push({
+            text: $.i18n('custom-actions'),
+            icon: 'fa-bars',
+            subMenu: globalFolders.docker[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    action: (e) => { e.preventDefault(); folderDockerCustomAction(id, i); }
+                }
+            })
+        });
+    }
+
+    folderEvents.dispatchEvent(new CustomEvent('docker-folder-context', {detail: { id, opts }}));
 
     context.attach(`#folder-id-${id}`, opts);
 };
@@ -679,6 +929,92 @@ const actionFolderDocker = async (id, action) => {
 }
 
 /**
+ * Execute the desired custom action
+ * @param {string} id 
+ * @param {number} action 
+ */
+const folderVMCustomAction = async (id, action) => {
+    $('div.spinner.fixed').show('slow');
+    const eventURL = '/plugins/dynamix.vm.manager/include/VMajax.php';
+    const folder = globalFolders.vms[id];
+    let act = folder.actions[action];
+    let prom = [];
+    if(act.type === 0) {
+        const cts = act.conatiners.map(e => folder.containers[e]).filter(e => e);
+        let ctAction = (e) => {};
+        if(act.action === 0) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'stop', uuid:e.id}, null,'json').promise());
+                    } else if(e.state !== "running" && e.state !== "pmsuspended" && e.state !== "paused" && e.state !== "unknown"){
+                        prom.push($.post(eventURL, {action: 'domain-start', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'domain-pause', uuid:e.id}, null,'json').promise());
+                    } else if(e.state === "paused" || e.state === "unknown") {
+                        prom.push($.post(eventURL, {action: 'domain-resume', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            }
+
+        } else if(act.action === 1) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(e.state !== "running" && e.state !== "pmsuspended" && e.state !== "paused" && e.state !== "unknown") {
+                        prom.push($.post(eventURL, {action: 'domain-start', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'domain-stop', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 2) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'domain-pause', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 3) {
+                ctAction = (e) => {
+                    if(e.state === "paused" || e.state === "unknown") {
+                        prom.push($.post(eventURL, {action: 'domain-restart', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            }
+
+        } else if(act.action === 2) {
+
+            ctAction = (e) => {
+                if(e.state === "running") {
+                    prom.push($.post(eventURL, {action: 'domain-pause', uuid:e.id}, null,'json').promise());
+                }
+            };
+
+        }
+
+        cts.forEach((e) => {
+            ctAction(e);
+        });
+    } else if(act.type === 1) {
+        const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+        prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+    }
+
+    await Promise.all(prom);
+
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
  * Atach the menu when clicking the folder icon
  * @param {string} id the id of the folder
  */
@@ -700,52 +1036,54 @@ const addVMFolderContext = (id) => {
     opts.push({
         divider: true
     });
+    if(!globalFolders.vms[id].settings.default_action) {
+        opts.push({
+            text: $.i18n('start'),
+            icon: "fa-play",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-start'); }
+        });
+    
+        opts.push({
+            text: $.i18n('stop'),
+            icon: "fa-stop",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-stop'); }
+        });
+    
+        opts.push({
+            text: $.i18n('pause'),
+            icon: "fa-pause",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-pause'); }
+        });
+    
+        opts.push({
+            text: $.i18n('resume'),
+            icon: "fa-play-circle",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-resume'); }
+        });
+    
+        opts.push({
+            text: $.i18n('restart'),
+            icon: "fa-refresh",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-restart'); }
+        });
+    
+        opts.push({
+            text: $.i18n('hibernate'),
+            icon: "fa-bed",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-pmsuspend'); }
+        });
+    
+        opts.push({
+            text: $.i18n('force-stop'),
+            icon: "fa-bomb",
+            action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-destroy'); }
+        });
+    
+        opts.push({
+            divider: true
+        });
+    }
 
-    opts.push({
-        text: $.i18n('start'),
-        icon: "fa-play",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-start'); }
-    });
-
-    opts.push({
-        text: $.i18n('stop'),
-        icon: "fa-stop",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-stop'); }
-    });
-
-    opts.push({
-        text: $.i18n('pause'),
-        icon: "fa-pause",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-pause'); }
-    });
-
-    opts.push({
-        text: $.i18n('resume'),
-        icon: "fa-play-circle",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-resume'); }
-    });
-
-    opts.push({
-        text: $.i18n('restart'),
-        icon: "fa-refresh",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-restart'); }
-    });
-
-    opts.push({
-        text: $.i18n('hibernate'),
-        icon: "fa-bed",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-pmsuspend'); }
-    });
-
-    opts.push({
-        text: $.i18n('force-stop'),
-        icon: "fa-bomb",
-        action: (e) => { e.preventDefault(); actionFolderVM(id, 'domain-destroy'); }
-    });
-
-    opts.push({
-        divider: true
-    });
 
     opts.push({
         text: $.i18n('edit'),
@@ -759,6 +1097,25 @@ const addVMFolderContext = (id) => {
         action: (e) => { e.preventDefault(); rmVMFolder(id); }
     });
 
+    if(globalFolders.vms[id].actions && globalFolders.vms[id].actions.length) {
+        opts.push({
+            divider: true
+        });
+
+        opts.push({
+            text: $.i18n('custom-actions'),
+            icon: 'fa-bars',
+            subMenu: globalFolders.vms[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    action: (e) => { e.preventDefault(); folderVMCustomAction(id, i); }
+                }
+            })
+        });
+    }
+
+    folderEvents.dispatchEvent(new CustomEvent('vm-folder-context', {detail: { id, opts }}));
 
     context.attach(`#folder-id-${id}`, opts);
 };

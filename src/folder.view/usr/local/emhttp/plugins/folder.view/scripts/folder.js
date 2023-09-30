@@ -24,11 +24,26 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
     // get folders
     let folders = JSON.parse(await $.get(`/plugins/folder.view/server/read.php?type=${type}`).promise());
     // get the list of element docker/vm
+    let typeFilter;
     if (type === 'docker') {
-        choose = JSON.parse(await $.get('/plugins/folder.view/server/read_elements.php?type=docker').promise());
+        typeFilter = (e) => {
+            return {
+                'Name': e.info.Name,
+                'Icon': e.info.Config.Labels['net.unraid.docker.icon'],
+                'Label': e.info.Config.Labels['folder.view']
+            }
+        };
     } else if (type === 'vm') {
-        choose = JSON.parse(await $.get('/plugins/folder.view/server/read_elements.php?type=vm').promise());
+        typeFilter = (e) => {
+            return {
+                'Name': e.name,
+                'Icon': e.icon,
+                'Label': undefined
+            }
+        };
     }
+
+    choose = Object.values(JSON.parse(await $.get(`/plugins/folder.view/server/read_info.php?type=${type}`).promise())).map(typeFilter);
 
     // if editing a folder and not creating one
     if (id) {
@@ -55,6 +70,7 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         form.preview_border.checked = currFolder.settings.preview_border || false;
         form.preview_border_color.value = currFolder.settings.preview_border_color || rgbToHex($('body').css('color'));
         form.update_column.checked = currFolder.settings.update_column || false;
+        form.default_action.checked = currFolder.settings.default_action || false;
         form.expand_tab.checked = currFolder.settings.expand_tab;
         form.expand_dashboard.checked = currFolder.settings.expand_dashboard;
         form.regex.value = currFolder.regex;
@@ -64,6 +80,12 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
                 selected.push(choose.splice(index, 1)[0]);
             }
         };
+
+        currFolder.actions?.forEach((e, i) => {
+            $('.custom-action-wrapper').append(`<div class="custom-action-n-${i}">${e.name} <button onclick="return customAction(${i});"><i class="fa fa-pencil" aria-hidden="true"></i></button><button onclick="return rCcustomAction(${i});"><i class="fa fa-trash" aria-hidden="true"></i></button><input type="hidden" name="custom_action[]" value="${btoa(JSON.stringify(e))}"></div>`);
+        });
+
+
         // make the ui respond to the previus changes
         updateForm();
         updateRegex(form.regex);
@@ -71,7 +93,7 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
     }
 
     // create the *cool* unraid button for the autostart
-    $('input.basic-switch').switchButton({ labels_placement: 'right', off_label: "Off", on_label: "On"});
+    $('input.basic-switch').switchButton({ labels_placement: 'right', off_label: $.i18n('off'), on_label: $.i18n('on')});
 
     // iterate over the folders
     for (const [id, value] of Object.entries(folders)) {
@@ -111,7 +133,8 @@ const updateIcon = (e) => {
  */
 const updateRegex = (e) => {
     choose = choose.concat(selectedRegex);
-    selectedRegex = [];
+    const fldName = $('[name="name"]')[0].value;
+    selectedRegex = choose.filter(el => el.Label === fldName);
     if (e.value) {
         const regex = new RegExp(e.value);
         for (let i = 0; i < choose.length; i++) {
@@ -216,31 +239,34 @@ const sortTable = (e) => {
  * @returns {bool} always false
  */
 const submitForm = async (e) => {
+    const actions = $('input[name*="custom_action"]').map((i, e) => JSON.parse(atob($(e).val()))).get();
     // this is easy, no need for a comment :)
     const folder = {
         name: e.name.value.toString(),
         icon: e.icon.value.toString(),
         settings: {
-            'preview': parseInt(e.preview.value.toString()),
-            'preview_hover': e.preview_hover.checked,
-            'preview_update': e.preview_update.checked,
-            'preview_grayscale': e.preview_grayscale.checked,
-            'preview_webui': e.preview_webui.checked,
-            'preview_logs': e.preview_logs.checked,
-            'preview_console': e.preview_console.checked,
-            'preview_vertical_bars': e.preview_vertical_bars.checked,
-            'context': parseInt(e.context.value.toString()),
-            'context_trigger': parseInt(e.context_trigger.value.toString()),
-            'context_graph': parseInt(e.context_graph.value.toString()),
-            'context_graph_time': parseInt(e.context_graph_time.value.toString()),
-            'preview_border': e.preview_border.checked,
-            'preview_border_color': e.preview_border_color.value.toString(),
-            'update_column': e.update_column.checked,
-            'expand_tab': e.expand_tab.checked,
-            'expand_dashboard': e.expand_dashboard.checked,
+            preview: parseInt(e.preview.value.toString()),
+            preview_hover: e.preview_hover.checked,
+            preview_update: e.preview_update.checked,
+            preview_grayscale: e.preview_grayscale.checked,
+            preview_webui: e.preview_webui.checked,
+            preview_logs: e.preview_logs.checked,
+            preview_console: e.preview_console.checked,
+            preview_vertical_bars: e.preview_vertical_bars.checked,
+            context: parseInt(e.context.value.toString()),
+            context_trigger: parseInt(e.context_trigger.value.toString()),
+            context_graph: parseInt(e.context_graph.value.toString()),
+            context_graph_time: parseInt(e.context_graph_time.value.toString()),
+            preview_border: e.preview_border.checked,
+            preview_border_color: e.preview_border_color.value.toString(),
+            update_column: e.update_column.checked,
+            default_action: e.default_action.checked,
+            expand_tab: e.expand_tab.checked,
+            expand_dashboard: e.expand_dashboard.checked,
         },
         regex: e.regex.value.toString(),
-        containers: [...$('input[name*="containers"]:checked').map((i, e) => $(e).val())]
+        containers: [...$('input[name*="containers"]:checked').map((i, e) => $(e).val())],
+        actions
     }
     // send the data to the right endpoint
     if (id) {
@@ -273,4 +299,114 @@ const cancelBtn = () => {
 const setIconAsContainer = (e) => {
     $('div.canvas > form')[0].icon.value = e.firstChild.src;
     $($('div.canvas > form')[0].icon).trigger('input');
+};
+
+/**
+ * Add a custom action to the folder
+ * @param {number | undefined} action 
+ */
+const customAction = (action = undefined) => {
+    let config = {
+        name: '',
+        type: 0,
+        action: 0,
+        modes: 0,
+        conatiners: []
+    }
+    if(action !== undefined) {
+        config = JSON.parse(atob($('input[name*="custom_action"]').map((i, e) => $(e).val()).get()[action]));
+    }
+    const selectCt = $('.action-subject [name="action_elements"]');
+    selectCt.children().remove();
+    [...$('input[name*="containers"]:checked').map((i, e) => $(e).val()), ...selectedRegex.map(e => e.Name)].forEach((e) => {
+        if(config.conatiners.includes(e)) {
+            selectCt.append(`<option value="${e}" selected>${e}</option>`);
+        } else {
+            selectCt.append(`<option value="${e}">${e}</option>`);
+        }
+    });
+    const dialog = $('.dialogCustomAction');
+    const customNumber = $('input[name*="custom_action"]').length;
+    dialog.html($('.templateDialogCustomAction').html());
+    dialog.find('[name="action_elements"]').multiselect({
+        header: false,
+        noneSelectedText: "Select options",
+        zIndex: 99999999,
+        appendTo: document.body,
+        selectedText: (numChecked, numTotal, checkedItems) => {
+            return checkedItems.map(e => e.value).join(', ');
+        },
+        classes: 'multiselect-container'
+    });
+    dialog.find('[name="action_name"]').val(config.name);
+    dialog.find('[name="action_type"]').val(config.type);
+    dialog.find('[constraint*=\'action-type-\']').hide();
+    dialog.find(`[constraint*=\'action-type-${config.type}\']`).show();
+    if(config.type === 0) {
+        dialog.find('[name="action_standard"]').val(config.action);
+        dialog.find('[constraint*=\'action-standard-\']').hide();
+        dialog.find(`[constraint*=\'action-standard-${config.action}\']`).show();
+        if(config.type === 0) {
+            dialog.find('[name="action_cycle"]').val(config.modes);
+        } else if(config.type === 1) {
+            dialog.find('[name="action_set"]').val(config.modes);
+        }
+    } else if(config.type === 1){
+        dialog.find('[name="action_script"]').val(config.script || '');
+    }
+    dialog.dialog({
+        title: (action !== undefined) ? 'Edit action' : 'Add action',
+        resizable: false,
+        width: 800,
+        modal: true,
+        show: { effect: 'fade', duration: 250 },
+        hide: { effect: 'fade', duration: 250 },
+        buttons: {
+            "Add": function () {
+                const that = $(this);
+                let cfg = {
+                    name: that.find('[name="action_name"]').val(),
+                    type: parseInt(that.find('[name="action_type"]').val())
+                }
+                if(cfg.type === 0) {
+                    cfg.conatiners = that.find('[name="action_elements"]').val();
+                    cfg.action = parseInt(that.find('[name="action_standard"]').val());
+                    if(cfg.action === 0) {
+                        cfg.modes = parseInt(that.find('[name="action_cycle"]').val());
+                    } else if(cfg.action === 1) {
+                        cfg.modes = parseInt(that.find('[name="action_set"]').val());
+                    }
+                } else if(cfg.type === 1) {
+                    cfg.script = that.find('[name="action_script"]').val();
+                }
+                if(action !== undefined) {
+                    $(`.custom-action-n-${action} > input[type="hidden"]`).val(btoa(JSON.stringify(cfg)));
+                } else {
+                    $('.custom-action-wrapper').append(`<div class="custom-action-n-${(action !== undefined) ? action : customNumber}">${cfg.name} <button onclick="return customAction(${(action !== undefined) ? action : customNumber});"><i class="fa fa-pencil" aria-hidden="true"></i></button><button onclick="return rCcustomAction(${(action !== undefined) ? action : customNumber});"><i class="fa fa-trash" aria-hidden="true"></i></button><input type="hidden" name="custom_action[]" value="${btoa(JSON.stringify(cfg))}"></div>`);
+                }
+                $(this).dialog("close");
+            },
+            "Cancel": function () {
+                $(this).dialog("close");
+            }
+        },
+        close: () => {
+            dialog.find('[name="action_elements"]').multiselect("destroy");
+        }
+    });
+    $(".ui-dialog .ui-dialog-titlebar").addClass('menu');
+    $('.ui-dialog .ui-dialog-titlebar-close').css({'display':'none'});
+    $(".ui-dialog .ui-dialog-title").css({'text-align':'center','width':'100%'});
+    $(".ui-dialog .ui-dialog-content").css({'padding-top':'15px','vertical-align':'bottom'});
+    $(".ui-button-text").css({'padding':'0px 5px'});
+    return false;
+};
+
+/**
+ * Remove a custom action from the folder
+ * @param {number} action 
+ */
+const rCcustomAction =  (action) => {
+    $(`.custom-action-n-${action}`).remove();
+    return false;
 };

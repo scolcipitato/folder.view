@@ -46,6 +46,12 @@ const createFolders = async () => {
 
     let foldersDone = {};
 
+    folderEvents.dispatchEvent(new CustomEvent('vm-pre-folders-creation', {detail: {
+        folders: folders,
+        order: order,
+        vmInfo: vmInfo
+    }}));
+
     // Draw the folders in the order
     for (let key = 0; key < order.length; key++) {
         const container = order[key];
@@ -79,6 +85,12 @@ const createFolders = async () => {
         }
     }
 
+    folderEvents.dispatchEvent(new CustomEvent('vm-post-folders-creation', {detail: {
+        folders: folders,
+        order: order,
+        vmInfo: vmInfo
+    }}));
+
     // Assing the folder done to the global object
     globalFolders = foldersDone;
 
@@ -95,9 +107,20 @@ const createFolders = async () => {
  * @param {Array<string>} foldersDone folders that are done
  */
 const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
+
+    folderEvents.dispatchEvent(new CustomEvent('vm-pre-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        vmInfo: vmInfo,
+        foldersDone: foldersDone
+    }}));
+
     // default varibles
     let started = 0;
-    let autostart = false;
+    let autostart = 0;
+    let autostartStarted = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -106,7 +129,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     }
 
     // the HTML template for the folder
-    const fld = `<tr parent-id="${id}" class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder"><td class="vm-name folder-name"><div class="folder-name-sub"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer folder-outer"><span id="${id}" onclick='addVMFolderContext("${id}")' class="hand folder-hand"><img src="${folder.icon}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner"><a class="folder-appname" href="#" onclick='editFolder("${id}")'>${folder.name}</a><a class="folder-appname-id">folder-${id}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text folder-load-status"></i><span class="state folder-state">stopped</span></span></span><button class="dropDown-${id} folder-dropdown" onclick='dropDownButton("${id}")'><i class="fa fa-chevron-down" aria-hidden="true"></i></button></div></td><td colspan="5"><div class="folder-storage"></div><div class="folder-preview"></div></td><td class="folder-autostart"><input class="autostart" type="checkbox" id="folder-${id}-auto" style="display:none"></td></tr><tr child-id="${id}" id="name-${id}" style="display:none"><td colspan="8" style="margin:0;padding:0"></td></tr>`;
+    const fld = `<tr parent-id="${id}" class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder"><td class="vm-name folder-name"><div class="folder-name-sub"><i class="fa fa-arrows-v mover orange-text"></i><span class="outer folder-outer"><span id="${id}" onclick='addVMFolderContext("${id}")' class="hand folder-hand"><img src="${folder.icon}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></span><span class="inner folder-inner"><a class="folder-appname" href="#" onclick='editFolder("${id}")'>${folder.name}</a><a class="folder-appname-id">folder-${id}</a><br><i id="load-folder-${id}" class="fa fa-square stopped red-text folder-load-status"></i><span class="state folder-state"> ${$.i18n('stopped')}</span></span></span><button class="dropDown-${id} folder-dropdown" onclick='dropDownButton("${id}")'><i class="fa fa-chevron-down" aria-hidden="true"></i></button></div></td><td colspan="5"><div class="folder-storage"></div><div class="folder-preview"></div></td><td class="folder-autostart"><input class="autostart" type="checkbox" id="folder-${id}-auto" style="display:none"></td></tr><tr child-id="${id}" id="name-${id}" style="display:none"><td colspan="8" style="margin:0;padding:0"></td></tr>`;
 
     // insertion at position of the folder
     if (position === 0) {
@@ -116,7 +139,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     }
 
     // create the *cool* unraid button for the autostart
-    $(`#folder-${id}-auto`).switchButton({ labels_placement: 'right', off_label: "Off", on_label: "On", checked: false });
+    $(`#folder-${id}-auto`).switchButton({ labels_placement: 'right', off_label: $.i18n('off'), on_label: $.i18n('on'), checked: false });
 
     // Set the border if enabled and set the color
     if(folder.settings.preview_border) {
@@ -129,29 +152,29 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
     let addPreview;
     switch (folder.settings.preview) {
         case 1:
-            addPreview = (id) => {
-                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer:last`).clone());
+            addPreview = (id, autostart) => {
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
             };
             break;
         case 2:
-            addPreview = (id) => {
-                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.hand:last`).clone());
+            addPreview = (id, autostart) => {
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.hand:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
             };
             break;
         case 3:
-            addPreview = (id) => {
-                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.inner:last`).clone());
+            addPreview = (id, autostart) => {
+                $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.inner:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
             };
             break;
         case 4:
-            addPreview = (id) => {
+            addPreview = (id, autostart) => {
                 let lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
                 if(!lstSpan[0] || lstSpan.children().length >= 2) {
                     $(`tr.folder-id-${id} div.folder-preview`).append($('<span class="outer"></span>'));
                     lstSpan = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
                 }
                 lstSpan.append($('<span class="inner"></span>'));
-                lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.inner > a:last`).clone())
+                lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.vm-name > span.outer > span.inner > a:last`).clone().addClass(`${autostart ? 'autostart' : ''}`))
             };
             break;
         default:
@@ -172,9 +195,23 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
 
     // loop over the containers
     for (const container of folder.containers) {
+
         // get both index, tis is needed for removing from the orders later
         const index = cutomOrder.indexOf(container);
         const offsetIndex = order.indexOf(container);
+
+        folderEvents.dispatchEvent(new CustomEvent('vm-pre-folder-preview', {detail: {
+            folder: folder,
+            id: id,
+            position: position,
+            order: order,
+            vmInfo: vmInfo,
+            foldersDone: foldersDone,
+            container: container,
+            vm: vmInfo[container],
+            index: index,
+            offsetIndex: offsetIndex
+        }}));
 
         if (index > -1) {
             // remove the containers from the order
@@ -194,10 +231,10 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
                 console.log(`${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
             }
             
-            addPreview(id);
+            addPreview(id, ct.autostart);
 
             // element to set the preview options
-            const element = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`);
+            const element = $(`tr.folder-id-${id} div.folder-preview > span:last`);
 
             //temp var
             let sel;
@@ -212,9 +249,36 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
                 sel.css('filter', 'grayscale(100%)');
             }
 
+            if (folder.settings.preview_logs && ct.logs) {
+                sel = element.children('span.inner').last();
+                if (!sel.length) {
+                    sel = element;
+                }
+                sel.append($(`<span class="folder-element-custom-btn folder-element-logs"><a href="#" onclick="openTerminal('log', '${container}', '${ct.logs}')"><i class="fa fa-bars" aria-hidden="true"></i></a></span>`));
+            }
+
             // set the status of the folder
             started += ct.state!=="shutoff" ? 1 : 0;
-            autostart = autostart || ct.autostart;
+            autostart += ct.autostart ? 1 : 0;
+            autostartStarted += (ct.autostart && ct.state!=="shutoff") ? 1 : 0;
+
+            folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-preview', {detail: {
+                folder: folder,
+                id: id,
+                position: position,
+                order: order,
+                vmInfo: vmInfo,
+                foldersDone: foldersDone,
+                vm: container,
+                ct: vmInfo[container],
+                index: index,
+                offsetIndex: offsetIndex,
+                states: {
+                    started,
+                    autostart,
+                    autostartStarted
+                }
+            }}));
         }
     }
 
@@ -235,21 +299,41 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
 
     if (started) {
         $(`tr.folder-id-${id} i#load-folder-${id}`).attr('class', 'fa fa-play started green-text folder-load-status');
-        $(`tr.folder-id-${id} span.folder-state`).text(`${started}/${Object.entries(folder.containers).length} started`);
+        $(`tr.folder-id-${id} span.folder-state`).text(`${started}/${Object.entries(folder.containers).length} ${$.i18n('started')}`);
     }
 
     if (autostart) {
         $(`#folder-${id}-auto`).next().click();
     }
 
+    if(autostart === 0) {
+        $(`tr.folder-id-${id}`).addClass('no-autostart');
+    } else if (autostart > 0 && autostartStarted === 0) {
+        $(`tr.folder-id-${id}`).addClass('autostart-off');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart !== autostartStarted) {
+        $(`tr.folder-id-${id}`).addClass('autostart-partial');
+    } else if (autostart > 0 && autostartStarted > 0 && autostart === autostartStarted) {
+        $(`tr.folder-id-${id}`).addClass('autostart-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.started = started;
     folder.status.autostart = autostart;
+    folder.status.autostartStarted = autostartStarted;
     folder.status.expanded = false;
 
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before
     $(`#folder-${id}-auto`).on("change", folderAutostart);
+
+    folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-creation', {detail: {
+        folder: folder,
+        id: id,
+        position: position,
+        order: order,
+        vmInfo: vmInfo,
+        foldersDone: foldersDone
+    }}));
 };
 
 /**
@@ -278,6 +362,7 @@ const folderAutostart = (el) => {
  * @param {string} id the id of the folder
  */
 const dropDownButton = (id) => {
+    folderEvents.dispatchEvent(new CustomEvent('vm-pre-folder-expansion', {detail: { id }}));
     const element = $(`.dropDown-${id}`);
     const state = element.attr('active') === "true";
     if (state) {
@@ -295,6 +380,7 @@ const dropDownButton = (id) => {
     if(globalFolders[id]) {
         globalFolders[id].status.expanded = !state;
     }
+    folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-expansion', {detail: { id }}));
 };
 
 /**
@@ -398,6 +484,92 @@ const actionFolder = async (id, action) => {
 }
 
 /**
+ * Execute the desired custom action
+ * @param {string} id 
+ * @param {number} action 
+ */
+const folderCustomAction = async (id, action) => {
+    $('div.spinner.fixed').show('slow');
+    const eventURL = '/plugins/dynamix.vm.manager/include/VMajax.php';
+    const folder = globalFolders[id];
+    let act = folder.actions[action];
+    let prom = [];
+    if(act.type === 0) {
+        const cts = act.conatiners.map(e => folder.containers[e]).filter(e => e);
+        let ctAction = (e) => {};
+        if(act.action === 0) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'stop', uuid:e.id}, null,'json').promise());
+                    } else if(e.state !== "running" && e.state !== "pmsuspended" && e.state !== "paused" && e.state !== "unknown"){
+                        prom.push($.post(eventURL, {action: 'domain-start', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'domain-pause', uuid:e.id}, null,'json').promise());
+                    } else if(e.state === "paused" || e.state === "unknown") {
+                        prom.push($.post(eventURL, {action: 'domain-resume', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            }
+
+        } else if(act.action === 1) {
+
+            if(act.modes === 0) {
+                ctAction = (e) => {
+                    if(e.state !== "running" && e.state !== "pmsuspended" && e.state !== "paused" && e.state !== "unknown") {
+                        prom.push($.post(eventURL, {action: 'domain-start', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 1) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'domain-stop', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 2) {
+                ctAction = (e) => {
+                    if(e.state === "running") {
+                        prom.push($.post(eventURL, {action: 'domain-pause', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            } else if(act.modes === 3) {
+                ctAction = (e) => {
+                    if(e.state === "paused" || e.state === "unknown") {
+                        prom.push($.post(eventURL, {action: 'domain-restart', uuid:e.id}, null,'json').promise());
+                    }
+                };
+            }
+
+        } else if(act.action === 2) {
+
+            ctAction = (e) => {
+                if(e.state === "running") {
+                    prom.push($.post(eventURL, {action: 'domain-pause', uuid:e.id}, null,'json').promise());
+                }
+            };
+
+        }
+
+        cts.forEach((e) => {
+            ctAction(e);
+        });
+    } else if(act.type === 1) {
+        const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+        prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+    }
+
+    await Promise.all(prom);
+
+    loadlist();
+    $('div.spinner.fixed').hide('slow');
+};
+
+/**
  * Atach the menu when clicking the folder icon
  * @param {string} id the id of the folder
  */
@@ -408,63 +580,86 @@ const addVMFolderContext = (id) => {
         above: false
     });
 
-    opts.push({
-        text:"Start",
-        icon:"fa-play",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-start'); }
-    });
+    if(!globalFolders[id].settings.default_action) {
+        opts.push({
+            text:$.i18n('start'),
+            icon:"fa-play",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-start'); }
+        });
+    
+        opts.push({
+            text:$.i18n('stop'),
+            icon:"fa-stop",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-stop'); }
+        });
+    
+        opts.push({
+            text:$.i18n('pause'),
+            icon:"fa-pause",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-pause'); }
+        });
+    
+        opts.push({
+            text:$.i18n('resume'),
+            icon:"fa-play-circle",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-resume'); }
+        });
+    
+        opts.push({
+            text:$.i18n('restart'),
+            icon:"fa-refresh",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-restart'); }
+        });
+    
+        opts.push({
+            text:$.i18n('hibernate'),
+            icon:"fa-bed",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-pmsuspend'); }
+        });
+    
+        opts.push({
+            text:$.i18n('force-stop'),
+            icon:"fa-bomb",
+            action:(e) => { e.preventDefault(); actionFolder(id, 'domain-destroy'); }
+        });
+    
+        opts.push({
+            divider: true
+        });
+    }
+
 
     opts.push({
-        text:"Stop",
-        icon:"fa-stop",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-stop'); }
-    });
-
-    opts.push({
-        text:"Pause",
-        icon:"fa-pause",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-pause'); }
-    });
-
-    opts.push({
-        text:"Resume",
-        icon:"fa-play-circle",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-resume'); }
-    });
-
-    opts.push({
-        text:"Restart",
-        icon:"fa-refresh",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-restart'); }
-    });
-
-    opts.push({
-        text:"Hibernate",
-        icon:"fa-bed",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-pmsuspend'); }
-    });
-
-    opts.push({
-        text:"Force Stop",
-        icon:"fa-bomb",
-        action:(e) => { e.preventDefault(); actionFolder(id, 'domain-destroy'); }
-    });
-
-    opts.push({
-        divider: true
-    });
-
-    opts.push({
-        text: 'Edit',
+        text: $.i18n('edit'),
         icon: 'fa-wrench',
         action: (e) => { e.preventDefault(); editFolder(id); }
     });
 
     opts.push({
-        text: 'Remove',
+        text: $.i18n('remove'),
         icon: 'fa-trash',
         action: (e) => { e.preventDefault(); rmFolder(id); }
     });
+
+    if(globalFolders[id].actions && globalFolders[id].actions.length) {
+        opts.push({
+            divider: true
+        });
+
+        opts.push({
+            text: $.i18n('custom-actions'),
+            icon: 'fa-bars',
+            subMenu: globalFolders[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
+                }
+            })
+        });
+    }
+
+    folderEvents.dispatchEvent(new CustomEvent('vm-folder-context', {detail: { id, opts }}));
 
     context.attach('#' + id, opts);
 };
@@ -496,7 +691,7 @@ window.loadlist = (x) => {
 
 // Add the button for creating a folder
 const createFolderBtn = () => { location.href = "/VMs/Folder?type=vm" };
-$('<input type="button" onclick="createFolderBtn()" value="Add Folder" style="display:none">').insertAfter('table#kvm_table');
+
 
 $.ajaxPrefilter((options, originalOptions, jqXHR) => {
     // This is needed because unraid don't like the folder and the number are set incorrectly, this intercept the request and change the numbers to make the order appear right, this is important for the autostart and to draw the folders

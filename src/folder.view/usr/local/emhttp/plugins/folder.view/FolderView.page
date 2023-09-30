@@ -12,18 +12,9 @@ Markdown="false"
 <? require_once('/usr/local/emhttp/plugins/folder.view/langs/script.php') ?>
 <link rel="stylesheet" href="<?autov('/plugins/folder.view/styles/folderview.css')?>">
 
-<h2 data-i18n="custom-css">Custom CSS</h2>
-<div class="custom-css">
-    <button data-i18n="[html]import-css-docker" onclick="importCSS('docker')"><i class="fa fa-upload" aria-hidden="true"></i> Import docker</button>
-    <button data-i18n="[html]import-css-vm" onclick="importCSS('vm')"><i class="fa fa-upload" aria-hidden="true"></i> Import vm</button>
-    <button data-i18n="[html]import-css-dashboard" onclick="importCSS('dashboard')"><i class="fa fa-upload" aria-hidden="true"></i> Import dashboard</button>
-    <button data-i18n="[html]export-css-docker" onclick="exportCSS('docker')"><i class="fa fa-download" aria-hidden="true"></i> Export docker</button>
-    <button data-i18n="[html]export-css-vm" onclick="exportCSS('vm')"><i class="fa fa-download" aria-hidden="true"></i> Export vm</button>
-    <button data-i18n="[html]export-css-dashboard" onclick="exportCSS('dashboard')"><i class="fa fa-download" aria-hidden="true"></i> Export dashboard</button>
-    <button data-i18n="[html]clear-css-docker" onclick="clearCSS('docker')"><i class="fa fa-ban" aria-hidden="true"></i> Clear docker</button>
-    <button data-i18n="[html]clear-css-vm" onclick="clearCSS('vm')"><i class="fa fa-ban" aria-hidden="true"></i> Clear vm</button>
-    <button data-i18n="[html]clear-css-dashboard" onclick="clearCSS('dashboard')"><i class="fa fa-ban" aria-hidden="true"></i> Clear dashboard</button>
-</div>
+<h2 data-i18n="customizations">Customizations</h2>
+<button data-i18n="file-manager" onclick="fileManager()">Open File Manager</button>
+
 
 <h2 data-i18n="docker">Docker</h2>
 <div class="folder-table">
@@ -76,8 +67,6 @@ Markdown="false"
     </table>
 </div>
 <hr>
-
-<button data-i18n="file-manager" onclick="fileManager()">Open File Manager</button>
 
 <script src="<?autov('/plugins/folder.view/scripts/folderview.js')?>"></script>
 

@@ -88,8 +88,8 @@ div.folder-preview-4 span.outer {
 }
 
 .preview-outbox {
-    min-width: 40vw;
-    min-height: 44vh;
+    width: 40vw;
+    height: 44vh;
     padding: 5px;
     background-color: #fff;
     border-radius: 5px;
@@ -151,6 +151,7 @@ div.folder-preview-4 span.outer {
 .action-info {
     position: relative;
     min-width: 15em;
+    max-width: 15vw;
 }
 
 .action {
@@ -219,10 +220,19 @@ div.folder-preview-4 span.outer {
     flex-grow: 10;
     background-color: inherit !important;
     border: none !important;
+    min-width: 25vw;
 }
 
 .info-tabs, .comb-stat-grapth, .cpu-stat-grapth, .mem-stat-grapth, .info-ports, .info-volumes {
     background-color: inherit !important;
     color: initial !important;
     border: none !important;
+}
+
+.info-ports, .info-volumes {
+    overflow: auto;
+}
+
+.preview-outbox div.status-stats div.usage-disk.mm span:first-of-type {
+    background-color: var(--folder-view-graph-cpu);
 }

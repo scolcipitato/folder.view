@@ -1,7 +1,49 @@
 # DEV Guide
 
-When making custom CSS you don't want to overwrite existing class except the ones I created, don't get me wrong, you can change existing classes, but it's not recommended.
+## File names
+The file names need to follow this pattern `SOMETHING.TAB_NAME.(js/css)`.
+Where `SOMETHING` is replaced by any string, anything you like.
+Where `TAB_NAME` is one of those values:
+ - `dashboard`
+ - `docker`
+ - `vm`
+
+You can use a file on multiple tabs by chaining those names with a `-` in between.
+DO NOT remove the `.` those are needed.
+
+Example
+```javascript
+    scolcipitato.dashboard.css // Will only work on the dashboard
+    scolcipitato.docker.css // Will only work on the docker tab
+    scolcipitato.vm.css // Will only work on the vms tab
+    scolcipitato.dashboard-docker.css // Will work on the dashboard and docker tabs
+    scolcipitato.dashboard-vm.css // Will work on the dashboard and vms tabs
+    scolcipitato.dashboard-docker-vm.css // Will work on the dashboard,docker and vms tabs
+
+    scolcipitato.dashboard.js // Will only work on the dashboard
+    scolcipitato.docker.js // Will only work on the docker tab
+    scolcipitato.vm.js // Will only work on the vms tab
+    scolcipitato.dashboard-docker.js // Will work on the dashboard and docker tabs
+    scolcipitato.dashboard-vm.js // Will work on the dashboard and vms tabs
+    scolcipitato.dashboard-docker-vm.js // Will work on the dashboard,docker and vms tabs
+
+    0.scolcipitato.dashboard.css // Will only work on the dashboard
+    scolcipitato-dashboard.css // Will not work
+    
+```
+
+## CSS
 The file you want to edit is in `/boot/config/plugins/folder.view/styles`, it's plain CSS, so you will need to know CSS before doing something.
-You can find the template used for creating the folder in their respective folder named `template.html` and the default CSS in `template.css`, you can't change the template.html because it is hard-coded into the plugin, so any visual modification should be done trough CSS.
+
+You can find the template used for creating the folder here, ([Dashboard](./dashboard/tab.html), [Docker](./docker/tab.html), [VMs](./vms/tab.html)), you can't change the template.html because it is hard-coded into the plugin, so any visual modification should be done trough CSS.
+
+You can find the default styles here, ([Dashboard](../src/folder.view/usr/local/emhttp/plugins/folder.view/styles/dashboard.css), [Docker](../src/folder.view/usr/local/emhttp/plugins/folder.view/styles/docker.css), [VMs](../src/folder.view/usr/local/emhttp/plugins/folder.view/styles/vm.css)).
+
 This is it, have fun.
-Once done you can publish it [here](https://github.com/scolcipitato/folder.view.custom-css), you can fork it and make a PR or just send it to me and I will add it to the repo.
+
+## JS
+The file you want to edit is in `/boot/config/plugins/folder.view/scripts`, it's plain JavaScript, so you will need to know JavaScript before doing something.
+
+You can find the template used for creating custom plugins here, ([Dashboard](./dashboard/events.js), [Docker](./docker/events.js), [VMs](./vms/events.js)).
+
+You can remove the comments when you are done, thay are there just for documentation.
