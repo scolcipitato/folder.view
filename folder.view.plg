@@ -169,11 +169,9 @@
     <FILE Run="/bin/bash">
         <INLINE>
             mkdir -p /boot/config/plugins/&name;/styles
+            mkdir -p /boot/config/plugins/&name;/scripts
             rm -f $(ls /boot/config/plugins/&name;/&name;*.txz | grep -v '&version;')
             echo "&version;" > /boot/config/plugins/&name;/version
-            touch /boot/config/plugins/&name;/styles/docker-custom.css
-            touch /boot/config/plugins/&name;/styles/vm-custom.css
-            touch /boot/config/plugins/&name;/styles/dashboard-custom.css
             echo ""
             echo "----------------------------------------------------"
             echo " &name; has been installed."
