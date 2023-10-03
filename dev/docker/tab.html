@@ -216,10 +216,36 @@
                 <canvas></canvas>
             </div>
             <div class="info-ports" id="info-ports-${ct.shortId}" style="display: none;">
-                ${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}
+                ${ct.info.Ports?.length > 10 ? (`
+                    <span class="info-ports-more" style="display: none;">
+                        ${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}
+                        <br>
+                        <a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-ports-less').css('display', 'inline')">${$.i18n('compress')}</a>
+                    </span>
+                    <span class="info-ports-less">
+                        ${ct.info.Ports?.slice(0,10).map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}
+                        <br>
+                        <a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-ports-more').css('display', 'inline')">${$.i18n('expand')}</a>
+                    </span>
+                `) : (`
+                    <span class="info-ports-mono">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}</span>
+                `)}
             </div>
             <div class="info-volumes" id="info-volumes-${ct.shortId}" style="display: none;">
-                ${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}
+                ${ct.Mounts?.filter(e => e.Type==='bind').length > 10 ? (`
+                    <span class="info-volumes-more" style="display: none;">
+                        ${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}
+                        <br>
+                        <a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-volumes-less').css('display', 'inline')">${$.i18n('compress')}</a>
+                    </span>
+                    <span class="info-volumes-less">
+                        ${ct.Mounts?.filter(e => e.Type==='bind').slice(0,10).map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}
+                        <br>
+                        <a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-volumes-more').css('display', 'inline')">${$.i18n('expand')}</a>
+                    </span>
+                `) : (`
+                    <span class="info-volumes-mono">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}</span>
+                `)}
             </div>
         </div>
     </div>

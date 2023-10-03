@@ -233,6 +233,10 @@ div.folder-preview-4 span.outer {
     overflow: auto;
 }
 
+.info-ports a, .info-volumes a {
+    color: #486dba;
+}
+
 .preview-outbox div.status-stats div.usage-disk.mm span:first-of-type {
     background-color: var(--folder-view-graph-cpu);
 }
