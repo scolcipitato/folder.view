@@ -268,7 +268,7 @@
         $final = [];
         foreach ($dir as $el) {
             if(isset($el['sub']) && (!isset($folderFilter) || (isset($folderFilter) && !preg_match($folderFilter, $el['name'])))) {
-                $final = array_merge($final, dirToArrayOfFiles($el['sub'], $filter));
+                $final = array_merge($final, dirToArrayOfFiles($el['sub'], $fileFilter, $folderFilter));
             } else if(!isset($fileFilter) || (isset($fileFilter) && preg_match($fileFilter, $el['name']))) {
                 array_push($final, $el);
             }

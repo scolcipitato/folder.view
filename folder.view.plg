@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.10.03">
-<!ENTITY md5 "61b399333a54ddc315dfee209d001cf6">
+<!ENTITY version "2023.10.04">
+<!ENTITY md5 "fe19e88b6b46e0a0ce23b1932064bb04">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.10.04
+- Target blan on repo tooltip.
+- Fixed import of folder.
+
 ###2023.10.03
 - Fixed issue with tooltip not opening.
 - Fixed issue with too much ports with advanced view.
