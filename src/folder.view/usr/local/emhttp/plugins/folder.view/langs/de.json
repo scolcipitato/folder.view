@@ -3,7 +3,7 @@
         "authors": [
             "kennymc.c"
         ],
-        "last-updated": "2023-09-30",
+        "last-updated": "2023-10-09",
 		"locale": "de"
     },
     "add-folder": "Ordner hinzufügen",
@@ -132,8 +132,8 @@
     "custom-actions-action-1": "Einstellen",
     "custom-actions-action-2": "Neustart",
     "custom-actions-states": "Zustände:",
-    "custom-actions-cycle-0": "Start - stoppen",
-    "custom-actions-cycle-1": "Pause - fortsetzen",
+    "custom-actions-cycle-0": "Start - Stoppen",
+    "custom-actions-cycle-1": "Pause - Fortsetzen",
     "custom-actions-set-0": "Start",
     "custom-actions-set-1": "Stopp",
     "custom-actions-set-2": "Pause",
@@ -145,6 +145,6 @@
     "customizations": "Benutzeranpassungen",
     "on": "Ein",
     "off": "Aus",
-    "correct-autostart": "Correct autostart order",
-    "incorrect-autostart": "Incorrect autostart order"
+    "correct-autostart": "Richtige Autostart-Reihenfolge",
+    "incorrect-autostart": "Falsche Autostart-Reihenfolge"
 }
