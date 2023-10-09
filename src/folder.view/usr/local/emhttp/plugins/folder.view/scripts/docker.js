@@ -122,6 +122,8 @@ const createFolders = async () => {
 
     if(!(autostartOrder.length === autostartActual.length && autostartOrder.every((value, index) => value === autostartActual[index]))) {
         $('.nav-item.AutostartOrder.util > a > b').removeClass('green-text').addClass('red-text');
+        $('.nav-item.AutostartOrder.util > a > span').text($.i18n('incorrect-autostart'));
+        $('.nav-item.AutostartOrder.util > a').attr('title', $.i18n('incorrect-autostart'));
     }
 };
 
@@ -1237,7 +1239,6 @@ let folderReq = [];
 
 // Add the button for creating a folder
 const createFolderBtn = () => { location.href = "/Docker/Folder?type=docker" };
-$(`<div class="nav-item AutostartOrder util"><a 'href="#" class="hand" onclick="return false;" title="Autostart order"><b class="fa fa-rocket system green-text"></b><span>Autostart order</span></a></div>`).insertBefore('div.nav-item.LockButton.util');
 
 // This is needed because unraid don't like the folder and the number are set incorrectly, this intercept the request and change the numbers to make the order appear right, this is important for the autostart and to draw the folders
 $.ajaxPrefilter((options, originalOptions, jqXHR) => {

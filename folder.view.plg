@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.10.04">
-<!ENTITY md5 "fe19e88b6b46e0a0ce23b1932064bb04">
+<!ENTITY version "2023.10.09">
+<!ENTITY md5 "d21d163e3dfdcafd764b75d28170a047">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.10.09
+- Fixed autostart icon on Gray and Azure themes.
+- Changed autostart order icon.
+
 ###2023.10.04
 - Target blan on repo tooltip.
 - Fixed import of folder.

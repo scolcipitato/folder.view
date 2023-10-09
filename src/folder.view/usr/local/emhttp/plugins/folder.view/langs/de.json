@@ -144,5 +144,7 @@
     "default-action-tooltip": "Entfernt die Standard-Aktionsbuttons wie Start, Stopp und Neustart aus dem Ordner-Kontextmenü.",
     "customizations": "Benutzeranpassungen",
     "on": "Ein",
-    "off": "Aus"
+    "off": "Aus",
+    "correct-autostart": "Correct autostart order",
+    "incorrect-autostart": "Incorrect autostart order"
 }

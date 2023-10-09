@@ -3,7 +3,7 @@
         "authors": [
             "scolcipitato"
         ],
-        "last-updated": "2023-09-26",
+        "last-updated": "2023-10-09",
 		"locale": "it"
     },
     "add-folder": "Aggiungi Cartella",
@@ -144,5 +144,7 @@
     "default-action-tooltip": "Riumove i bottoni come avvia, ferma e riavvia dal menu contestuale della cartella",
     "customizations": "Customizations",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "correct-autostart": "Ordine partenza automatica corretto",
+    "incorrect-autostart": "Ordine partenza automatica incorretto"
 }

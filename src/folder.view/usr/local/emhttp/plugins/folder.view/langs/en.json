@@ -3,7 +3,7 @@
         "authors": [
             "scolcipitato"
         ],
-        "last-updated": "2023-09-26",
+        "last-updated": "2023-10-09",
 		"locale": "en"
     },
     "add-folder": "Add Folder",
@@ -144,5 +144,7 @@
     "default-action-tooltip": "Will remove the default action button like start, stop and restart from the folder context menu.",
     "customizations": "Customizations",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "correct-autostart": "Correct autostart order",
+    "incorrect-autostart": "Incorrect autostart order"
 }
