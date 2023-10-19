@@ -139,7 +139,10 @@ const updateRegex = (e) => {
         const regex = new RegExp(e.value);
         for (let i = 0; i < choose.length; i++) {
             if (regex.test(choose[i].Name)) {
-                selectedRegex.push(choose.splice(i, 1)[0]);
+                const tmpSel = choose.splice(i, 1)[0];
+                if(!selectedRegex.includes(tmpSel)) {
+                    selectedRegex.push(tmpSel);
+                }
                 i--;
             }
         }
@@ -319,7 +322,7 @@ const customAction = (action = undefined) => {
     const selectCt = $('.action-subject [name="action_elements"]');
     selectCt.children().remove();
     [...$('input[name*="containers"]:checked').map((i, e) => $(e).val()), ...selectedRegex.map(e => e.Name)].forEach((e) => {
-        if(config.conatiners.includes(e)) {
+        if(config.conatiners?.includes(e)) {
             selectCt.append(`<option value="${e}" selected>${e}</option>`);
         } else {
             selectCt.append(`<option value="${e}">${e}</option>`);
@@ -346,9 +349,9 @@ const customAction = (action = undefined) => {
         dialog.find('[name="action_standard"]').val(config.action);
         dialog.find('[constraint*=\'action-standard-\']').hide();
         dialog.find(`[constraint*=\'action-standard-${config.action}\']`).show();
-        if(config.type === 0) {
+        if(config.action === 0) {
             dialog.find('[name="action_cycle"]').val(config.modes);
-        } else if(config.type === 1) {
+        } else if(config.action === 1) {
             dialog.find('[name="action_set"]').val(config.modes);
         }
     } else if(config.type === 1){
@@ -381,8 +384,9 @@ const customAction = (action = undefined) => {
                 }
                 if(action !== undefined) {
                     $(`.custom-action-n-${action} > input[type="hidden"]`).val(btoa(JSON.stringify(cfg)));
+                    $(`.custom-action-n-${action} > span`).text(cfg.name + ' ');
                 } else {
-                    $('.custom-action-wrapper').append(`<div class="custom-action-n-${(action !== undefined) ? action : customNumber}">${cfg.name} <button onclick="return customAction(${(action !== undefined) ? action : customNumber});"><i class="fa fa-pencil" aria-hidden="true"></i></button><button onclick="return rCcustomAction(${(action !== undefined) ? action : customNumber});"><i class="fa fa-trash" aria-hidden="true"></i></button><input type="hidden" name="custom_action[]" value="${btoa(JSON.stringify(cfg))}"></div>`);
+                    $('.custom-action-wrapper').append(`<div class="custom-action-n-${(action !== undefined) ? action : customNumber}"><span>${cfg.name} </span><button onclick="return customAction(${(action !== undefined) ? action : customNumber});"><i class="fa fa-pencil" aria-hidden="true"></i></button><button onclick="return rCcustomAction(${(action !== undefined) ? action : customNumber});"><i class="fa fa-trash" aria-hidden="true"></i></button><input type="hidden" name="custom_action[]" value="${btoa(JSON.stringify(cfg))}"></div>`);
                 }
                 $(this).dialog("close");
             },
