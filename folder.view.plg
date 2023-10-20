@@ -14,7 +14,7 @@
     <CHANGES>
 ###2023.10.20.1
 - HTML IS NOT A PROGRAMMING LANGUAGE.
-- Browser not detecting \<p> tag as whole block around a translation.
+- Browser not detecting p tag as whole block around a translation.
 
 ###2023.10.20
 - Fixed translation not always working on chromium based browsers.
