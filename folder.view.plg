@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.10.20">
-<!ENTITY md5 "310866c71f21b4ff36a5802d130ed22f">
+<!ENTITY version "2023.10.20.1">
+<!ENTITY md5 "756ff6a24b1678e6842279631afa587f">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.10.20.1
+- HTML IS NOT A PROGRAMMING LANGUAGE.
+- Browser not detecting \<p> tag as whole block around a translation.
+
 ###2023.10.20
 - Fixed translation not always working on chromium based browsers.
 
