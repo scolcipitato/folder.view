@@ -14,7 +14,7 @@
 <script src="/plugins/folder.view/scripts/include/jquery.i18n.emitter.js"></script>
 <script src="/plugins/folder.view/scripts/include/jquery.i18n.emitter.bidi.js"></script>
 <script>
-    if(typeof window.folderi18n === 'undefined' ) {
+    if(typeof folderi18n === 'undefined' ) {
         folderi18n = () => {};
     }
     $.i18n({
@@ -24,7 +24,6 @@
             if($loc != 'en') {
                 echo "'$loc': '/plugins/folder.view/langs/$loc.json',";
             }
-        ?>
-        'en': '/plugins/folder.view/langs/en.json'
-    }).done(folderi18n);
+        ?>'en': '/plugins/folder.view/langs/en.json'
+    }).then(folderi18n, ()=>{});
 </script>
