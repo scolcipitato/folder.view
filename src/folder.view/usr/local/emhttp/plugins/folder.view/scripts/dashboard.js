@@ -85,7 +85,7 @@ const createFolders = async () => {
     
         // if started only is active hide all stopped folder
         if ($('input#apps').is(':checked')) {
-            $('tbody#docker_view > tr.updated > td > span.outer.stopped').css('display', 'none');
+            $('tbody#docker_view > tr.updated > td > div > span.outer.stopped').css('display', 'none');
         }
 
         
@@ -193,7 +193,7 @@ const createFolders = async () => {
 
         // if started only is active hide all stopped folder
         if ($('input#vms').is(':checked')) {
-            $('tbody#vm_view > tr.updated > td > span.outer.stopped').css('display', 'none');
+            $('tbody#vm_view > tr.updated > td > div > span.outer.stopped').css('display', 'none');
         }
 
         // Expand folders that are set to be expanded by default, this is here because is easier to work with all compressed folder when creating them
@@ -722,8 +722,19 @@ const folderDockerCustomAction = async (id, action) => {
             ctAction(e);
         });
     } else if(act.type === 1) {
-        const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
-        prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+        if(act.script_sync) {
+            let scriptVariables = {}
+            let rawVars = await $.post("/plugins/user.scripts/exec.php",{action:'getScriptVariables',script:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+            rawVars.trim().split('\n').forEach((e) => { const variable = e.split('='); scriptVariables[variable[0]] = variable[1] });
+            if(scriptVariables['directPHP']) {
+                $.post("/plugins/user.scripts/exec.php",{action:'directRunScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) { openBox(data,act.name,800,1200, 'loadlist');}})
+            } else {
+                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2=',act.name,800,1200,true, 'loadlist');}});
+            }
+        } else {
+            const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+        }
     }
 
     await Promise.all(prom);
@@ -1004,8 +1015,19 @@ const folderVMCustomAction = async (id, action) => {
             ctAction(e);
         });
     } else if(act.type === 1) {
-        const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
-        prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+        if(act.script_sync) {
+            let scriptVariables = {}
+            let rawVars = await $.post("/plugins/user.scripts/exec.php",{action:'getScriptVariables',script:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+            rawVars.trim().split('\n').forEach((e) => { const variable = e.split('='); scriptVariables[variable[0]] = variable[1] });
+            if(scriptVariables['directPHP']) {
+                $.post("/plugins/user.scripts/exec.php",{action:'directRunScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) { openBox(data,act.name,800,1200, 'loadlist');}})
+            } else {
+                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2=',act.name,800,1200,true, 'loadlist');}});
+            }
+        } else {
+            const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
+            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+        }
     }
 
     await Promise.all(prom);

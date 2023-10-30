@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.10.21">
-<!ENTITY md5 "2e72068905c17816206186722c7fd02f">
+<!ENTITY version "2023.10.31">
+<!ENTITY md5 "ad31162703b065d5bcaaf540065a9ff7">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.10.31
+- Added the ability to translate the text in the plugins tab.
+- Added the ability to run custom script in the foreground (sync)
+
 ###2023.10.21
 - Updated spanish translation.
 

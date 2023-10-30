@@ -121,7 +121,7 @@
     "file-manager": "Datei-Verwaltung öffnen",
     "custom-actions": "Eigene Aktionen",
     "custom-actions-folder": "Eigene Aktionen:",
-    "custom-actions-folder-tooltip": "<b>Name:</b> Nur der Name der Aktion.<br><b>Art:</b> Art der Aktion.<br><ul><li><b>Standard</b> - Normale Aktion für Docker-Container (Start, Stopp, ...).</li><li><b>Eigene</b> - Führt ein User-Skript aus (benötigt das User Scripts Plugin).</li></ul><b>Aktion:</b> Auszuführende Aktion.<br><ul><li><b>Wechsel</b> - Wechsel zwischen zwei Zuständen.</li><li><b>Einstellen</b> - Einen Zustand festlegen.</li><li><b>Neustart</b> - Einfacher Neustart.</li></ul><b>Container:</b> Eine durch Komma (,) getrennte Liste von Containern.<br><b>Skript:</b> Nur der Name des Skripts (<b>bei den Namen wird zwischen Groß- und Kleinschreibung unterschieden und es werden Leerzeichen benötigt</b>).",
+    "custom-actions-folder-tooltip": "<b>Name:</b> Nur der Name der Aktion.<br><b>Art:</b> Art der Aktion.<br><ul><li><b>Standard</b> - Normale Aktion für Docker-Container (Start, Stopp, ...).</li><li><b>Eigene</b> - Führt ein User-Skript aus (benötigt das User Scripts Plugin).</li></ul><b>Aktion:</b> Auszuführende Aktion.<br><ul><li><b>Wechsel</b> - Wechsel zwischen zwei Zuständen.</li><li><b>Einstellen</b> - Einen Zustand festlegen.</li><li><b>Neustart</b> - Einfacher Neustart.</li></ul><b>Container:</b> Eine durch Komma (,) getrennte Liste von Containern.<br><b>Skript:</b> Nur der Name des Skripts (<b>bei den Namen wird zwischen Groß- und Kleinschreibung unterschieden und es werden Leerzeichen benötigt</b>).<br><b>Sync:</b> Whether to run the script in background or not.",
     "custom-action": "<i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Eine eigene Aktion hinzufügen",
     "custom-action-tooltip": "Ermöglicht es dir, eigene Aktionen für den Ordner auszuführen.",
     "custom-actions-type": "Art:",
@@ -146,5 +146,11 @@
     "on": "Ein",
     "off": "Aus",
     "correct-autostart": "Richtige Autostart-Reihenfolge",
-    "incorrect-autostart": "Falsche Autostart-Reihenfolge"
+    "incorrect-autostart": "Falsche Autostart-Reihenfolge",
+    "folderview-desc": "FolderView lets you create folders for grouping Dockers and VMs together to help with organization. Especially useful if you're using docker-compose. Getting Started: A new button named \"Add Folder\" will appear at the bottom of the docker/VM tab next to \"Add Container/VM\".",
+    "action-add": "Add action",
+    "action-edit": "Edit action",
+    "action-add-btn": "Add",
+    "action-edit-btn": "Save",
+    "custom-actions-script-sync": "Sync:"
 }

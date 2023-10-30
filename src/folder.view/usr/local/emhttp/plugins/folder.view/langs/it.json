@@ -3,7 +3,7 @@
         "authors": [
             "scolcipitato"
         ],
-        "last-updated": "2023-10-09",
+        "last-updated": "2023-10-30",
 		"locale": "it"
     },
     "add-folder": "Aggiungi Cartella",
@@ -121,7 +121,7 @@
     "file-manager": "Apri il gestore di file",
     "custom-actions": "Azioni personalizzate",
     "custom-actions-folder": "Azioni personalizzate:",
-    "custom-actions-folder-tooltip": "<b>Nome:</b> Solo il nome dell'azione.<br><b>Tipo:</b> Il tipo di azione.<br><ul><li><b>Normale</b> - azione normale effettuata sui container (avvio, arresto, ...).</li><li><b>Personalizzata</b> - esegue uno script personalizzato (Plugin \"User Scripts\" richiesto).</li></ul><b>Azione:</b> Azione da eseguire.<br><ul><li><b>Inverti</b> - passaggio tra due stati.</li><li><b>Imposta</b> - imposta uno stato.</li><li><b>Riavvia</b> - riavvia.</li></ul><b>Conatiners:</b> Una lista separata da virgole dei containers su cui eseguire le azioni.<br><b>Script:</b> Lo script da eseguire (<b>I nomi sono sensibili alle maiuscole e alle minuscole e agli spazi</b>).",
+    "custom-actions-folder-tooltip": "<b>Nome:</b> Solo il nome dell'azione.<br><b>Tipo:</b> Il tipo di azione.<br><ul><li><b>Normale</b> - azione normale effettuata sui container (avvio, arresto, ...).</li><li><b>Personalizzata</b> - esegue uno script personalizzato (Plugin \"User Scripts\" richiesto).</li></ul><b>Azione:</b> Azione da eseguire.<br><ul><li><b>Inverti</b> - passaggio tra due stati.</li><li><b>Imposta</b> - imposta uno stato.</li><li><b>Riavvia</b> - riavvia.</li></ul><b>Conatiners:</b> Una lista separata da virgole dei containers su cui eseguire le azioni.<br><b>Script:</b> Lo script da eseguire (<b>I nomi sono sensibili alle maiuscole e alle minuscole e agli spazi</b>).<br><b>Sync:</b> Se eseguire lo scrip in background o no.",
     "custom-action": "<i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Aggiunge un'azione personalizzata",
     "custom-action-tooltip": "Permette di eseguire un'azione personalizzata sulla cartella.",
     "custom-actions-type": "Tipo:",
@@ -146,5 +146,11 @@
     "on": "On",
     "off": "Off",
     "correct-autostart": "Ordine partenza automatica corretto",
-    "incorrect-autostart": "Ordine partenza automatica incorretto"
+    "incorrect-autostart": "Ordine partenza automatica incorretto",
+    "folderview-desc": "FolderView ti permette di creare delle cartelle per raggruppare Docker e VM insieme per facilitare l'organizzazione. Utile nel caso tu stia usando docker-compose. Come iniziare: Un nuovo bottone apparirà in fondo alla schermata Docker/VM con il nome \"Aggiungi Cartella\" affianco al bottone \"Aggiungi container/VM\".",
+    "action-add": "Aggiungi azione",
+    "action-edit": "Modifica azione",
+    "action-add-btn": "Aggiungi",
+    "action-edit-btn": "Salva",
+    "custom-actions-script-sync": "Sync:"
 }

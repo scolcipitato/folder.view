@@ -3,7 +3,7 @@
         "authors": [
             "scolcipitato"
         ],
-        "last-updated": "2023-10-09",
+        "last-updated": "2023-10-30",
 		"locale": "en"
     },
     "add-folder": "Add Folder",
@@ -121,7 +121,7 @@
     "file-manager": "Open File Manager",
     "custom-actions": "Custom Actions",
     "custom-actions-folder": "Custom actions:",
-    "custom-actions-folder-tooltip": "<b>Name:</b> Just the name of the action.<br><b>Type:</b> Type of the action.<br><ul><li><b>Standard</b> - normal action on docker containers (start, stop, ...).</li><li><b>Custom</b> - will execute a User Scripts (User Scripts plugin required).</li></ul><b>Action:</b> Action to be performed.<br><ul><li><b>Cycle</b> - cycle between two states.</li><li><b>Set</b> - set a state.</li><li><b>Restart</b> - basic restart.</li></ul><b>Containers:</b> A comma (,) separated list of containers.<br><b>Script:</b> Just the name of the script (<b>Names are case sensitive and need white spaces</b>).",
+    "custom-actions-folder-tooltip": "<b>Name:</b> Just the name of the action.<br><b>Type:</b> Type of the action.<br><ul><li><b>Standard</b> - normal action on docker containers (start, stop, ...).</li><li><b>Custom</b> - will execute a User Scripts (User Scripts plugin required).</li></ul><b>Action:</b> Action to be performed.<br><ul><li><b>Cycle</b> - cycle between two states.</li><li><b>Set</b> - set a state.</li><li><b>Restart</b> - basic restart.</li></ul><b>Containers:</b> A comma (,) separated list of containers.<br><b>Script:</b> Just the name of the script (<b>Names are case sensitive and need white spaces</b>).<br><b>Sync:</b> Whether to run the script in background or not.",
     "custom-action": "<i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Add a custom action",
     "custom-action-tooltip": "Lets you perform custom action on the folder.",
     "custom-actions-type": "Type:",
@@ -146,5 +146,11 @@
     "on": "On",
     "off": "Off",
     "correct-autostart": "Correct autostart order",
-    "incorrect-autostart": "Incorrect autostart order"
+    "incorrect-autostart": "Incorrect autostart order",
+    "folderview-desc": "FolderView lets you create folders for grouping Dockers and VMs together to help with organization. Especially useful if you're using docker-compose. Getting Started: A new button named \"Add Folder\" will appear at the bottom of the docker/VM tab next to \"Add Container/VM\".",
+    "action-add": "Add action",
+    "action-edit": "Edit action",
+    "action-add-btn": "Add",
+    "action-edit-btn": "Save",
+    "custom-actions-script-sync": "Sync:"
 }
