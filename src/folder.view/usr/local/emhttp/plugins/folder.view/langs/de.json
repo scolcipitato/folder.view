@@ -3,7 +3,7 @@
         "authors": [
             "kennymc.c"
         ],
-        "last-updated": "2023-10-09",
+        "last-updated": "2023-10-31",
 		"locale": "de"
     },
     "add-folder": "Ordner hinzufügen",
@@ -147,10 +147,11 @@
     "off": "Aus",
     "correct-autostart": "Richtige Autostart-Reihenfolge",
     "incorrect-autostart": "Falsche Autostart-Reihenfolge",
-    "folderview-desc": "FolderView lets you create folders for grouping Dockers and VMs together to help with organization. Especially useful if you're using docker-compose. Getting Started: A new button named \"Add Folder\" will appear at the bottom of the docker/VM tab next to \"Add Container/VM\".",
-    "action-add": "Add action",
-    "action-edit": "Edit action",
-    "action-add-btn": "Add",
-    "action-edit-btn": "Save",
+    "folderview-desc": "Mit FolderView kannst du Ordner erstellen, um Docker-Container und VMs zu gruppieren und so die Organisation zu erleichtern. Das ist besonders nützlich, wenn du docker-compose verwendest. Der erste Schritt: Ein neuer Button mit dem Namen \"Ordner hinzufügen\" erscheint unten im Docker/VM-Reiter neben \"Container/VM hinzufügen\".",
+    "action-add": "Aktion hinzufügen",
+    "action-edit": "Aktion bearbeiten",
+    "action-add-btn": "Hinzufügen",
+    "action-edit-btn": "Speichern",
     "custom-actions-script-sync": "Sync:"
 }
+
