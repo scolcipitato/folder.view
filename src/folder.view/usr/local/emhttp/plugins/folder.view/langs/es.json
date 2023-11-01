@@ -147,10 +147,10 @@
     "off": "No",
     "correct-autostart": "Orden de inicio automático correcto",
     "incorrect-autostart": "Orden de inicio automático incorrecto",
-    "folderview-desc": "FolderView lets you create folders for grouping Dockers and VMs together to help with organization. Especially useful if you're using docker-compose. Getting Started: A new button named \"Add Folder\" will appear at the bottom of the docker/VM tab next to \"Add Container/VM\".",
-    "action-add": "Add action",
-    "action-edit": "Edit action",
-    "action-add-btn": "Add",
-    "action-edit-btn": "Save",
-    "custom-actions-script-sync": "Sync:"
+    "folderview-desc": "FolderView te permite crear carpetas para agrupar Dockers y VM para ayudar con la organización. Es especialmente útil si estás usando Docker-Compose. Primeros pasos: aparecerá un nuevo botón llamado \"Agregar carpeta\" en la parte inferior de la pestaña Docker/VM junto a \"Agregar contenedor/VM\".",
+    "action-add": "Añadir acción",
+    "action-edit": "Editar acción",
+    "action-add-btn": "Añadir",
+    "action-edit-btn": "Guardar",
+    "custom-actions-script-sync": "Sincronizar:"
 }
