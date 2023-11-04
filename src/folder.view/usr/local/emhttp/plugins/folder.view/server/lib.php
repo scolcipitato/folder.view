@@ -120,7 +120,8 @@
                     $ct['info']['Shell'] = $template['Shell'];
                     $ct['info']['template'] = $template;
                 } else {
-                    $ct['info']['State']['WebUi'] = '';
+                    $ct['info']['State']['WebUi'] = $ct['Labels']['net.unraid.docker.webui'] ?? '';
+                    $ct['info']['Shell'] = $ct['Labels']['net.unraid.docker.shell'] ?? '';
                 }
 
                 // extractID in /usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php edited

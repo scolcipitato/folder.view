@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.11.01">
-<!ENTITY md5 "ad267a165c22c7b49baf0241c252895c">
+<!ENTITY version "2023.11.04">
+<!ENTITY md5 "645ec9e94c3819ce29102e9a666725f0">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.11.04
+- WebUi and shell values are taken from labels if a template is not available.
+- Fixed an issue with tolltipster.
+
 ###2023.11.01
 - Update German translation.
 - Updated spanish translation.

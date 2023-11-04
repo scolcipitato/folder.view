@@ -343,7 +343,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 $(tooltip).tooltipster({
                     interactive: true,
                     theme: ['tooltipster-docker-folder'],
-                    trigger: folder.settings.context_trigger || 'click',
+                    trigger: (folder.settings.context_trigger===1 ? 'hover' : 'click') || 'click',
                     zIndex: 99999999,
                     functionBefore: (origin, continueTooltip) => {
                         folderEvents.dispatchEvent(new CustomEvent('docker-tooltip-before', {detail: {
