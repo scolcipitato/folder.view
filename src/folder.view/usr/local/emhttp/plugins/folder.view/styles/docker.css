@@ -48,6 +48,14 @@
     margin-top: 7px;
 }
 
+.folder-preview-wrapper .inner > span.appname {
+    width: 11rem;
+    display: inline-block;
+    overflow: clip;
+    white-space: nowrap;
+    word-break: break-all;
+}
+
 .folder-preview-divider:not(:last-child) {
     float: left;
     height: 80%;
@@ -67,6 +75,13 @@ div.folder-preview img.img {
 
 .folder-element .ct-name {
     padding-left: 30px !important;
+}
+
+.folder-element .ct-name .inner > span.appname {
+    width: 177px;
+    display: inline-block;
+    overflow: clip;
+    white-space: nowrap;
 }
 
 div.folder-preview-4 span.outer {
