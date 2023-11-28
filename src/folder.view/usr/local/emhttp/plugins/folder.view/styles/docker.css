@@ -81,7 +81,7 @@ div.folder-preview img.img {
     width: 177px;
     display: inline-block;
     overflow: clip;
-    white-space: nowrap;
+    word-break: break-all;
 }
 
 div.folder-preview-4 span.outer {
