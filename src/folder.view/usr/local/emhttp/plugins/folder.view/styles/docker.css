@@ -49,7 +49,6 @@
 }
 
 .folder-preview-wrapper .inner > span.appname {
-    width: 11rem;
     display: inline-block;
     overflow: clip;
     white-space: nowrap;

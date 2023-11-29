@@ -58,6 +58,7 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         form.preview.value = currFolder.settings.preview.toString();
         form.preview_hover.checked = currFolder.settings.preview_hover;
         form.preview_update.checked = currFolder.settings.preview_update;
+        form.preview_text_width.value = currFolder.settings.preview_text_width || '';
         form.preview_grayscale.checked = currFolder.settings.preview_grayscale;
         form.preview_webui.checked = currFolder.settings.preview_webui;
         form.preview_logs.checked = currFolder.settings.preview_logs;
@@ -251,6 +252,7 @@ const submitForm = async (e) => {
             preview: parseInt(e.preview.value.toString()),
             preview_hover: e.preview_hover.checked,
             preview_update: e.preview_update.checked,
+            preview_text_width: e.preview_text_width.value,
             preview_grayscale: e.preview_grayscale.checked,
             preview_webui: e.preview_webui.checked,
             preview_logs: e.preview_logs.checked,

@@ -192,6 +192,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.outer:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
+                $(`tr.folder-id-${id} div.folder-preview span.inner > span.appname`).css("width", folder.settings.preview_text_width);
                 if(folder.settings.context === 2 || folder.settings.context === 0) {
                     tmpId = $(`tr.folder-id-${id} div.folder-preview > span.outer:last > span.hand`);
                     tmpId.attr("id", "folder-preview-" + ctid);
@@ -221,6 +222,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                 $(`tr.folder-id-${id} div.folder-preview`).append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
                 let tmpId = $(`tr.folder-id-${id} div.folder-preview > span.inner:last`).find('i[id^="load-"]');
                 tmpId.attr("id", "folder-" + tmpId.attr("id"));
+                $(`tr.folder-id-${id} div.folder-preview span.inner > span.appname`).css("width", folder.settings.preview_text_width);
 
                 if(folder.settings.context === 2 || folder.settings.context === 0) {
                     tmpId = $(`tr.folder-id-${id} div.folder-preview > span.inner:last > span.appname > a.exec`);
@@ -241,6 +243,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                     }
                     lstSpan.append($('<span class="inner"></span>'));
                     lstSpan.children('span.inner:last').append($(`tr.folder-id-${id} div.folder-storage > tr > td.ct-name > span.outer > span.inner > span.appname:last`).clone().addClass(`${autostart ? 'autostart' : ''}`));
+                    $(`tr.folder-id-${id} div.folder-preview span.inner > span.appname`).css("width", folder.settings.preview_text_width);
 
                     if(folder.settings.context === 2 || folder.settings.context === 0) {
                         let tmpId = $(`tr.folder-id-${id} div.folder-preview span.inner:last > span.appname > a.exec`);
