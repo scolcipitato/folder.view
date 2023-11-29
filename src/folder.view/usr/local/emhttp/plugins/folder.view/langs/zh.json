@@ -64,8 +64,6 @@
     "preview-hover-tooltip": "只在鼠标指针悬停的时候展示预览。",
     "preview-update": "有更新时显示橙色文本：",
     "preview-update-tooltip": "当容器有更新的时候，用橙色显示容器名称。",
-    "preview-text-width": "文本宽度：",
-    "preview-text-width-tooltip": "将在预览中限制容器名称文本的宽度。 <br>例如<b>12px</b>、<b>1rem</b>（更多写法详见<a href=\"https://developer.mozilla.org/zh-CN/docs/Web/CSS/length\">这篇</a>文档)。 <br>留空将不限制宽度。",
     "preview-grayscale": "预览灰度图标：",
     "preview-grayscale-tooltip": "将预览图标改为灰度样式。",
     "preview-webui": "添加打开WebUI：",
@@ -154,5 +152,7 @@
     "action-edit": "修改操作",
     "action-add-btn": "添加",
     "action-edit-btn": "保存",
-    "custom-actions-script-sync": "同步执行："
+    "custom-actions-script-sync": "同步执行：",
+    "preview-text-width": "文本宽度：",
+    "preview-text-width-tooltip": "将在预览中限制容器名称文本的宽度。 <br>例如<b>12px</b>、<b>1rem</b>（更多写法详见<a href=\"https://developer.mozilla.org/zh-CN/docs/Web/CSS/length\">这篇</a>文档)。 <br>留空将不限制宽度。"
 }

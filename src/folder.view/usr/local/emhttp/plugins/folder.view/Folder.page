@@ -103,7 +103,7 @@ Markdown="false"
                     </blockquote>
                 </div>
             </li>
-            <li constraint="preview-1 preview-3 preview-4 docker">
+            <li constraint="preview-1 preview-3 preview-4">
                 <div class="basic">
                     <dl>
                         <dt data-i18n="preview-text-width">Text width:</dt>

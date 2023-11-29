@@ -5,7 +5,7 @@ const createFolders = async () => {
     const prom = await Promise.all(folderReq);
     // Parse the results
     let folders = JSON.parse(prom[0]);
-    const unraidOrder = JSON.parse(prom[1]);
+    const unraidOrder = Object.values(JSON.parse(prom[1]));
     const vmInfo = JSON.parse(prom[2]);
     let order = JSON.parse(prom[3]);
 
@@ -232,6 +232,7 @@ const createFolder = (folder, id, position, order, vmInfo, foldersDone) => {
             }
             
             addPreview(id, ct.autostart);
+            $(`tr.folder-id-${id} div.folder-preview span.inner > a`).css("width", folder.settings.preview_text_width || '');
 
             // element to set the preview options
             const element = $(`tr.folder-id-${id} div.folder-preview > span:last`);
