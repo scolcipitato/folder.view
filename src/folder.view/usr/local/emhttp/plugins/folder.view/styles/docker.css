@@ -48,6 +48,13 @@
     margin-top: 7px;
 }
 
+.folder-preview-wrapper .inner > span.appname {
+    display: inline-block;
+    overflow: clip;
+    white-space: nowrap;
+    word-break: break-all;
+}
+
 .folder-preview-divider:not(:last-child) {
     float: left;
     height: 80%;

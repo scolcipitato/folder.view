@@ -339,6 +339,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             };
 
             const tooltip = addPreview(id, ct.shortId, !(ct.info.State.Autostart === false));
+            $(`tr.folder-id-${id} div.folder-preview span.inner > span.appname`).css("width", folder.settings.preview_text_width || '');
             if(tooltip && tooltip.length > 0) {
                 $(tooltip).tooltipster({
                     interactive: true,
