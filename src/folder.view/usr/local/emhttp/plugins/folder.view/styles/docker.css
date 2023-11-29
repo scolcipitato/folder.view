@@ -76,6 +76,7 @@ div.folder-preview img.img {
     padding-left: 30px !important;
 }
 
+/* https://github.com/libook */
 .folder-element .ct-name .inner > span.appname {
     width: 177px;
     display: inline-block;
