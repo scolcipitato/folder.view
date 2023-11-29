@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.11.28">
-<!ENTITY md5 "44f54294f6086f83ded46fedd49fa0ee">
+<!ENTITY version "2023.11.29">
+<!ENTITY md5 "ccf558c8e189b7948a4844a17125061d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.11.28
+- Ability to change the width of the names in the preview (by libook).
+- Small fix for VMs
+
 ###2023.11.28
 - Minor css addition.
 
