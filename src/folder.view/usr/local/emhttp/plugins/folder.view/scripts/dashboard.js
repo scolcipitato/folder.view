@@ -120,7 +120,7 @@ const createFolders = async () => {
         const prom = await Promise.all(folderReq.vm);
         // Parse the results
         let folders = JSON.parse(prom[0]);
-        const unraidOrder = JSON.parse(prom[1]);
+        const unraidOrder = Object.values(JSON.parse(prom[1]));
         const vmInfo = JSON.parse(prom[2]);
         let order = JSON.parse(prom[3]);
     
