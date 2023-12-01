@@ -14,7 +14,7 @@ const createFolders = async () => {
         let folders = JSON.parse(prom[0]);
         const unraidOrder = JSON.parse(prom[1]);
         const containersInfo = JSON.parse(prom[2]);
-        let order = JSON.parse(prom[3]);
+        let order = Object.values(JSON.parse(prom[3]));
     
         // Filter the order to get the container that aren't in the order, this happen when a new container is created
         let newOnes = order.filter(x => !unraidOrder.includes(x));
@@ -122,7 +122,7 @@ const createFolders = async () => {
         let folders = JSON.parse(prom[0]);
         const unraidOrder = Object.values(JSON.parse(prom[1]));
         const vmInfo = JSON.parse(prom[2]);
-        let order = JSON.parse(prom[3]);
+        let order = Object.values(JSON.parse(prom[3]));
     
         // Filter the webui order to get the container that aren't in the order, this happen when a new container is created
         let newOnes = order.filter(x => !unraidOrder.includes(x));
