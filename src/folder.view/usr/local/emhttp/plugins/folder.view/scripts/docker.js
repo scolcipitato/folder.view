@@ -80,7 +80,7 @@ const createFolders = async () => {
         if (container && folderRegex.test(container)) {
             let id = container.replace(folderRegex, '');
             if (folders[id]) {
-                createFolder(folders[id], id, key, order, containersInfo, Object.keys(foldersDone));
+                key -= createFolder(folders[id], id, key, order, containersInfo, Object.keys(foldersDone));
                 key -= newOnes.length;
                 // Move the folder to the done object and delete it from the undone one
                 foldersDone[id] = folders[id];
@@ -135,6 +135,7 @@ const createFolders = async () => {
  * @param {Array<string>} order order of containers
  * @param {object} containersInfo info of the containers
  * @param {Array<string>} foldersDone folders that are done
+ * @returns the number of element removed before the folder
  */
 const createFolder = (folder, id, position, order, containersInfo, foldersDone) => {
 
@@ -152,6 +153,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     let started = 0;
     let autostart = 0;
     let autostartStarted = 0;
+    let remBefore = 0;
 
     // Get if the advanced view is enabled
     const advanced = $.cookie('docker_listview_mode') == 'advanced';
@@ -291,6 +293,12 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
         
         if (index > -1) {
+
+            // Keep track of removed elements before the folder to set back the for loop for creating folders, otherwise folder will be skipped
+            if(offsetIndex < position) {
+                remBefore += 1;
+            }
+
             // remove the containers from the order
             cutomOrder.splice(index, 1);
             order.splice(offsetIndex, 1);
@@ -738,6 +746,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         containersInfo: containersInfo,
         foldersDone: foldersDone
     }}));
+
+    return remBefore;
 };
 
 /**

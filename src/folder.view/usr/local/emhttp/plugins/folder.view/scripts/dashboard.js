@@ -64,7 +64,7 @@ const createFolders = async () => {
             if (container && folderRegex.test(container)) {
                 let id = container.replace(folderRegex, '');
                 if (folders[id]) {
-                    createFolderDocker(folders[id], id, key, order, containersInfo, Object.keys(foldersDone));
+                    key -= createFolderDocker(folders[id], id, key, order, containersInfo, Object.keys(foldersDone));
                     key -= newOnes.length;
                     // Move the folder to the done object and delete it from the undone one
                     foldersDone[id] = folders[id];
@@ -172,7 +172,7 @@ const createFolders = async () => {
             if (container && folderRegex.test(container)) {
                 let id = container.replace(folderRegex, '');
                 if (folders[id]) {
-                    createFolderVM(folders[id], id, key, order, vmInfo, Object.keys(foldersDone));
+                    key -= createFolderVM(folders[id], id, key, order, vmInfo, Object.keys(foldersDone));
                     key -= newOnes.length;
                     // Move the folder to the done object and delete it from the undone one
                     foldersDone[id] = folders[id];
@@ -224,6 +224,7 @@ const createFolders = async () => {
  * @param {Array<string>} order order of containers
  * @param {object} containersInfo info of the containers
  * @param {Array<string>} foldersDone folders that are done
+ * @returns the number of element removed before the folder
  */
 const createFolderDocker = (folder, id, position, order, containersInfo, foldersDone) => {
 
@@ -241,6 +242,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     let started = 0;
     let autostart = 0;
     let autostartStarted = 0;
+    let remBefore = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -291,6 +293,12 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         }}));
 
         if (index > -1) {
+
+            // Keep track of removed elements before the folder to set back the for loop for creating folders, otherwise folder will be skipped
+            if(offsetIndex < position) {
+                remBefore += 1;
+            }
+
             // remove the containers from the order
             cutomOrder.splice(index, 1);
             order.splice(offsetIndex, 1);
@@ -383,6 +391,8 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         containersInfo: containersInfo,
         foldersDone: foldersDone
     }}));
+
+    return remBefore;
 };
 
 /**
@@ -393,6 +403,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
  * @param {Array<string>} order order of vms
  * @param {object} vmInfo info of the vms
  * @param {Array<string>} foldersDone folders that are done
+ * @returns the number of element removed before the folder
  */
 const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
 
@@ -409,6 +420,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
     let started = 0;
     let autostart = 0;
     let autostartStarted = 0;
+    let remBefore = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
     if (folder.regex) {
@@ -457,6 +469,12 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         }}));
 
         if (index > -1) {
+
+            // Keep track of removed elements before the folder to set back the for loop for creating folders, otherwise folder will be skipped
+            if(offsetIndex < position) {
+                remBefore += 1;
+            }
+
             // remove the containers from the order
             cutomOrder.splice(index, 1);
             order.splice(offsetIndex, 1);
@@ -527,6 +545,7 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
     folder.status.autostart = autostart;
     folder.status.autostartStarted = autostartStarted;
     folder.status.expanded = false;
+
     folderEvents.dispatchEvent(new CustomEvent('vm-post-folder-creation', {detail: {
         folder: folder,
         id: id,
@@ -535,6 +554,8 @@ const createFolderVM = (folder, id, position, order, vmInfo, foldersDone) => {
         vmInfo: vmInfo,
         foldersDone: foldersDone
     }}));
+
+    return remBefore;
 };
 
 /**

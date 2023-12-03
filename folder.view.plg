@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.12.01.1">
-<!ENTITY md5 "a6a7dea70174ae4d37c6f3bdb891b117">
+<!ENTITY version "2023.12.03">
+<!ENTITY md5 "b20e4cf5f2c9f88f536b4d1388075bb1">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2023.12.03
+- Fixed an issue preventing folders from appearing when a container was before a folder.
+
 ###2023.12.01.1
 - Fix problem with order not being an array.
 
