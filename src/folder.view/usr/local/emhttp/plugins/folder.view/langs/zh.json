@@ -140,6 +140,8 @@
     "custom-actions-set-3": "继续",
     "custom-actions-cts": "容器：",
     "custom-actions-script": "脚本：",
+    "override-default-actions": "覆盖默认操作:",
+    "override-default-actions-tooltip": "将删除默认菜单并将其替换为下面设置的自定义操作.",
     "default-action": "隐藏默认操作按钮：",
     "default-action-tooltip": "将从文件夹中移除默认的操作按钮，如启动、停止和重启。",
     "customizations": "自定义",
@@ -153,6 +155,8 @@
     "action-add-btn": "添加",
     "action-edit-btn": "保存",
     "custom-actions-script-sync": "同步执行：",
+    "custom-actions-arguments": "同步:",
+    "actions-icon": "图标:",
     "preview-text-width": "文本宽度：",
     "preview-text-width-tooltip": "将在预览中限制容器名称文本的宽度。 <br>例如<b>12px</b>、<b>1rem</b>（更多写法详见<a href=\"https://developer.mozilla.org/zh-CN/docs/Web/CSS/length\">这篇</a>文档)。 <br>留空将不限制宽度。"
 }
