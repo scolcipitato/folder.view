@@ -1011,7 +1011,7 @@ const folderCustomAction = async (id, action) => {
             ctAction(e);
         });
     } else if(act.type === 1) {
-        let args=('script_args' in act) ? act.script_args : '';
+        const args = act.script_args || '';
         if(act.script_sync) {
             let scriptVariables = {}
             let rawVars = await $.post("/plugins/user.scripts/exec.php",{action:'getScriptVariables',script:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
@@ -1050,7 +1050,7 @@ const addDockerFolderContext = (id) => {
             ...globalFolders[id].actions.map((e, i) => {
                 return {
                     text: e.name,
-                    icon: (e.script_icon != '') ? e.script_icon : (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    icon: e.script_icon || "fa-bolt",
                     action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
                 }
             })
@@ -1136,7 +1136,7 @@ const addDockerFolderContext = (id) => {
             subMenu: globalFolders[id].actions.map((e, i) => {
                 return {
                     text: e.name,
-                    icon: (e.script_icon != '') ? e.script_icon : (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    icon: e.script_icon || "fa-bolt",
                     action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
                 }
             })

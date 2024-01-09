@@ -318,7 +318,8 @@ const customAction = (action = undefined) => {
         type: 0,
         action: 0,
         modes: 0,
-        conatiners: []
+        conatiners: [],
+        script_icon: ''
     }
     if(action !== undefined) {
         config = JSON.parse(atob($('input[name*="custom_action"]').map((i, e) => $(e).val()).get()[action]));
@@ -351,8 +352,6 @@ const customAction = (action = undefined) => {
     dialog.find(`[constraint*=\'action-type-${config.type}\']`).show();
     dialog.find('input.basic-switch-sync').prop("checked", config.script_sync || false);
     dialog.find('input.basic-switch-sync').switchButton({ labels_placement: 'right', off_label: $.i18n('off'), on_label: $.i18n('on')});
-    icon = (config.type === 0) ? 'fa-cogs' : ((config.type === 1) ? 'fa-file-text-o' : 'fa-bolt')
-    dialog.find('[name="action_script_icon"]').val(config.script_icon || icon);
     if(config.type === 0) {
         dialog.find('[name="action_standard"]').val(config.action);
         dialog.find('[constraint*=\'action-standard-\']').hide();
@@ -366,14 +365,15 @@ const customAction = (action = undefined) => {
         dialog.find('[name="action_script"]').val(config.script || '');
         dialog.find('[name="action_script_args"]').val(config.script_args || '');
     }
+    dialog.find('[name="action_script_icon"]').val(config.script_icon);
     buttons = {};
     buttons[(action !== undefined) ? $.i18n('action-edit-btn') : $.i18n('action-add-btn')] = function() {
         const that = $(this);
         let cfg = {
             name: that.find('[name="action_name"]').val(),
             type: parseInt(that.find('[name="action_type"]').val()),
-            script_icon: that.find('[name="action_script_icon"]').val()
         }
+        cfg.script_icon = that.find('[name="action_script_icon"]').val() || ((cfg.type === 0) ? 'fa-cogs' : ((cfg.type === 1) ? 'fa-file-text-o' : 'fa-bolt'));
         if(cfg.type === 0) {
             cfg.conatiners = that.find('[name="action_elements"]').val();
             cfg.action = parseInt(that.find('[name="action_standard"]').val());
