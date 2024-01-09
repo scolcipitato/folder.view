@@ -321,6 +321,19 @@ Markdown="false"
         </div>
         <div class="basic">
             <dl>
+                <dt data-i18n="override-default-actions">Override default actions:</dt>
+                <dd>
+                    <input class="basic-switch" name="override_default_actions" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p data-i18n="[html]override-default-actions-tooltip">
+                    Will remove the default menu and replace it with the custom actions set below.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
                 <dt data-i18n="default-action">Hide default action button:</dt>
                 <dd>
                     <input class="basic-switch" name="default_action" type="checkbox" style="display: none;" />
@@ -510,12 +523,30 @@ Markdown="false"
                 </dd>
             </dl>
         </div>
+        <dl>
+            <dt data-i18n="actions-icon">Icon:</dt>
+            <dd>
+                <input type="text" name="action_script_icon">
+            </dd>
+        </dl>
     </div>
     <div class="custom" style="display: none;" constraint="action-type-1">
         <dl>
             <dt data-i18n="custom-actions-script">Script:</dt>
             <dd>
                 <input type="text" name="action_script">
+            </dd>
+        </dl>
+        <dl>
+            <dt data-i18n="custom-actions-arguments">Arguments:</dt>
+            <dd>
+                <input type="text" name="action_script_args">
+            </dd>
+        </dl>
+        <dl>
+            <dt data-i18n="actions-icon">Icon:</dt>
+            <dd>
+                <input type="text" name="action_script_icon">
             </dd>
         </dl>
         <dl>
