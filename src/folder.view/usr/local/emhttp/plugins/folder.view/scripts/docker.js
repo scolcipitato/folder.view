@@ -153,6 +153,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     let started = 0;
     let autostart = 0;
     let autostartStarted = 0;
+    let managed = 0;
     let remBefore = 0;
 
     // Get if the advanced view is enabled
@@ -589,7 +590,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                         tootltipObserver.disconnect();
                         tootltipObserver = undefined;
                     },
-                    content: $(`<div class="preview-outbox-${ct.shortId} preview-outbox"><div class="first-row"><div class="preview-name"><div class="preview-img"><img src="${ct.Labels['net.unraid.docker.icon']}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></div><div class="preview-actual-name"><span class="blue-text appname">${ct.info.Name}</span><br><i class="fa fa-${ct.info.State.Running ? (ct.info.State.Paused ? 'pause' : 'play') : 'square'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'paused' : 'started') : 'stopped'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'orange-text' : 'green-text') : 'red-text'}"></i><span class="state"> ${ct.info.State.Running ? (ct.info.State.Paused ? $.i18n('paused') : $.i18n('started')) : $.i18n('stopped')}</span></div></div><table class="preview-status"><thead class="status-header"><tr><th class="status-header-version">${$.i18n('version')}</th><th class="status-header-stats">CPU/MEM</th><th class="status-header-autostart">${$.i18n('autostart')}</th></tr></thead><tbody><tr><td><div class="status-version">${!ct.info.State.Updated === false ? `<span class="green-text folder-update-text"><i class="fa fa-check fa-fw"></i>${$.i18n('up-to-date')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('force-update')}</span></a>`:`<span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i>${$.i18n('update-ready')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('apply-update')}</span></a>`}<br><i class="fa fa-info-circle fa-fw"></i> ${ct.info.Config.Image.split(':').pop()}</div></td><td><div class="status-stats"><span class="cpu-${ct.shortId}">0%</span><div class="usage-disk mm"><span id="cpu-${ct.shortId}" style="width: 0%;"></span><span></span></div><br><span class="mem-${ct.shortId}">0 / 0</span></div></td><td><div class="status-autostart"><input type="checkbox" style="display:none" class="staus-autostart-checkbox"></div></td></tr></tbody></table></div><div class="second-row"><div class="action-info"><div class="action"><div class="action-left"><ul class="fa-ul">${(ct.info.State.Running && !ct.info.State.Paused) ?  `${ct.info.State.WebUi ? `<li><a href="${ct.info.State.WebUi}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i> ${$.i18n('webui')}</a></li>` : ''}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '${ct.info.Shell}');"><i class="fa fa-terminal" aria-hidden="true"></i> ${$.i18n('console')}</a></li>` : ''}${!ct.info.State.Running ? `<li><a onclick="event.preventDefault(); eventControl({action:'start', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('start')}</a></li>` : `${ct.info.State.Paused ? `<li><a onclick="event.preventDefault(); eventControl({action:'resume', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('resume')}</a></li>` : `<li><a onclick="event.preventDefault(); eventControl({action:'stop', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-stop" aria-hidden="true"></i> ${$.i18n('stop')}</a></li><li><a onclick="event.preventDefault(); eventControl({action:'pause', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-pause" aria-hidden="true"></i> ${$.i18n('pause')}</a></li>`}<li><a onclick="event.preventDefault(); eventControl({action:'restart', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-refresh" aria-hidden="true"></i> ${$.i18n('restart')}</a></li>`}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '.log');"><i class="fa fa-navicon" aria-hidden="true"></i> ${$.i18n('logs')}</a></li>${ct.info.template ? `<li><a onclick="event.preventDefault(); editContainer('${ct.info.Name}', '${ct.info.template.path}');"><i class="fa fa-wrench" aria-hidden="true"></i> ${$.i18n('edit')}</a></li>` : ''}<li><a onclick="event.preventDefault(); rmContainer('${ct.info.Name}', '${ct.shortImageId}', '${ct.shortId}');"><i class="fa fa-trash" aria-hidden="true"></i> ${$.i18n('remove')}</a></li></ul></div><div class="action-right"><ul class="fa-ul">${ct.info.ReadMe ? `<li><a href="${ct.info.ReadMe}" target="_blank"><i class="fa fa-book" aria-hidden="true"></i> ${$.i18n('read-me-first')}</a></li>` : ''}${ct.info.Project ? `<li><a href="${ct.info.Project}" target="_blank"><i class="fa fa-life-ring" aria-hidden="true"></i> ${$.i18n('project-page')}</a></li>` : ''}${ct.info.Support ? `<li><a href="${ct.info.Support}" target="_blank"><i class="fa fa-question" aria-hidden="true"></i> ${$.i18n('support')}</a></li>` : ''}${ct.info.registry ? `<li><a href="${ct.info.registry}" target="_blank"><i class="fa fa-info-circle" aria-hidden="true"></i> ${$.i18n('more-info')}</a></li>` : ''}${ct.info.DonateLink ? `<li><a href="${ct.info.DonateLink}" target="_blank"><i class="fa fa-usd" aria-hidden="true"></i> ${$.i18n('donate')}</a></li>` : ''}</ul></div></div><div class="info-ct"><span class="container-id">${$.i18n('container-id')}: ${ct.shortId}</span><br><span class="repo">${$.i18n('by')}: <a target="_blank" ${ct.info.registry ? `href="${ct.info.registry}"` : ''} >${ct.info.Config.Image.split(':').shift()}</a></span></div></div><div class="info-section"><ul class="info-tabs"><li><a class="tabs-graph" href="#comb-grapth-${ct.shortId}">${$.i18n('graph')}</a></li><li><a class="tabs-cpu-graph" href="#cpu-grapth-${ct.shortId}">${$.i18n('cpu-graph')}</a></li><li><a class="tabs-mem-graph" href="#mem-grapth-${ct.shortId}">${$.i18n('mem-graph')}</a></li><li><a class="tabs-ports" href="#info-ports-${ct.shortId}">${$.i18n('port-mappings')}</a></li><li><a class="tabs-volumes" href="#info-volumes-${ct.shortId}">${$.i18n('volume-mappings')}</a></li></ul><div class="comb-grapth-${ct.shortId} comb-stat-grapth" id="comb-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="cpu-grapth-${ct.shortId} cpu-stat-grapth" id="cpu-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="mem-grapth-${ct.shortId} mem-stat-grapth" id="mem-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="info-ports" id="info-ports-${ct.shortId}" style="display: none;">${ct.info.Ports?.length > 10 ? (`<span class="info-ports-more" style="display: none;">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-ports-less').css('display', 'inline')">${$.i18n('compress')}</a></span><span class="info-ports-less">${ct.info.Ports?.slice(0,10).map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-ports-more').css('display', 'inline')">${$.i18n('expand')}</a></span>`) : (`<span class="info-ports-mono">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}</span>`)}</div><div class="info-volumes" id="info-volumes-${ct.shortId}" style="display: none;">${ct.Mounts?.filter(e => e.Type==='bind').length > 10 ? (`<span class="info-volumes-more" style="display: none;">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-volumes-less').css('display', 'inline')">${$.i18n('compress')}</a></span><span class="info-volumes-less">${ct.Mounts?.filter(e => e.Type==='bind').slice(0,10).map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-volumes-more').css('display', 'inline')">${$.i18n('expand')}</a></span>`) : (`<span class="info-volumes-mono">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}</span>`)}</div></div></div></div>`)
+                    content: $(`<div class="preview-outbox-${ct.shortId} preview-outbox"><div class="first-row"><div class="preview-name"><div class="preview-img"><img src="${ct.Labels['net.unraid.docker.icon']}" class="img folder-img" onerror='this.src="/plugins/dynamix.docker.manager/images/question.png"'></div><div class="preview-actual-name"><span class="blue-text appname">${ct.info.Name}</span><br><i class="fa fa-${ct.info.State.Running ? (ct.info.State.Paused ? 'pause' : 'play') : 'square'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'paused' : 'started') : 'stopped'} ${ct.info.State.Running ? (ct.info.State.Paused ? 'orange-text' : 'green-text') : 'red-text'}"></i><span class="state"> ${ct.info.State.Running ? (ct.info.State.Paused ? $.i18n('paused') : $.i18n('started')) : $.i18n('stopped')}</span></div></div><table class="preview-status"><thead class="status-header"><tr><th class="status-header-version">${$.i18n('version')}</th><th class="status-header-stats">CPU/MEM</th><th class="status-header-autostart">${$.i18n('autostart')}</th></tr></thead><tbody><tr><td><div class="status-version">${!ct.info.State.Updated === false ? `<span class="green-text folder-update-text"><i class="fa fa-check fa-fw"></i>${$.i18n('up-to-date')}</span>${ct.info.State.manager === 'dockerman' ? `<br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('force-update')}</span></a>` : ''}`:`<span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i>${$.i18n('update-ready')}</span><br><a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i>${$.i18n('apply-update')}</span></a>`}<br><i class="fa fa-info-circle fa-fw"></i> ${ct.info.Config.Image.split(':').pop()}</div></td><td><div class="status-stats"><span class="cpu-${ct.shortId}">0%</span><div class="usage-disk mm"><span id="cpu-${ct.shortId}" style="width: 0%;"></span><span></span></div><br><span class="mem-${ct.shortId}">0 / 0</span></div></td><td><div class="status-autostart"><input type="checkbox" style="display:none" class="staus-autostart-checkbox"></div></td></tr></tbody></table></div><div class="second-row"><div class="action-info"><div class="action"><div class="action-left"><ul class="fa-ul">${(ct.info.State.Running && !ct.info.State.Paused) ?  `${ct.info.State.WebUi ? `<li><a href="${ct.info.State.WebUi}" target="_blank"><i class="fa fa-globe" aria-hidden="true"></i> ${$.i18n('webui')}</a></li>` : ''}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '${ct.info.Shell}');"><i class="fa fa-terminal" aria-hidden="true"></i> ${$.i18n('console')}</a></li>` : ''}${!ct.info.State.Running ? `<li><a onclick="event.preventDefault(); eventControl({action:'start', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('start')}</a></li>` : `${ct.info.State.Paused ? `<li><a onclick="event.preventDefault(); eventControl({action:'resume', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-play" aria-hidden="true"></i> ${$.i18n('resume')}</a></li>` : `<li><a onclick="event.preventDefault(); eventControl({action:'stop', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-stop" aria-hidden="true"></i> ${$.i18n('stop')}</a></li><li><a onclick="event.preventDefault(); eventControl({action:'pause', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-pause" aria-hidden="true"></i> ${$.i18n('pause')}</a></li>`}<li><a onclick="event.preventDefault(); eventControl({action:'restart', container:'${ct.shortId}'}, 'loadlist');"><i class="fa fa-refresh" aria-hidden="true"></i> ${$.i18n('restart')}</a></li>`}<li><a onclick="event.preventDefault(); openTerminal('docker', '${ct.info.Name}', '.log');"><i class="fa fa-navicon" aria-hidden="true"></i> ${$.i18n('logs')}</a></li>${ct.info.template ? `<li><a onclick="event.preventDefault(); editContainer('${ct.info.Name}', '${ct.info.template.path}');"><i class="fa fa-wrench" aria-hidden="true"></i> ${$.i18n('edit')}</a></li>` : ''}<li><a onclick="event.preventDefault(); rmContainer('${ct.info.Name}', '${ct.shortImageId}', '${ct.shortId}');"><i class="fa fa-trash" aria-hidden="true"></i> ${$.i18n('remove')}</a></li></ul></div><div class="action-right"><ul class="fa-ul">${ct.info.ReadMe ? `<li><a href="${ct.info.ReadMe}" target="_blank"><i class="fa fa-book" aria-hidden="true"></i> ${$.i18n('read-me-first')}</a></li>` : ''}${ct.info.Project ? `<li><a href="${ct.info.Project}" target="_blank"><i class="fa fa-life-ring" aria-hidden="true"></i> ${$.i18n('project-page')}</a></li>` : ''}${ct.info.Support ? `<li><a href="${ct.info.Support}" target="_blank"><i class="fa fa-question" aria-hidden="true"></i> ${$.i18n('support')}</a></li>` : ''}${ct.info.registry ? `<li><a href="${ct.info.registry}" target="_blank"><i class="fa fa-info-circle" aria-hidden="true"></i> ${$.i18n('more-info')}</a></li>` : ''}${ct.info.DonateLink ? `<li><a href="${ct.info.DonateLink}" target="_blank"><i class="fa fa-usd" aria-hidden="true"></i> ${$.i18n('donate')}</a></li>` : ''}</ul></div></div><div class="info-ct"><span class="container-id">${$.i18n('container-id')}: ${ct.shortId}</span><br><span class="repo">${$.i18n('by')}: <a target="_blank" ${ct.info.registry ? `href="${ct.info.registry}"` : ''} >${ct.info.Config.Image.split(':').shift()}</a></span></div></div><div class="info-section"><ul class="info-tabs"><li><a class="tabs-graph" href="#comb-grapth-${ct.shortId}">${$.i18n('graph')}</a></li><li><a class="tabs-cpu-graph" href="#cpu-grapth-${ct.shortId}">${$.i18n('cpu-graph')}</a></li><li><a class="tabs-mem-graph" href="#mem-grapth-${ct.shortId}">${$.i18n('mem-graph')}</a></li><li><a class="tabs-ports" href="#info-ports-${ct.shortId}">${$.i18n('port-mappings')}</a></li><li><a class="tabs-volumes" href="#info-volumes-${ct.shortId}">${$.i18n('volume-mappings')}</a></li></ul><div class="comb-grapth-${ct.shortId} comb-stat-grapth" id="comb-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="cpu-grapth-${ct.shortId} cpu-stat-grapth" id="cpu-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="mem-grapth-${ct.shortId} mem-stat-grapth" id="mem-grapth-${ct.shortId}" style="display: none;"><canvas></canvas></div><div class="info-ports" id="info-ports-${ct.shortId}" style="display: none;">${ct.info.Ports?.length > 10 ? (`<span class="info-ports-more" style="display: none;">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-ports-less').css('display', 'inline')">${$.i18n('compress')}</a></span><span class="info-ports-less">${ct.info.Ports?.slice(0,10).map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-ports-more').css('display', 'inline')">${$.i18n('expand')}</a></span>`) : (`<span class="info-ports-mono">${ct.info.Ports?.map(e=>`${e.PrivateIP}:${e.PrivatePort}/${e.Type.toUpperCase()} <i class="fa fa-arrows-h"></i> ${e.PublicIP}:${e.PublicPort}`).join('<br>') || ''}</span>`)}</div><div class="info-volumes" id="info-volumes-${ct.shortId}" style="display: none;">${ct.Mounts?.filter(e => e.Type==='bind').length > 10 ? (`<span class="info-volumes-more" style="display: none;">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-volumes-less').css('display', 'inline')">${$.i18n('compress')}</a></span><span class="info-volumes-less">${ct.Mounts?.filter(e => e.Type==='bind').slice(0,10).map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}<br><a onclick="event.preventDefault(); $(this).parent().css('display', 'none').siblings('.info-volumes-more').css('display', 'inline')">${$.i18n('expand')}</a></span>`) : (`<span class="info-volumes-mono">${ct.Mounts?.filter(e => e.Type==='bind').map(e=>`${e.Destination} <i class="fa fa-arrows-h"></i> ${e.Source}`).join('<br>') || ''}</span>`)}</div></div></div></div>`)
                 });
             }
 
@@ -598,6 +599,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             newFolder[container].pause = ct.info.State.Paused;
             newFolder[container].state = ct.info.State.Running;
             newFolder[container].update = ct.info.State.Updated === false;
+            newFolder[container].managed = ct.info.State.manager === 'dockerman';
 
             if(folderDebugMode) {
                 console.log(`${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -657,6 +659,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             started += newFolder[container].state ? 1 : 0;
             autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
             autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
+            managed += newFolder[container].managed ? 1 : 0;
 
             folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-preview', {detail: {
                 folder: folder,
@@ -673,7 +676,8 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
                     upToDate,
                     started,
                     autostart,
-                    autostartStarted
+                    autostartStarted,
+                    managed
                 }
             }}));
         }
@@ -698,6 +702,10 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
 
     if(folder.settings.update_column) {
         $(`tr.folder-id-${id} > td.updatecolumn`).next().attr('colspan',4).end().remove();
+    }
+
+    if(managed === 0) {
+        $(`tr.folder-id-${id} > td.updatecolumn > div.advanced`).remove();
     }
 
     //set tehe status of a folder
@@ -733,6 +741,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     folder.status.started = started;
     folder.status.autostart = autostart;
     folder.status.autostartStarted = autostartStarted;
+    folder.status.managed = managed;
     folder.status.expanded = false;
 
     // add the function to handle the change on the autostart checkbox, this is here because of the if before, i don't want to handle the change i triggered before
@@ -856,7 +865,7 @@ const editFolder = (id) => {
 const forceUpdateFolder = (id) => {
     hideAllTips();
     const folder = globalFolders[id];
-    openDocker('update_container ' + Object.keys(folder.containers).join('*'), $.i18n('updating', folder.name),'','loadlist');
+    openDocker('update_container ' + Object.entries(folder.containers).filter(([k, v]) => v.managed).map(e => e[0]).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -866,13 +875,7 @@ const forceUpdateFolder = (id) => {
 const updateFolder = (id) => {
     hideAllTips();
     const folder = globalFolders[id];
-    let toUpdate = [];
-    for (const name of Object.keys(folder.containers)) {
-        if(folder.containers[name].update) {
-            toUpdate.push(name);
-        }
-    }
-    openDocker('update_container ' + toUpdate.join('*'), $.i18n('updating', folder.name),'','loadlist');
+    openDocker('update_container ' + Object.entries(folder.containers).filter(([k, v]) => v.managed && v.update).map(e => e[0]).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -1095,23 +1098,25 @@ const addDockerFolderContext = (id) => {
         });
     }
 
-    if(!globalFolders[id].status.upToDate) {
+    if(globalFolders[id].status.managed > 0) {
+        if(!globalFolders[id].status.upToDate) {
+            opts.push({
+                text: $.i18n('update'),
+                icon: 'fa-cloud-download',
+                action: (e) => { e.preventDefault();  updateFolder(id); }
+            });
+        } else {
+            opts.push({
+                text: $.i18n('update-force'),
+                icon: 'fa-cloud-download',
+                action: (e) => { e.preventDefault(); forceUpdateFolder(id); }
+            });
+        }
+
         opts.push({
-            text: $.i18n('update'),
-            icon: 'fa-cloud-download',
-            action: (e) => { e.preventDefault();  updateFolder(id); }
-        });
-    } else {
-        opts.push({
-            text: $.i18n('update-force'),
-            icon: 'fa-cloud-download',
-            action: (e) => { e.preventDefault(); forceUpdateFolder(id); }
+            divider: true
         });
     }
-
-    opts.push({
-        divider: true
-    });
 
     opts.push({
         text: $.i18n('edit'),

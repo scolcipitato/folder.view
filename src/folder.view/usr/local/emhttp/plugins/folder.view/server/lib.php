@@ -106,6 +106,7 @@
                 $ct['info']['State']['Autostart'] = array_search($ct['info']['Name'], $autoStart);
                 $ct['info']['Config']['Image'] = DockerUtil::ensureImageTag($ct['info']['Config']['Image']);
                 $ct['info']['State']['Updated'] = $DockerUpdate->getUpdateStatus($ct['info']['Config']['Image']);
+                $ct['info']['State']['manager'] = $ct['Labels']['net.unraid.docker.managed'] ?? false;
                 $template = array_filter($templates, function($el) use ($ct) {
                     return $el['image'] == $ct['info']['Config']['Image'] && $el['Name'] == $ct['info']['Name'];
                 });

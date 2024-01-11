@@ -242,6 +242,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     let started = 0;
     let autostart = 0;
     let autostartStarted = 0;
+    let managed = 0;
     let remBefore = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
@@ -315,6 +316,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             newFolder[container].pause = ct.info.State.Paused;
             newFolder[container].state = ct.info.State.Running;
             newFolder[container].update = ct.info.State.Updated === false;
+            newFolder[container].managed = ct.info.State.manager === 'dockerman';
 
             if(folderDebugMode) {
                 console.log(`Docker ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -325,6 +327,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             started += newFolder[container].state ? 1 : 0;
             autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
             autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
+            managed += newFolder[container].managed ? 1 : 0;
 
             folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-preview', {detail: {
                 folder: folder,
@@ -341,7 +344,8 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
                     upToDate,
                     started,
                     autostart,
-                    autostartStarted
+                    autostartStarted,
+                    managed
                 }
             }}));
         }
@@ -381,6 +385,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     folder.status.started = started;
     folder.status.autostart = autostart;
     folder.status.autostartStarted = autostartStarted;
+    folder.status.managed = managed;
     folder.status.expanded = false;
 
     folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-creation', {detail: {
@@ -838,23 +843,25 @@ const addDockerFolderContext = (id) => {
         });
     }
 
-    if(!globalFolders.docker[id].status.upToDate) {
+    if(globalFolders.docker[id].status.managed > 0) {
+        if(!globalFolders.docker[id].status.upToDate) {
+            opts.push({
+                text: $.i18n('update'),
+                icon: 'fa-cloud-download',
+                action: (e) => { e.preventDefault();  updateFolderDocker(id); }
+            });
+        } else {
+            opts.push({
+                text: $.i18n('update-force'),
+                icon: 'fa-cloud-download',
+                action: (e) => { e.preventDefault(); forceUpdateFolderDocker(id); }
+            });
+        }
+        
         opts.push({
-            text: $.i18n('update'),
-            icon: 'fa-cloud-download',
-            action: (e) => { e.preventDefault();  updateFolderDocker(id); }
-        });
-    } else {
-        opts.push({
-            text: $.i18n('update-force'),
-            icon: 'fa-cloud-download',
-            action: (e) => { e.preventDefault(); forceUpdateFolderDocker(id); }
+            divider: true
         });
     }
-    
-    opts.push({
-        divider: true
-    });
 
     opts.push({
         text: $.i18n('edit'),
@@ -897,7 +904,7 @@ const addDockerFolderContext = (id) => {
  */
 const forceUpdateFolderDocker = (id) => {
     const folder = globalFolders.docker[id];
-    openDocker('update_container ' + Object.keys(folder.containers).join('*'), $.i18n('updating', folder.name),'','loadlist');
+    openDocker('update_container ' + Object.entries(folder.containers).filter(([k, v]) => v.managed).map(e => e[0]).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -906,13 +913,7 @@ const forceUpdateFolderDocker = (id) => {
  */
 const updateFolderDocker = (id) => {
     const folder = globalFolders.docker[id];
-    let toUpdate = [];
-    for (const name of Object.keys(folder.containers)) {
-        if(folder.containers[name].update > 0) {
-            toUpdate.push(name);
-        }
-    }
-    openDocker('update_container ' + toUpdate.join('*'), $.i18n('updating', folder.name),'','loadlist');
+    openDocker('update_container ' + Object.entries(folder.containers).filter(([k, v]) => v.managed && v.update).map(e => e[0]).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
