@@ -111,7 +111,7 @@
                     return $el['image'] == $ct['info']['Config']['Image'] && $el['Name'] == $ct['info']['Name'];
                 });
                 $template = $template[array_key_first($template)];
-                if(!is_null($template)) {
+                if($ct['Labels']['net.unraid.docker.managed'] == 'dockerman' && !is_null($template)) {
                     $ct['info']['State']['WebUi'] = $template['WebUi'];
                     $ct['info']['registry'] = $template['registry'];
                     $ct['info']['Support'] = $template['Support'];
