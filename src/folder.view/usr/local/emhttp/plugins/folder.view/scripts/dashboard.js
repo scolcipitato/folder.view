@@ -379,6 +379,14 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-full');
     }
 
+    if(managed === 0) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('no-managed');
+    } else if (managed > 0 && managed < Object.values(folder.containers).length) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('managed-partial');
+    } else if (managed > 0 && managed === Object.values(folder.containers).length) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('managed-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.upToDate = upToDate;

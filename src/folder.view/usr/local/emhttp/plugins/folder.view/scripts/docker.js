@@ -735,6 +735,14 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         $(`tr.folder-id-${id}`).addClass('autostart-full');
     }
 
+    if(managed === 0) {
+        $(`tr.folder-id-${id}`).addClass('no-managed');
+    } else if (managed > 0 && managed < Object.values(folder.containers).length) {
+        $(`tr.folder-id-${id}`).addClass('managed-partial');
+    } else if (managed > 0 && managed === Object.values(folder.containers).length) {
+        $(`tr.folder-id-${id}`).addClass('managed-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.upToDate = upToDate;
