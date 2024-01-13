@@ -704,16 +704,17 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
         $(`tr.folder-id-${id} > td.updatecolumn`).next().attr('colspan',4).end().remove();
     }
 
-    if(managed === 0) {
-        $(`tr.folder-id-${id} > td.updatecolumn > div.advanced`).remove();
-    }
-
-    //set tehe status of a folder
+    //set the status of a folder
 
     if (!upToDate) {
         $(`tr.folder-id-${id} > td.updatecolumn > span`).replaceWith($(`<div class="advanced" style="display: ${advanced ? 'block' : 'none'};"><span class="orange-text folder-update-text" style="white-space:nowrap;"><i class="fa fa-flash fa-fw"></i> ${$.i18n('update-ready')}</span></div>`));
         $(`tr.folder-id-${id} > td.updatecolumn > div.advanced:has(a)`).remove();
         $(`tr.folder-id-${id} > td.updatecolumn`).append($(`<a class="exec" onclick="updateFolder('${id}');"><span style="white-space:nowrap;"><i class="fa fa-cloud-download fa-fw"></i> ${$.i18n('apply-update')}</span></a>`));
+    }
+    
+    // remove any update/force-update links in the update column
+    if(managed === 0) {
+        $(`tr.folder-id-${id} > td.updatecolumn a.exec`).each( function() {this.remove();} );
     }
 
     if (started) {
