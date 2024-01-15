@@ -204,7 +204,7 @@
             $user_prefs = "$user_prefs/dockerMan/userprefs.cfg";
 
             if (file_exists($user_prefs)) {
-                $prefs = parse_ini_file($user_prefs) ?: [];
+                $prefs = array_values(parse_ini_file($user_prefs)) ?: [];
                 $sort = [];
                 foreach ($containers as $ct)  {
                     $sort[] = array_search($ct['Name'],$prefs);
