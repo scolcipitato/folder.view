@@ -226,7 +226,7 @@
 
             if (!empty($vms)) {
                 if (file_exists($user_prefs)) {
-                    $prefs = parse_ini_file($user_prefs) ?: [];
+                    $prefs = array_values(parse_ini_file($user_prefs)) ?: [];
                     $sort = [];
                     foreach ($vms as $vm) {
                         $sort[] = array_search($vm,$prefs);

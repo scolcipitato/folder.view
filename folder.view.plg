@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2024.01.15">
-<!ENTITY md5 "5fc0caab83363da8c3c72f5c9bb9b83a">
+<!ENTITY version "2024.01.16">
+<!ENTITY md5 "b1f6c9f35d75de73f33271e4d54ee724">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2024.01.16
+- Fix for vms.
+
 ###2024.01.15
 - Custom action improvements.
 - Remove update and force update buttons for non-dockerman containers.
