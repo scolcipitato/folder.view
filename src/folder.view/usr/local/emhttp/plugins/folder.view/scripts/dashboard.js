@@ -242,6 +242,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
     let started = 0;
     let autostart = 0;
     let autostartStarted = 0;
+    let managed = 0;
     let remBefore = 0;
 
     // If regex is present searches all containers for a match and put them inside the folder containers
@@ -315,6 +316,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             newFolder[container].pause = ct.info.State.Paused;
             newFolder[container].state = ct.info.State.Running;
             newFolder[container].update = ct.info.State.Updated === false;
+            newFolder[container].managed = ct.info.State.manager === 'dockerman';
 
             if(folderDebugMode) {
                 console.log(`Docker ${newFolder[container].id}(${offsetIndex}, ${index}) => ${id}`);
@@ -325,6 +327,7 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
             started += newFolder[container].state ? 1 : 0;
             autostart += !(ct.info.State.Autostart === false) ? 1 : 0;
             autostartStarted += ((!(ct.info.State.Autostart === false)) && newFolder[container].state) ? 1 : 0;
+            managed += newFolder[container].managed ? 1 : 0;
 
             folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-preview', {detail: {
                 folder: folder,
@@ -341,7 +344,8 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
                     upToDate,
                     started,
                     autostart,
-                    autostartStarted
+                    autostartStarted,
+                    managed
                 }
             }}));
         }
@@ -375,12 +379,21 @@ const createFolderDocker = (folder, id, position, order, containersInfo, folders
         $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('autostart-full');
     }
 
+    if(managed === 0) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('no-managed');
+    } else if (managed > 0 && managed < Object.values(folder.containers).length) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('managed-partial');
+    } else if (managed > 0 && managed === Object.values(folder.containers).length) {
+        $(`.folder-showcase-outer-${id}, .folder-showcase-outer-${id} > span.outer`).addClass('managed-full');
+    }
+
     // set the status
     folder.status = {};
     folder.status.upToDate = upToDate;
     folder.status.started = started;
     folder.status.autostart = autostart;
     folder.status.autostartStarted = autostartStarted;
+    folder.status.managed = managed;
     folder.status.expanded = false;
 
     folderEvents.dispatchEvent(new CustomEvent('docker-post-folder-creation', {detail: {
@@ -743,6 +756,7 @@ const folderDockerCustomAction = async (id, action) => {
             ctAction(e);
         });
     } else if(act.type === 1) {
+        const args = act.script_args || '';
         if(act.script_sync) {
             let scriptVariables = {}
             let rawVars = await $.post("/plugins/user.scripts/exec.php",{action:'getScriptVariables',script:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
@@ -750,11 +764,11 @@ const folderDockerCustomAction = async (id, action) => {
             if(scriptVariables['directPHP']) {
                 $.post("/plugins/user.scripts/exec.php",{action:'directRunScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) { openBox(data,act.name,800,1200, 'loadlist');}})
             } else {
-                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2=',act.name,800,1200,true, 'loadlist');}});
+                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2='+args,act.name,800,1200,true, 'loadlist');}});
             }
         } else {
             const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
-            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&arg2='+args+'&csrf_token='+csrf_token+'&done=Done').promise());
         }
     }
 
@@ -787,7 +801,22 @@ const addDockerFolderContext = (id) => {
         divider: true
     });
 
-    if(!globalFolders.docker[id].settings.default_action) {
+    if(globalFolders.docker[id].settings.override_default_actions && globalFolders.docker[id].actions && globalFolders.docker[id].actions.length) {
+        opts.push(
+            ...globalFolders.docker[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: e.script_icon || "fa-bolt",
+                    action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
+                }
+            })
+        );
+    
+        opts.push({
+            divider: true
+        });
+
+    } else if(!globalFolders.docker[id].settings.default_action) {
         opts.push({
             text: $.i18n('start'),
             icon: 'fa-play',
@@ -822,23 +851,25 @@ const addDockerFolderContext = (id) => {
         });
     }
 
-    if(!globalFolders.docker[id].status.upToDate) {
+    if(globalFolders.docker[id].status.managed > 0) {
+        if(!globalFolders.docker[id].status.upToDate) {
+            opts.push({
+                text: $.i18n('update'),
+                icon: 'fa-cloud-download',
+                action: (e) => { e.preventDefault();  updateFolderDocker(id); }
+            });
+        } else {
+            opts.push({
+                text: $.i18n('update-force'),
+                icon: 'fa-cloud-download',
+                action: (e) => { e.preventDefault(); forceUpdateFolderDocker(id); }
+            });
+        }
+        
         opts.push({
-            text: $.i18n('update'),
-            icon: 'fa-cloud-download',
-            action: (e) => { e.preventDefault();  updateFolderDocker(id); }
-        });
-    } else {
-        opts.push({
-            text: $.i18n('update-force'),
-            icon: 'fa-cloud-download',
-            action: (e) => { e.preventDefault(); forceUpdateFolderDocker(id); }
+            divider: true
         });
     }
-    
-    opts.push({
-        divider: true
-    });
 
     opts.push({
         text: $.i18n('edit'),
@@ -852,7 +883,7 @@ const addDockerFolderContext = (id) => {
         action: (e) => { e.preventDefault(); rmDockerFolder(id); }
     });
 
-    if(globalFolders.docker[id].actions && globalFolders.docker[id].actions.length) {
+    if(!globalFolders.docker[id].settings.override_default_actions && globalFolders.docker[id].actions && globalFolders.docker[id].actions.length) {
         opts.push({
             divider: true
         });
@@ -863,7 +894,7 @@ const addDockerFolderContext = (id) => {
             subMenu: globalFolders.docker[id].actions.map((e, i) => {
                 return {
                     text: e.name,
-                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    icon: e.script_icon || "fa-bolt",
                     action: (e) => { e.preventDefault(); folderDockerCustomAction(id, i); }
                 }
             })
@@ -881,7 +912,7 @@ const addDockerFolderContext = (id) => {
  */
 const forceUpdateFolderDocker = (id) => {
     const folder = globalFolders.docker[id];
-    openDocker('update_container ' + Object.keys(folder.containers).join('*'), $.i18n('updating', folder.name),'','loadlist');
+    openDocker('update_container ' + Object.entries(folder.containers).filter(([k, v]) => v.managed).map(e => e[0]).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -890,13 +921,7 @@ const forceUpdateFolderDocker = (id) => {
  */
 const updateFolderDocker = (id) => {
     const folder = globalFolders.docker[id];
-    let toUpdate = [];
-    for (const name of Object.keys(folder.containers)) {
-        if(folder.containers[name].update > 0) {
-            toUpdate.push(name);
-        }
-    }
-    openDocker('update_container ' + toUpdate.join('*'), $.i18n('updating', folder.name),'','loadlist');
+    openDocker('update_container ' + Object.entries(folder.containers).filter(([k, v]) => v.managed && v.update).map(e => e[0]).join('*'), $.i18n('updating', folder.name),'','loadlist');
 };
 
 /**
@@ -1036,18 +1061,19 @@ const folderVMCustomAction = async (id, action) => {
             ctAction(e);
         });
     } else if(act.type === 1) {
+        const args = act.script_args || '';
         if(act.script_sync) {
             let scriptVariables = {}
             let rawVars = await $.post("/plugins/user.scripts/exec.php",{action:'getScriptVariables',script:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
             rawVars.trim().split('\n').forEach((e) => { const variable = e.split('='); scriptVariables[variable[0]] = variable[1] });
             if(scriptVariables['directPHP']) {
-                $.post("/plugins/user.scripts/exec.php",{action:'directRunScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) { openBox(data,act.name,800,1200, 'loadlist');}})
+                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2='+args,act.name,800,1200,true, 'loadlist');}});
             } else {
                 $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2=',act.name,800,1200,true, 'loadlist');}});
             }
         } else {
             const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
-            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&arg2='+args+'&csrf_token='+csrf_token+'&done=Done').promise());
         }
     }
 
@@ -1079,7 +1105,23 @@ const addVMFolderContext = (id) => {
     opts.push({
         divider: true
     });
-    if(!globalFolders.vms[id].settings.default_action) {
+
+    if(globalFolders.vms[id].settings.override_default_actions && globalFolders.vms[id].actions && globalFolders.vms[id].actions.length) {
+        opts.push(
+            ...globalFolders.vms[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: e.script_icon || "fa-bolt",
+                    action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
+                }
+            })
+        );
+    
+        opts.push({
+            divider: true
+        });
+
+    } else if(!globalFolders.vms[id].settings.default_action) {
         opts.push({
             text: $.i18n('start'),
             icon: "fa-play",
@@ -1140,7 +1182,7 @@ const addVMFolderContext = (id) => {
         action: (e) => { e.preventDefault(); rmVMFolder(id); }
     });
 
-    if(globalFolders.vms[id].actions && globalFolders.vms[id].actions.length) {
+    if(!globalFolders.vms[id].settings.override_default_actions && globalFolders.vms[id].actions && globalFolders.vms[id].actions.length) {
         opts.push({
             divider: true
         });
@@ -1151,7 +1193,7 @@ const addVMFolderContext = (id) => {
             subMenu: globalFolders.vms[id].actions.map((e, i) => {
                 return {
                     text: e.name,
-                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    icon: e.script_icon || "fa-bolt",
                     action: (e) => { e.preventDefault(); folderVMCustomAction(id, i); }
                 }
             })

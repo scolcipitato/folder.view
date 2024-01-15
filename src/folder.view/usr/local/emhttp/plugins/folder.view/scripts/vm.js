@@ -571,6 +571,7 @@ const folderCustomAction = async (id, action) => {
             ctAction(e);
         });
     } else if(act.type === 1) {
+        const args = act.script_args || '';
         if(act.script_sync) {
             let scriptVariables = {}
             let rawVars = await $.post("/plugins/user.scripts/exec.php",{action:'getScriptVariables',script:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
@@ -578,11 +579,11 @@ const folderCustomAction = async (id, action) => {
             if(scriptVariables['directPHP']) {
                 $.post("/plugins/user.scripts/exec.php",{action:'directRunScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) { openBox(data,act.name,800,1200, 'loadlist');}})
             } else {
-                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2=',act.name,800,1200,true, 'loadlist');}});
+                $.post("/plugins/user.scripts/exec.php",{action:'convertScript',path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`},function(data) {if(data) {openBox('/plugins/user.scripts/startScript.sh&arg1='+data+'&arg2='+args,act.name,800,1200,true, 'loadlist');}});
             }
         } else {
             const cmd = await $.post("/plugins/user.scripts/exec.php",{action:'convertScript', path:`/boot/config/plugins/user.scripts/scripts/${act.script}/script`}).promise();
-            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&csrf_token='+csrf_token+'&done=Done').promise());
+            prom.push($.get('/logging.htm?cmd=/plugins/user.scripts/backgroundScript.sh&arg1='+cmd+'&arg2='+args+'&csrf_token='+csrf_token+'&done=Done').promise());
         }
     }
 
@@ -603,7 +604,22 @@ const addVMFolderContext = (id) => {
         above: false
     });
 
-    if(!globalFolders[id].settings.default_action) {
+    if(globalFolders[id].settings.override_default_actions && globalFolders[id].actions && globalFolders[id].actions.length) {
+        opts.push(
+            ...globalFolders[id].actions.map((e, i) => {
+                return {
+                    text: e.name,
+                    icon: e.script_icon || "fa-bolt",
+                    action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
+                }
+            })
+        );
+    
+        opts.push({
+            divider: true
+        });
+
+    } else if(!globalFolders[id].settings.default_action) {
         opts.push({
             text:$.i18n('start'),
             icon:"fa-play",
@@ -664,7 +680,7 @@ const addVMFolderContext = (id) => {
         action: (e) => { e.preventDefault(); rmFolder(id); }
     });
 
-    if(globalFolders[id].actions && globalFolders[id].actions.length) {
+    if(!globalFolders[id].settings.override_default_actions && globalFolders[id].actions && globalFolders[id].actions.length) {
         opts.push({
             divider: true
         });
@@ -675,7 +691,7 @@ const addVMFolderContext = (id) => {
             subMenu: globalFolders[id].actions.map((e, i) => {
                 return {
                     text: e.name,
-                    icon: (e.type === 0) ? 'fa-cogs' : ((e.type === 1) ? 'fa-file-text-o' : 'fa-bolt'),
+                    icon: e.script_icon || "fa-bolt",
                     action: (e) => { e.preventDefault(); folderCustomAction(id, i); }
                 }
             })

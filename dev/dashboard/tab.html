@@ -10,6 +10,9 @@
         - autostart-off is applied when the folder does have some container to autostart, but ALL the autostart containers are stopped.
         - autostart-partial is applied when the folder does have some container to autostart, but NOT ALL the autostart containers are started.
         - autostart-full is applied when the folder does have some container to autostart, but ALL the autostart containers are started.
+        - managed-full is applied when the folder does have ALL containers created with the unraid webui.
+        - managed-partial is applied when the folder does have some container created with the webui and some created in other ways.
+        - no-managed is applied when the folder doesn't have any container created with the webui.
     -->
     <div class="folder-showcase-outer-${id} folder-showcase-outer">
         <span class="outer solid apps stopped folder-docker">

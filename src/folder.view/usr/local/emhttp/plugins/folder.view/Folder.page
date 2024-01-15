@@ -321,6 +321,19 @@ Markdown="false"
         </div>
         <div class="basic">
             <dl>
+                <dt data-i18n="override-default-actions">Override default actions:</dt>
+                <dd>
+                    <input class="basic-switch" name="override_default_actions" type="checkbox" style="display: none;" />
+                </dd>
+            </dl>
+            <blockquote class="inline_help">
+                <p data-i18n="[html]override-default-actions-tooltip">
+                    Will remove the default menu and replace it with the custom actions set below.
+                </p>
+            </blockquote>
+        </div>
+        <div class="basic">
+            <dl>
                 <dt data-i18n="default-action">Hide default action button:</dt>
                 <dd>
                     <input class="basic-switch" name="default_action" type="checkbox" style="display: none;" />
@@ -388,7 +401,7 @@ Markdown="false"
             </dl>
             <blockquote class="inline_help">
                 <span data-i18n="[html]custom-actions-folder-tooltip">
-                    <b>Name:</b> Just the name of the action.<br><b>Type:</b> Type of the action.<br><ul><li><b>Standard</b> - normal action on docker containers (start, stop, ...).</li><li><b>Custom</b> - will execute a User Scripts (User Scripts plugin required).</li></ul><b>Action:</b> Action to be performed.<br><ul><li><b>Cycle</b> - cycle between two states.</li><li><b>Set</b> - set a state.</li><li><b>Restart</b> - basic restart.</li></ul><b>Conatiners:</b> A comma (,) separated list of conatiners.<br><b>Script:</b> Just the name of the script (<b>Names are case sensitive and need white spaces</b>).<br><b>Sync:</b> Whether to run the script in background or not.
+                    <b>Name:</b> Just the name of the action.<br><b>Type:</b> Type of the action.<br><ul><li><b>Standard</b> - normal action on docker containers (start, stop, ...).</li><li><b>Custom</b> - will execute a User Scripts (User Scripts plugin required).</li></ul><b>Action:</b> Action to be performed.<br><ul><li><b>Cycle</b> - cycle between two states.</li><li><b>Set</b> - set a state.</li><li><b>Restart</b> - basic restart.</li></ul><b>Conatiners:</b> A comma (,) separated list of conatiners.<br><b>Script:</b> Just the name of the script (<b>Names are case sensitive and need white spaces</b>).<br><b>Arguments:</b> Arguments passed to the script.<br><b>Sync:</b> Whether to run the script in background or not.<br><b>Icon:</b> Icon of the action, leave empty for default.
                 </span>
             </blockquote>
         </div>
@@ -519,10 +532,22 @@ Markdown="false"
             </dd>
         </dl>
         <dl>
+            <dt data-i18n="custom-actions-arguments">Arguments:</dt>
+            <dd>
+                <input type="text" name="action_script_args">
+            </dd>
+        </dl>
+        <dl>
             <dt data-i18n="custom-actions-script-sync">Sync:</dt>
             <dd>
             <input class="basic-switch-sync" name="action_script_sync" type="checkbox" style="display: none;" />
             </dd>
         </dl>
     </div>
+    <dl>
+        <dt data-i18n="icon">Icon:</dt>
+        <dd>
+            <input type="text" name="action_script_icon">
+        </dd>
+    </dl>
 </div>

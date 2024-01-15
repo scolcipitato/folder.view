@@ -73,6 +73,7 @@ $('div.canvas > form')[0].preview_border_color.value = rgbToHex($('body').css('c
         form.update_column.checked = currFolder.settings.update_column || false;
         form.default_action.checked = currFolder.settings.default_action || false;
         form.expand_tab.checked = currFolder.settings.expand_tab;
+        form.override_default_actions.checked = currFolder.settings.override_default_actions;
         form.expand_dashboard.checked = currFolder.settings.expand_dashboard;
         form.regex.value = currFolder.regex;
         for (const ct of currFolder.containers) {
@@ -267,6 +268,7 @@ const submitForm = async (e) => {
             update_column: e.update_column.checked,
             default_action: e.default_action.checked,
             expand_tab: e.expand_tab.checked,
+            override_default_actions: e.override_default_actions.checked,
             expand_dashboard: e.expand_dashboard.checked,
         },
         regex: e.regex.value.toString(),
@@ -316,7 +318,8 @@ const customAction = (action = undefined) => {
         type: 0,
         action: 0,
         modes: 0,
-        conatiners: []
+        conatiners: [],
+        script_icon: ''
     }
     if(action !== undefined) {
         config = JSON.parse(atob($('input[name*="custom_action"]').map((i, e) => $(e).val()).get()[action]));
@@ -360,14 +363,17 @@ const customAction = (action = undefined) => {
         }
     } else if(config.type === 1){
         dialog.find('[name="action_script"]').val(config.script || '');
+        dialog.find('[name="action_script_args"]').val(config.script_args || '');
     }
+    dialog.find('[name="action_script_icon"]').val(config.script_icon);
     buttons = {};
     buttons[(action !== undefined) ? $.i18n('action-edit-btn') : $.i18n('action-add-btn')] = function() {
         const that = $(this);
         let cfg = {
             name: that.find('[name="action_name"]').val(),
-            type: parseInt(that.find('[name="action_type"]').val())
+            type: parseInt(that.find('[name="action_type"]').val()),
         }
+        cfg.script_icon = that.find('[name="action_script_icon"]').val() || ((cfg.type === 0) ? 'fa-cogs' : ((cfg.type === 1) ? 'fa-file-text-o' : 'fa-bolt'));
         if(cfg.type === 0) {
             cfg.conatiners = that.find('[name="action_elements"]').val();
             cfg.action = parseInt(that.find('[name="action_standard"]').val());
@@ -378,6 +384,7 @@ const customAction = (action = undefined) => {
             }
         } else if(cfg.type === 1) {
             cfg.script = that.find('[name="action_script"]').val();
+            cfg.script_args = that.find('[name="action_script_args"]').val();
             cfg.script_sync = that.find('[name="action_script_sync"]').prop("checked");
         }
         if(action !== undefined) {

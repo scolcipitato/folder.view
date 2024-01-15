@@ -106,11 +106,12 @@
                 $ct['info']['State']['Autostart'] = array_search($ct['info']['Name'], $autoStart);
                 $ct['info']['Config']['Image'] = DockerUtil::ensureImageTag($ct['info']['Config']['Image']);
                 $ct['info']['State']['Updated'] = $DockerUpdate->getUpdateStatus($ct['info']['Config']['Image']);
+                $ct['info']['State']['manager'] = $ct['Labels']['net.unraid.docker.managed'] ?? false;
                 $template = array_filter($templates, function($el) use ($ct) {
                     return $el['image'] == $ct['info']['Config']['Image'] && $el['Name'] == $ct['info']['Name'];
                 });
                 $template = $template[array_key_first($template)];
-                if(!is_null($template)) {
+                if($ct['Labels']['net.unraid.docker.managed'] == 'dockerman' && !is_null($template)) {
                     $ct['info']['State']['WebUi'] = $template['WebUi'];
                     $ct['info']['registry'] = $template['registry'];
                     $ct['info']['Support'] = $template['Support'];
@@ -203,7 +204,7 @@
             $user_prefs = "$user_prefs/dockerMan/userprefs.cfg";
 
             if (file_exists($user_prefs)) {
-                $prefs = parse_ini_file($user_prefs) ?: [];
+                $prefs = array_values(parse_ini_file($user_prefs)) ?: [];
                 $sort = [];
                 foreach ($containers as $ct)  {
                     $sort[] = array_search($ct['Name'],$prefs);

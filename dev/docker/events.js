@@ -101,6 +101,7 @@ folderEvents.addEventListener('docker-post-folder-preview',
      * @param {number} detail.states.started Number of started containers inside the folder
      * @param {number} detail.states.autostart Number of containers set to autostart inside the folder
      * @param {number} detail.states.autostartStarted Number of containers set to autostart that are started inside the folder
+     * @param {number} detail.states.managed Number of containers that are managed by dockerman
      */
     ({detail}) => {
         // Code here

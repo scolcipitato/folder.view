@@ -121,7 +121,7 @@
     "file-manager": "Apri il gestore di file",
     "custom-actions": "Azioni personalizzate",
     "custom-actions-folder": "Azioni personalizzate:",
-    "custom-actions-folder-tooltip": "<b>Nome:</b> Solo il nome dell'azione.<br><b>Tipo:</b> Il tipo di azione.<br><ul><li><b>Normale</b> - azione normale effettuata sui container (avvio, arresto, ...).</li><li><b>Personalizzata</b> - esegue uno script personalizzato (Plugin \"User Scripts\" richiesto).</li></ul><b>Azione:</b> Azione da eseguire.<br><ul><li><b>Inverti</b> - passaggio tra due stati.</li><li><b>Imposta</b> - imposta uno stato.</li><li><b>Riavvia</b> - riavvia.</li></ul><b>Conatiners:</b> Una lista separata da virgole dei containers su cui eseguire le azioni.<br><b>Script:</b> Lo script da eseguire (<b>I nomi sono sensibili alle maiuscole e alle minuscole e agli spazi</b>).<br><b>Sync:</b> Se eseguire lo scrip in background o no.",
+    "custom-actions-folder-tooltip": "<b>Nome:</b> Solo il nome dell'azione.<br><b>Tipo:</b> Il tipo di azione.<br><ul><li><b>Normale</b> - azione normale effettuata sui container (avvio, arresto, ...).</li><li><b>Personalizzata</b> - esegue uno script personalizzato (Plugin \"User Scripts\" richiesto).</li></ul><b>Azione:</b> Azione da eseguire.<br><ul><li><b>Inverti</b> - passaggio tra due stati.</li><li><b>Imposta</b> - imposta uno stato.</li><li><b>Riavvia</b> - riavvia.</li></ul><b>Conatiners:</b> Una lista separata da virgole dei containers su cui eseguire le azioni.<br><b>Script:</b> Lo script da eseguire (<b>I nomi sono sensibili alle maiuscole e alle minuscole e agli spazi</b>).<br><b>Argomenti:</b> Argomenti passati agli script.<br><b>Sync:</b> Se eseguire lo scrip in background o no.<br><b>Icona:</b>L'icona dell'azione.",
     "custom-action": "<i class=\"fa fa-plus\" aria-hidden=\"true\"></i> Aggiunge un'azione personalizzata",
     "custom-action-tooltip": "Permette di eseguire un'azione personalizzata sulla cartella.",
     "custom-actions-type": "Tipo:",
@@ -154,5 +154,8 @@
     "action-edit-btn": "Salva",
     "custom-actions-script-sync": "Sync:",
     "preview-text-width": "Lunghezza del testo:",
-    "preview-text-width-tooltip": "Limita la lunghezza del testo nella preview. <br>Esempio: <b>12px</b>, <b>1rem</b> (<a href=\"https://developer.mozilla.org/en-US/docs/Web/CSS/length\">Qui</a> trovi più informazioni). <br>Lasciare vuoto per non impostare un limite."
+    "preview-text-width-tooltip": "Limita la lunghezza del testo nella preview. <br>Esempio: <b>12px</b>, <b>1rem</b> (<a href=\"https://developer.mozilla.org/en-US/docs/Web/CSS/length\">Qui</a> trovi più informazioni). <br>Lasciare vuoto per non impostare un limite.",
+    "override-default-actions": "Sovrascrivi azioni di base:",
+    "override-default-actions-tooltip": "Riumuove il menu di base e lo rimpiazza con le azioni personalizzate.",
+    "custom-actions-arguments": "Argomenti:"
 }

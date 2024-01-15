@@ -1,9 +1,12 @@
 <!-- 
-    tr.folder also have one of 4 classes applied
+    tr.folder also have one of 7 classes applied
     - no-autostart is applied when the folder doesn't have any container set to autostart.
     - autostart-off is applied when the folder does have some container to autostart, but ALL the autostart containers are stopped.
     - autostart-partial is applied when the folder does have some container to autostart, but NOT ALL the autostart containers are started.
     - autostart-full is applied when the folder does have some container to autostart, but ALL the autostart containers are started.
+    - managed-full is applied when the folder does have ALL containers created with the unraid webui.
+    - managed-partial is applied when the folder does have some container created with the webui and some created in other ways.
+    - no-managed is applied when the folder doesn't have any container created with the webui.
  -->
 <tr class="sortable folder-id-${id} ${folder.settings.preview_hover ? 'hover' : ''} folder">
     <td class="ct-name folder-name">
@@ -124,13 +127,14 @@
                                     <i class="fa fa-check fa-fw"></i>
                                     ${$.i18n('up-to-date')}
                                 </span>
-                                <br>
-                                <a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');">
-                                    <span style="white-space:nowrap;">
-                                        <i class="fa fa-cloud-download fa-fw"></i>
-                                            ${$.i18n('force-update')}
-                                    </span>
-                                </a>`
+                                ${ct.info.State.manager === 'dockerman' ? 
+                                    `<br>
+                                    <a class="exec" onclick="hideAllTips(); updateContainer('${ct.info.Name}');">
+                                        <span style="white-space:nowrap;">
+                                            <i class="fa fa-cloud-download fa-fw"></i>
+                                                ${$.i18n('force-update')}
+                                        </span>
+                                    </a>` : '' }`
                                 :
                                 `<span class="orange-text folder-update-text" style="white-space:nowrap;">
                                     <i class="fa fa-flash fa-fw"></i>
