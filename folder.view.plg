@@ -6,12 +6,19 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2023.12.03">
-<!ENTITY md5 "b20e4cf5f2c9f88f536b4d1388075bb1">
+<!ENTITY version "2024.01.15">
+<!ENTITY md5 "5fc0caab83363da8c3c72f5c9bb9b83a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2024.01.15
+- Custom action improvements.
+- Remove update and force update buttons for non-dockerman containers.
+- fix: ct info pulls data from template instead of labels.
+- new classes for managed and unmanaged folders.
+- small fix to vms.
+
 ###2023.12.03
 - Fixed an issue preventing folders from appearing when a container was before a folder.
 
