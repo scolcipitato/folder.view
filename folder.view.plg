@@ -6,13 +6,13 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2024.01.16">
-<!ENTITY md5 "b1f6c9f35d75de73f33271e4d54ee724">
+<!ENTITY version "2024.01.16.1">
+<!ENTITY md5 "9f014ba9be211f7a967504728a93b11c">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
-###2024.01.16
+###2024.01.16 and 2024.01.16.1
 - Fix for vms.
 
 ###2024.01.15
