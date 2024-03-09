@@ -33,8 +33,9 @@
 }
 
 .folder-preview {
+    margin: 2px
     border-radius: 4px;
-    height: 3.5em;
+    height: auto;
     overflow: hidden;
     display: flex;
     flex-wrap: wrap;
@@ -44,8 +45,7 @@
 .folder-preview-wrapper {
     float: left;
     height: 100%;
-    margin-left: 10px;
-    margin-top: 7px;
+    margin: 10px;
 }
 
 .folder-preview-wrapper .inner > span.appname {
