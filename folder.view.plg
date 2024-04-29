@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2024.01.22">
-<!ENTITY md5 "887fe2b893db2dda6f5b074e20fec2c8">
+<!ENTITY version "2024.04.30">
+<!ENTITY md5 "7a3f59a4ddaa88d93613a5d020b2d4be">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2024.04.30
+- Update es language.
+
 ###2024.01.22
 - Fix undefined request for docker without icons.
 
