@@ -121,28 +121,7 @@
                     $ct['info']['Shell'] = $template['Shell'];
                     $ct['info']['template'] = $template;
                 } else {
-                    global $host;
-                    $WebUI = $ct['Labels']['net.unraid.docker.webui'] ?? '';
-                    if (preg_match("%\[(IP|PORT:(\d+))\]%", $WebUI)) {
-                        if (preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches)) {
-                            $ConfigPort = $matches[1] ?? '';
-                            foreach ($ct['Ports'] as $port) {
-                                if ($port['PrivatePort']==$ConfigPort) {
-                                    $ip = ($ct['NetworkMode']=='host'||!is_null($port['PublicPort'])) ? $host : $port['IP'];
-                                    $WebUI = preg_replace("%\[IP\]%", $ip, $WebUI);
-                                    $WebUI = preg_replace("%\[PORT:\d+\]%", $port['PublicPort'], $WebUI);
-
-                                    break;
-                                }
-                            }
-                        } else {
-                            $ip = (count($ct['Ports'])) ? (($ct['NetworkMode']=='host'||!is_null($ct['Ports'][0]['PublicPort'])) ? $host : $ct['Ports'][0]['IP']) : $host;
-                            $WebUI = preg_replace("%\[IP\]%", $ip, $WebUI);
-                        }
-                    }
-                    $ct['info']['State']['WebUi'] = $WebUI;
-
-                    // $ct['info']['State']['WebUi'] = $ct['Labels']['net.unraid.docker.webui'] ?? '';
+                    $ct['info']['State']['WebUi'] = $ct['Labels']['net.unraid.docker.webui'] ?? '';
                     $ct['info']['Shell'] = $ct['Labels']['net.unraid.docker.shell'] ?? '';
                 }
 
@@ -163,7 +142,12 @@
                     }
                     $ip = $ct['NetworkSettings']['Networks'][$ct['HostConfig']['NetworkMode']]['IPAddress'];
                     if(strlen($ip) == 0) $ip = $host;
+                } else if (!$id) {
+                    $ct['HostConfig']['NetworkMode'] = DockerUtil::ctMap($ct['HostConfig']['NetworkMode']);
+                    $ports = &$ct['info']['Config']['ExposedPorts'];
+                    $nat = false;
                 }
+                $ip = ($driver[$ct['HostConfig']['NetworkMode']]=='bridge' || $ct['HostConfig']['NetworkMode']=='host') ? $host : $ct['NetworkSettings']['Networks'][$ct['HostConfig']['NetworkMode']]['IPAddress'] ?? $host;
                 $ports = (isset($ports) && is_array($ports)) ? $ports : [];
                 foreach ($ports as $port => $value) {
                     [$PrivatePort, $PType] = array_pad(explode('/', $port),2,'');
