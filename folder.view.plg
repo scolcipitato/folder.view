@@ -6,12 +6,19 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2024.04.30">
-<!ENTITY md5 "7a3f59a4ddaa88d93613a5d020b2d4be">
+<!ENTITY version "2024.07.28">
+<!ENTITY md5 "2d5c25f724b65c28542ddf75e76a1aa0">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2024.07.28
+- fix: handle non dockerman webui templates
+- fix: handle IP parse for containers without NetworkMode set.  remove duplicate parsing from previous commit.
+- fix: remove duplicate setting of IP
+- By: mtongnz
+
+
 ###2024.04.30
 - Update es language.
 
