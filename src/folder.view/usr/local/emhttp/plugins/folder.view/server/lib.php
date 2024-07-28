@@ -140,9 +140,12 @@
                         $ports = &$ct['info']['Config']['ExposedPorts'];
                         $nat = false;
                     }
-                    $ip = $ct['NetworkSettings']['Networks'][$ct['HostConfig']['NetworkMode']]['IPAddress'];
-                    if(strlen($ip) == 0) $ip = $host;
+                } else if (!$id) {
+                    $ct['HostConfig']['NetworkMode'] = DockerUtil::ctMap($ct['HostConfig']['NetworkMode']);
+                    $ports = &$ct['info']['Config']['ExposedPorts'];
+                    $nat = false;
                 }
+                $ip = ($driver[$ct['HostConfig']['NetworkMode']]=='bridge' || $ct['HostConfig']['NetworkMode']=='host') ? $host : $ct['NetworkSettings']['Networks'][$ct['HostConfig']['NetworkMode']]['IPAddress'] ?? $host;
                 $ports = (isset($ports) && is_array($ports)) ? $ports : [];
                 foreach ($ports as $port => $value) {
                     [$PrivatePort, $PType] = array_pad(explode('/', $port),2,'');
