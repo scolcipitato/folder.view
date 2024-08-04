@@ -6,12 +6,16 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2024.07.28">
-<!ENTITY md5 "2d5c25f724b65c28542ddf75e76a1aa0">
+<!ENTITY version "2024.08.04">
+<!ENTITY md5 "967447d6a78cb1cc4ede5b3d8796ab6a">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2024.08.04
+- fix: handle layout when number of overall columns changes by mtongnz
+- Update es.json by elBelgg
+
 ###2024.07.28
 - fix: handle non dockerman webui templates
 - fix: handle IP parse for containers without NetworkMode set.  remove duplicate parsing from previous commit.
