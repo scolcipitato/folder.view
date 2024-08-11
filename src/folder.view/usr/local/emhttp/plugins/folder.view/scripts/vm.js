@@ -402,13 +402,13 @@ const dropDownButton = (id) => {
 const rmFolder = (id) => {
     // Ask for a confirmation
     swal({
-        title: 'Are you sure?',
-        text: `Remove folder: ${globalFolders[id].name}`,
+        title: $.i18n('are-you-sure'),
+        text: `${$.i18n('remove-folder')}: ${globalFolders[id].name}`,
         type: 'warning',
         html: true,
         showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: $.i18n('yes-delete'),
+        cancelButtonText: $.i18n('cancel'),
         showLoaderOnConfirm: true
     },
     async (c) => {

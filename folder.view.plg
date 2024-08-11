@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2024.08.04">
-<!ENTITY md5 "967447d6a78cb1cc4ede5b3d8796ab6a">
+<!ENTITY version "2024.08.11">
+<!ENTITY md5 "6fafb02155cd17b23c7ec4c334128b1d">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="6.12.3">
     <CHANGES>
+###2024.08.11
+- fix: translation
+
 ###2024.08.04
 - fix: handle layout when number of overall columns changes by mtongnz
 - Update es.json by elBelgg
