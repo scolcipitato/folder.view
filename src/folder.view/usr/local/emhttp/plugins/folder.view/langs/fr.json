@@ -52,7 +52,7 @@
     "name": "Nom :",
     "name-tooltip": "Le nom du dossier, c'est pas compliqué.",
     "icon": "Icône :",
-    "icon-tooltip": "Un lien vers une image (<a href=\"https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#supported_image_formats\" target=\"_blank\">Formats pris en charge</a>)<br>Prend aussi en charge le format <b>data:image/{type};base64,</b> (<a href=\"https://base64.guru/converter/encode/image\" target=\"_blank\">Convertire l'image en chaînes de donnée</a>)<br><a href=\"https://forums.unraid.net/topic/92824-icon-collections-for-docker-folder-plugin/\" target=\"_blank\">Lien avec quelques icônes</a>.<br>Vous pouvez cliquer sur l'icône Docker/VM pour définir l'icône du dossier.",
+    "icon-tooltip": "Un lien vers une image (<a href=\"https://developer.mozilla.org/fr/docs/Web/HTML/Element/img#supported_image_formats\" target=\"_blank\">Formats pris en charge</a>)<br>Prend aussi en charge le format <b>data:image/{type};base64,</b> (<a href=\"https://base64.guru/converter/encode/image\" target=\"_blank\">Convertir l'image en chaînes de donnée</a>)<br><a href=\"https://forums.unraid.net/topic/92824-icon-collections-for-docker-folder-plugin/\" target=\"_blank\">Lien avec quelques icônes</a>.<br>Vous pouvez cliquer sur l'icône Docker/VM pour définir l'icône du dossier.",
     "preview": "Aperçu :",
     "preview-tooltip": "Le type d'aperçu, pas si compliqué.",
     "preview-option-0": "Aucun",
