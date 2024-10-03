@@ -3,7 +3,7 @@
         "authors": [
             "kennymc.c"
         ],
-        "last-updated": "2023-11-30",
+        "last-updated": "2024-10-03",
 		"locale": "de"
     },
     "add-folder": "Ordner hinzufügen",
@@ -103,7 +103,7 @@
     "expand-dashboard": "Im Übersicht-Reiter aufklappen:",
     "expand-dashboard-tooltip": "Lässt den Ordner im Übersicht-Reiter aufgeklappt starten.",
     "regex": "Regex (Reguläre Ausdrücke):",
-    "regex-tooltip": "Regex... <b>Lasciate ogne speranza, voi ch'intrate</b><br>Jeder Containername, auf den der reguläre Ausdruck passt, wird dem Ordner hinzugefügt.<br>Beispiel für das Hinzufügen von pterodactyl egg: <b>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}</b>.<br><a href=\"https://regex101.com/\">Website zum Testen deines regulären Ausdrucks</a>.<br>Wenn du den regulären Ausdruck bearbeitest, wird alles abgewählt, was manuell ausgewählt wurde.",
+    "regex-tooltip": "Regex... <b>Lasst, die Ihr eintretet, alle Hoffnung fahren</b><br>Jeder Containername, auf den der reguläre Ausdruck passt, wird dem Ordner hinzugefügt.<br>Beispiel für das Hinzufügen von pterodactyl egg: <b>[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}</b>.<br><a href=\"https://regex101.com/\">Website zum Testen deines regulären Ausdrucks</a>.<br>Wenn du den regulären Ausdruck bearbeitest, wird alles abgewählt, was manuell ausgewählt wurde.",
     "submit": "Übermitteln",
     "cancel": "Abbrechen",
     "order": "Reihenfolge:",
@@ -155,8 +155,7 @@
     "custom-actions-script-sync": "Sync:",
     "preview-text-width": "Textbreite:",
     "preview-text-width-tooltip": "Begrenzt die Breite des Containernamens in der Vorschau. <br>Zum Beispiel <b>12px</b>, <b>1rem</b> (<a href=\"https://developer.mozilla.org/en-US/docs/Web/CSS/length\">Hier</a> findest du mehr Einheiten). <br>Lass das Feld leer und es gibt keine Begrenzung.",
-    "override-default-actions": "Override default actions:",
-    "override-default-actions-tooltip": "Will remove the default menu and replace it with the custom actions set below.",
-    "custom-actions-arguments": "Arguments:"
+    "override-default-actions": "Standard-Aktionen überschreiben:",
+    "override-default-actions-tooltip": "Entfernt das Standard-Menü und ersetzt es durch die unten eingestellten benutzerdefinierten Aktionen.",
+    "custom-actions-arguments": "Argumente:"
 }
-
