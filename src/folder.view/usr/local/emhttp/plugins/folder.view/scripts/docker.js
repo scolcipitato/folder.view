@@ -623,11 +623,11 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
             }
 
             if (folder.settings.preview_update && !ct.info.State.Updated) {
-                sel = element.children('span.inner').children('span.blue-text');
+                sel = element.children('span.inner').children('span.appname');
                 if (!sel.length) {
-                    sel = element.children('span.blue-text');
+                    sel = element.children('span.appname');
                 }
-                sel.removeClass('blue-text').addClass('orange-text');
+                sel.addClass('orange-text');
                 sel.children('a.exec').addClass('orange-text');
             }
 
