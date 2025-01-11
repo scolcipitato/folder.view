@@ -6,12 +6,15 @@
 <!ENTITY launch "Settings/FolderView">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/main/&name;.plg">
-<!ENTITY version "2025.01.11">
-<!ENTITY md5 "d43d21aa4619d7f7fd674a4de188ba80">
+<!ENTITY version "2025.01.11.1">
+<!ENTITY md5 "6dee684987886bf16968346f42060757">
 ]>
 
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="folder-open-o" support="https://forums.unraid.net/topic/142782-plugin-folderview/" min="7.0.0">
     <CHANGES>
+###2025.01.11.1
+- Fix with issues
+
 ###2025.01.11
 - Add Polish translation
 - Fix docker for unraid 7

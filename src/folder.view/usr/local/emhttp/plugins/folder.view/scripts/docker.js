@@ -702,7 +702,7 @@ const createFolder = (folder, id, position, order, containersInfo, foldersDone) 
     }
 
     if(folder.settings.update_column) {
-        $(`tr.folder-id-${id} > td.updatecolumn`).next().attr('colspan',4).end().remove();
+        $(`tr.folder-id-${id} > td.updatecolumn`).next().attr('colspan',6).end().remove();
     }
 
     if(managed === 0) {
